@@ -23,7 +23,7 @@ repository                : "Twist-Shan/Twist-Shan.github.io"
 # Site Author
 author:
   # Biographic information
-  avatar           : "profile.png" # 记得在 /images 文件夹下放一张叫 profile.png 的头像
+  avatar           : "profile.jpg" 
   name             : "Liang Shan"
   pronouns         : "He/Him"
   bio              : "Undergraduate at Peking University"
