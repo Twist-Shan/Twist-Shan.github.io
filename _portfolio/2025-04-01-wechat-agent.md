@@ -1,6 +1,6 @@
 ---
 title: "WeChat Agent: LLM-driven Content & Typesetting Pipeline"
-excerpt: "Automating content generation with DeepSeek-VL v3, RAG, and external API orchestration. <br/><img src='/images/llm-project.jpg'>"
+excerpt: "Automating content generation with DeepSeek-VL v3, RAG, and external API orchestration."
 collection: portfolio
 ---
 
