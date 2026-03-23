@@ -2,9 +2,12 @@
 title: "Modular Quantitative Trading Backtesting Framework"
 collection: portfolio
 layout: single
+date: 
+last_modified_at: 
+read_time: false
 ---
 
-**Timeline:** Sep. 2024 – Jan. 2025
+**Timeline:** Sep. 2024 – Jan. 2025  
 **Advisor:** Prof. Changhao Jiang, Peking University
 
 This course project focused on building a professional-grade backtesting engine from scratch.
