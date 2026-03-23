@@ -30,7 +30,7 @@ author:
   location         : "Beijing, China"
   employer         : "Peking University"
   uri              : 
-  email            : "twistsl@stu.pku.edu.cn"
+  email            : "twistshan1218@gmail.com"
 
   # Academic websites
   googlescholar    : "https://scholar.google.com/citations?user=PS_CX0AAAAAJ"
@@ -49,7 +49,6 @@ author:
   
   # 如果你想在侧边栏显示小红书，可以临时借用 'flickr' 或 'bitbucket' 的位置，
   # 或者之后我教你修改 _includes/author-profile.html 来增加自定义图标。
-  flickr           : "https://xhslink.com/m/7k19nKMDuEu" # 暂时借用，显示为图标
 
 # Publication Category - The following the list of publication categories and their headings
 publication_category:
