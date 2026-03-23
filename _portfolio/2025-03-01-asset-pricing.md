@@ -4,7 +4,8 @@ excerpt: "Empirical research on Chinese A-shares using Markowitz framework and p
 collection: portfolio
 ---
 
-**Advisor:** Prof. Hai Huang, Peking University (Mar. 2025 – Jun. 2025)
+**Timeline:** Mar. 2025 – Jun. 2025  
+**Advisor:** Prof. Hai Huang, Peking University
 
 * **Market Analysis:** Conducted empirical research on the Chinese A-share market, analyzing risk-return profiles and market volatility drivers across historical cycles.
 * **Optimization:** Constructed optimal investment portfolios utilizing the Markowitz Mean-Variance framework, integrating fundamental quantitative stock selection.
