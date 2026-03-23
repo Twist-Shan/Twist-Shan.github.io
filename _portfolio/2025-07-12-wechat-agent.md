@@ -1,10 +1,11 @@
 ---
 title: "WeChat Agent: LLM-driven Content & Typesetting Pipeline"
-excerpt: "Automating content generation with DeepSeek-VL v3, RAG, and external API orchestration."
 collection: portfolio
+layout: single
+date: 2025-07-12
 ---
 
-**Timeline:** Apr. 2025 – Jun. 2025  
+**Timeline:** Apr. 2025 – Jul. 2025  
 **Advisor:** Prof. Shanghang Zhang, Peking University
 
 * **Automation:** Developed an LLM-driven typesetting plugin on the Dify platform, automating content generation and publishing via Python and WeChat APIs.
