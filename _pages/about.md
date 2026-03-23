@@ -37,8 +37,8 @@ This ongoing project focuses on developing efficient optimization frameworks for
 ## Personal Interests
 Beyond my academic pursuits, I am a passionate explorer of life's diverse flavors and experiences:
 * **Culinary Arts & Mixology:** I enjoy cooking and am an aspiring mixologist with a keen interest in the craft of cocktails and specialty coffee.
-* **Photography & Travel:** I love capturing the world through my lens; my recent journeys have taken me through the landscapes of Iceland, Norway, Spain, and Japan.
-* **Creativity & Leisure:** In my spare time, I find joy in assembling intricate models, exploring immersive video game worlds, and critiquing cinema.
+* **Photography & Travel:** I love capturing the world through my lens; my recent journeys have taken me through the landscapes of Spain, Norway, Iceland, and Japan.
+* **Creativity & Leisure:** In my spare time, I find joy in assembling Gumdam models, exploring immersive video game and films worlds.
 
 ## Contact
 * **Email:** [twistshan1218@gmail.com](mailto:twistshan1218@gmail.com)
