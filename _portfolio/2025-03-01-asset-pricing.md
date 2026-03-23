@@ -1,6 +1,6 @@
 ---
 title: "Empirical Asset Pricing and Portfolio Management"
-excerpt: "Empirical research on Chinese A-shares using Markowitz framework and performance evaluation models (TM/HM). <br/><img src='/images/finance-project.jpg'>"
+excerpt: "Empirical research on Chinese A-shares using Markowitz framework and performance evaluation models (TM/HM)."
 collection: portfolio
 ---
 
