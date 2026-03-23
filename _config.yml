@@ -7,12 +7,12 @@
 # server process.
 
 # Basic Site Settings
-locale                    : "en-US"
-site_theme                : "default" 
-title                     : "Twist Shan | Academic Portfolio"
+locale                  : "en-US"
+site_theme              : "default" 
+title                   : "Liang (Twist) Shan | Academic Portfolio"
 title_separator           : "-"
-name                      : &name "Twist Shan"
-description               : &description "Undergraduate Student in Statistics at Peking University. Research interests: Statistical Learning, Machine Learning, Optimization, and Financial Engineering."
+name                      : &name "Liang Shan"
+description               : &description "Undergraduate at Peking University (SMS & NSD). Research interests: Statistical Learning, Optimization, and Machine Learning (."
 url                       : "https://twist-shan.github.io" 
 baseurl                   : "" 
 repository                : "Twist-Shan/Twist-Shan.github.io"
@@ -33,54 +33,23 @@ author:
   email            : "twistsl@stu.pku.edu.cn"
 
   # Academic websites
-  academia         : # URL
-  arxiv            : # URL - Update with the correct link to your profile
   googlescholar    : "https://scholar.google.com/citations?user=PS_CX0AAAAAJ"
-  inspire-hep      : # URL
-  impactstory      : # URL
-  orcid            : "https://orcid.org/yourorcidurl"
-  semantic         : # URL
-  ssrn             : # URL
-  pubmed           : "https://www.ncbi.nlm.nih.gov/pubmed/?term=john+snow"
-  researchgate     : # URL
-  scopus           : # URL
-  zotero           : # URL
-
+  arxiv            : # 以后有论文了再填
+  orcid            : # 建议注册一个并填在这里
 
   # Repositories and software development
-  bitbucket        : # Username - Update with your username on the site
-  codepen          : # Username
-  dribbble         : # Username
   github           : "Twist-Shan"
-  kaggle           : # Username  
-  stackoverflow    : # User number or user number and name (i.e., use "1" or "1/jeff-atwood")    
 
-  # Social media
-  artstation       : # Username
-  bluesky          : "bsky.app" # Replace this with you Bluesky username
-  facebook         : # Username
-  flickr           : # Username
-  foursquare       : # Username
-  goodreads        : # Username
-  google_plus      : # Username
-  keybase          : # Username
-  instagram        : # Username
-  lastfm           : # Username
-  linkedin         : # Username
-  mastodon         : # URL
-  medium           : # URL
-  pinterest        : # Username
-  soundcloud       : # Username
-  steam            : # Username
-  telegram         : # URL
-  tumblr           : # Username
-  twitter          : # Username for X / Twitter
-  vine             : # Username
-  weibo            : # Username
-  wikipedia        : # Username
-  xing             : # Username
-  youtube          : # Username
-  zhihu            : # Username
+  # Social media (自定义添加或利用现有字段)
+  # 提示：由于 academicpages 原版字段有限，微信和手机号建议放在 CV 页面，
+  # 这里我们挂上你提供的社交媒体链接。
+  instagram        : # 待会你发给我后再填
+  wechat           : "Twist_SsLl" 
+  phone            : "+86 13661199541"
+  
+  # 如果你想在侧边栏显示小红书，可以临时借用 'flickr' 或 'bitbucket' 的位置，
+  # 或者之后我教你修改 _includes/author-profile.html 来增加自定义图标。
+  flickr           : "https://xhslink.com/m/7k19nKMDuEu" # 暂时借用，显示为图标
 
 # Publication Category - The following the list of publication categories and their headings
 publication_category:
