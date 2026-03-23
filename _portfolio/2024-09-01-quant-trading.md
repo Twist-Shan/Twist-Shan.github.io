@@ -1,7 +1,8 @@
 ---
 title: "Modular Quantitative Trading Backtesting Framework"
-excerpt: "Engineered a modular, object-oriented backtesting system in Python with vectorized data processing. <br/><img src='/images/quant-project.jpg'>"
+excerpt: "Engineered a modular, object-oriented backtesting system in Python with vectorized data processing."
 collection: portfolio
+date: ""
 ---
 
 **Advisor:** Prof. Changhao Jiang, Peking University (Sep. 2024 – Jan. 2025)
