@@ -2,9 +2,7 @@
 title: "Modular Quantitative Trading Backtesting Framework"
 collection: portfolio
 layout: single
-date: 
-last_modified_at: 
-read_time: false
+date: 2024-09-01  
 ---
 
 **Timeline:** Sep. 2024 – Jan. 2025  
