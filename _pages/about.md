@@ -45,7 +45,8 @@ I take pride in crafting polished LaTeX lecture notes for courses that spark my 
 Beyond my academic pursuits, I am a passionate explorer of life's diverse flavors and experiences:
 * **Culinary Arts & Mixology:** I enjoy cooking and am an aspiring mixologist with a keen interest in the craft of cocktails and specialty coffee.
 * **Photography & Travel:** I love capturing the world through my lens; my recent journeys have taken me through the landscapes of Spain, Norway, Iceland, and Japan.
-* **Creativity & Leisure:** In my spare time, I find joy in assembling Gumdam models, exploring immersive video game and films worlds.
+* **Creativity & Leisure:** In my spare time, I find joy in assembling Gumdam models, exploring immersive video game and film worlds.
+Follow me on xiaohongshu (Rednote) for more of my personal updates! [Twist.](https://xhslink.com/m/9dxau6bGaAh)
 
 ## Contact
 * **Email:** [twistshan1218@gmail.com](mailto:twistshan1218@gmail.com)
