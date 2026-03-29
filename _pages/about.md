@@ -21,7 +21,7 @@ I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus 
 
 ## Education
 * **Peking University**, B.A. in Mathematics (SMS) & Economics (NSD), 2023–2028 (Expected)
-* **University of Copenhagen**, Exchange Student in Mathematics & CS, 2025–2026
+* **University of Copenhagen**, Exchange Student in Statistics & Computer Science, 2025–2026
 
 ## Research Highlights
 
