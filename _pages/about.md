@@ -26,7 +26,7 @@ I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus 
 ## Research Highlights
 
 ### Algorithm Implementation for Partially Observed Dynamic Tensor Regression
-**Advisor:** Prof. Yi Chen (HKUST) & Prof. Biao Cai (CityU) | *May. 2025 – Present*
+**Advisor:** Prof. Yi Chen (HKUST) & Prof. Biao Cai (CityU) | *Jul. 2025 – Present*
 
 This ongoing project focuses on developing efficient optimization frameworks for ultra-high-dimensional dynamic tensor regression tasks.
 
@@ -38,7 +38,7 @@ This ongoing project focuses on developing efficient optimization frameworks for
 
 I take pride in crafting polished LaTeX lecture notes for courses that spark my curiosity, as well as developing unofficial solution sets for textbooks that lack publicly available answers. 
 
-* **Statistical Thinking** (Spring 2025)  
+* **Statistical Thinking** (Peking University Spring 2025)  
   *Instructor: [Prof. Wei Lin], Peking University* [**[Lecture Notes (PDF)]**](/files/Lecture_Notes_Statistical_Thinking.pdf)
 
 ## Personal Interests
