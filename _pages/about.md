@@ -28,7 +28,7 @@ I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus 
 ### Algorithm Implementation for Partially Observed Dynamic Tensor Regression
 **Advisor:** Prof. Yi Chen (HKUST) & Prof. Biao Cai (CityU) | *Jul. 2025 – Feb. 2026*
 
-This ongoing project focuses on developing efficient optimization frameworks for ultra-high-dimensional dynamic tensor regression tasks.
+This project focused on developing efficient optimization frameworks for ultra-high-dimensional dynamic tensor regression tasks.
 
 * **POSTER Framework:** Investigated and implemented the POSTER framework to handle complex random and block missing data patterns in dynamic tensor structures.
 * **Theoretical Analysis:** Initiated convergence analysis of the non-convex alternating minimization framework. I am currently utilizing tools from **High-Dimensional Probability** to establish statistical guarantees and error bounds under structural sparsity constraints.
