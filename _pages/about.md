@@ -41,6 +41,9 @@ I take pride in crafting polished LaTeX lecture notes for courses that spark my 
 * **Statistical Thinking** (Peking University Spring 2025)  
   *Instructor: [Prof. Wei Lin], Peking University* [**[Lecture Notes (PDF)]**](/files/Lecture_Notes_Statistical_Thinking.pdf)
 
+* Ongoing work: **Applied Stochastic Processes** (Peking University Press)  
+  *Author: [Prof. Dayue Chen] and [Prof. Fuxi Zhang], Peking University* [**[Solution Manual (PDF)]**]()
+
 ## Personal Interests
 Beyond my academic pursuits, I am a passionate explorer of life's diverse flavors and experiences:
 * **Culinary Arts & Mixology:** I enjoy cooking and am an aspiring mixologist with a keen interest in the craft of cocktails and specialty coffee.
