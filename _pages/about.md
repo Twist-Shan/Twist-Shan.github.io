@@ -13,7 +13,7 @@ redirect_from:
 
 I am an undergraduate student at **Peking University**, currently pursuing a double major in **Statistics** (School of Mathematical Sciences) and **Economics** (National School of Development). 
 
-In the 2025-2026 academic year, I conducted an international exchange at the **University of Copenhagen** (Department of SCIENCE), where I specialized in advanced topics such as MCMC and Stochastic Programming. 
+In the 2025-2026 academic year, I conducted an international exchange at the University of Copenhagen (Department of SCIENCE), where I specialized in advanced topics such as MCMC and Stochastic Programming. 
 
 My research interests are grounded in Statistical Foundations of Machine Learning, Optimization, and Operations Research. I am particularly fascinated by the synergy between these theoretical pillars and their applications in Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs).
 
@@ -30,10 +30,10 @@ I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus 
 
 This project investigates the internal state dynamics and feature vector geometry of modern sequence architectures like Transformers and Mamba.
 
-### Active Statistical Inference for Adaptive LLM Ranking
-**Advisor**: Prof. Zhimei Ren (UPenn) | *May. 2026 – Present*
+% ### Active Statistical Inference for Adaptive LLM Ranking
+% **Advisor**: Prof. Zhimei Ren (UPenn) | *May. 2026 – Present*
 
-This project aims to develop a sample-efficient and statistically rigorous framework for ranking Large Language Models (LLMs) by integrating Active Learning with Selection-adjusted Inference.
+% This project aims to develop a sample-efficient and statistically rigorous framework for ranking Large Language Models (LLMs) by integrating Active Learning with Selection-adjusted Inference.
 
 ### Algorithm Implementation for Partially Observed Dynamic Tensor Regression
 **Advisor:** Prof. Yi Chen (HKUST) & Prof. Biao Cai (CityU) | *Jul. 2025 – Feb. 2026*
