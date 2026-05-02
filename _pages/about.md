@@ -30,10 +30,12 @@ I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus 
 
 This project investigates the internal state dynamics and feature vector geometry of modern sequence architectures like Transformers and Mamba.
 
-% ### Active Statistical Inference for Adaptive LLM Ranking
-% **Advisor**: Prof. Zhimei Ren (UPenn) | *May. 2026 – Present*
+<div style="display:none">
+### Active Statistical Inference for Adaptive LLM Ranking
+**Advisor**: Prof. Zhimei Ren (UPenn) | *May. 2026 – Present*
 
-% This project aims to develop a sample-efficient and statistically rigorous framework for ranking Large Language Models (LLMs) by integrating Active Learning with Selection-adjusted Inference.
+This project aims to develop a sample-efficient and statistically rigorous framework for ranking Large Language Models (LLMs) by integrating Active Learning with Selection-adjusted Inference.
+</div>
 
 ### Algorithm Implementation for Partially Observed Dynamic Tensor Regression
 **Advisor:** Prof. Yi Chen (HKUST) & Prof. Biao Cai (CityU) | *Jul. 2025 – Feb. 2026*
