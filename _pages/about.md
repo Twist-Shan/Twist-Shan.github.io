@@ -25,17 +25,17 @@ I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus 
 
 ## Research Highlights
 
-### Geometric Interpretability and Feature Compression in Sequence Models
-**Advisor**: Prof. Yiqiao Zhong (UW-Madison) | *Apr. 2026 – Present*
+### Task Vector Geometry and Context Compression
+**Advisor:** Prof. Yiqiao Zhong (UW–Madison) | *Apr. 2026 – Present*
 
-This project investigates the internal state dynamics and feature vector geometry of modern sequence architectures like Transformers and Mamba.
+This project studies how sequence models compress task-relevant information into hidden states.
 
-<div style="display:none">
-### Active Statistical Inference for Adaptive LLM Ranking
-**Advisor**: Prof. Zhimei Ren (UPenn) | *May. 2026 – Present*
+See the ongoing research on [GitHub](https://github.com/Twist-Shan/Hidden_State_Evaluation).
 
-This project aims to develop a sample-efficient and statistically rigorous framework for ranking Large Language Models (LLMs) by integrating Active Learning with Selection-adjusted Inference.
-</div>
+### Active Pareto Set Identification from Binary Pairwise Feedback
+**Advisor:** Prof. Zhimei Ren (UPenn) | *May. 2026 – Present*
+
+This project focuses on developing active evaluation algorithms for identifying Pareto-optimal LLMs from noisy binary pairwise comparisons.
 
 ### Algorithm Implementation for Partially Observed Dynamic Tensor Regression
 **Advisor:** Prof. Yi Chen (HKUST) & Prof. Biao Cai (CityU) | *Jul. 2025 – Feb. 2026*
