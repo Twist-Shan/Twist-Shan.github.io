@@ -15,7 +15,7 @@ I am an undergraduate student at **Peking University**, currently pursuing a dou
 
 In the 2025-2026 academic year, I conducted an international exchange at the University of Copenhagen (Department of SCIENCE), where I specialized in advanced topics such as MCMC and Stochastic Programming. 
 
-My research interests are grounded in Statistical Foundations of Machine Learning and Operations Research. I am particularly fascinated by the synergy between these theoretical pillars and their applications in Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs).
+My research interests are grounded in **Statistical Foundations of Machine Learning and Operations Research**. I am particularly fascinated by the synergy between these theoretical pillars and their applications in **Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs)**.
 
 I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus on Statistics, Operations Research, or Computer Science.
 
