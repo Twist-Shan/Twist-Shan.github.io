@@ -20,8 +20,8 @@ My research interests are grounded in Statistical Foundations of Machine Learnin
 I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus on Statistics, Operations Research, or Computer Science.
 
 ## Education
-* **Peking University**, B.S. in Mathematics (SMS) & B.A. in Economics (NSD), 2023–2028 (Expected)
-* **University of Copenhagen**, Exchange Student in Statistics & Computer Science, 2025–2026
+* **Peking University**, B.S. in Mathematics (SMS) & B.A. in Economics (NSD), Aug. 2023 – Jun. 2028 (Expected)
+* **University of Copenhagen**, Exchange Student in Statistics & Computer Science, Sep. 2025– Jan. 2026
 
 ## Research Highlights
 
