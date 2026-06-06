@@ -62,6 +62,8 @@ Beyond my academic pursuits, I am a passionate explorer of life's diverse flavor
 * **Photography & Travel:** I love capturing the world through my lens; my recent journeys have taken me through the landscapes of Spain, Norway, Iceland, and Japan.
 * **Creativity & Leisure:** In my spare time, I find joy in assembling Gumdam models and LEGO, exploring immersive video game and film worlds.
 
+Also, more meanings of sl in future: First for self love; Second for slow learner but still learning; Third for social life.
+
 Follow me on xiaohongshu (Rednote) for more of my personal updates! [Twist.](https://xhslink.com/m/9dxau6bGaAh)
 
 ## Contact
