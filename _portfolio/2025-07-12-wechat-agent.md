@@ -11,5 +11,3 @@ date: 2025-07-12
 * **Automation:** Developed an LLM-driven typesetting plugin on the Dify platform, automating content generation and publishing via Python and WeChat APIs.
 * **Prompt Engineering:** Engineered structural prompts using DeepSeek-VL v3 to enforce strict HTML/CSS constraints for zero-shot generation of mobile-responsive layouts.
 * **RAG Integration:** Integrated a RAG-based writing assistant using embedding models and orchestrated external APIs (Firecrawl, Bing Search) for dynamic data retrieval.
-
-[View on GitHub](https://github.com/6zzhh6/WeChat_Formatting_Tool)
