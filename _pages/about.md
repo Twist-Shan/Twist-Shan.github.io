@@ -13,15 +13,14 @@ redirect_from:
 
 I am an undergraduate student at **Peking University**, currently pursuing a double major in **Statistics** (School of Mathematical Sciences) and **Economics** (National School of Development). 
 
-In the 2025-2026 academic year, I conducted an international exchange at the University of Copenhagen (Department of SCIENCE), where I specialized in advanced topics such as MCMC and Stochastic Programming. 
+My research interests are grounded in **Statistical Foundations of Modern Machine Learning and Operations Research**. I am particularly fascinated by the synergy between these theoretical pillars and their applications in **Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs)**.
 
-My research interests are grounded in **Statistical Foundations of Machine Learning and Operations Research**. I am particularly fascinated by the synergy between these theoretical pillars and their applications in **Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs)**.
-
-I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus on Statistics, Operations Research, or Computer Science.
+I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus on Statistics, Computer Science, or Operations Research.
 
 ## Education
 * **Peking University**, B.S. in Mathematics (SMS) & B.A. in Economics (NSD), Aug. 2023 – Jun. 2028 (Expected)
-* **University of Copenhagen**, Exchange Student in Statistics & Computer Science, Sep. 2025– Jan. 2026
+* **University of Copenhagen**, Exchange Student in Department of SCIENCE, Sep. 2025 – Jan. 2026
+* **University of Wisconsin–Madison**, Student Research Assistant in Statistics & Computer Science, Jul. 2026 – Sep. 2026
 
 ## Research Highlights
 
@@ -54,15 +53,13 @@ I take pride in crafting polished LaTeX lecture notes for courses that spark my 
   *Instructor: [Prof. Wei Lin], Peking University* [**[Lecture Notes (PDF)]**](/files/Lecture_Notes_Statistical_Thinking.pdf)
 
 * Ongoing work: **Applied Stochastic Processes** (Peking University Press, in Chinese)  
-  *Author: [Prof. Dayue Chen] and [Prof. Fuxi Zhang], Peking University* [**[Solution Manual (PDF)]**]()
+  *Author: [Prof. Dayue Chen] and [Prof. Fuxi Zhang], Peking University* [**[Solution Manual (PDF)]**](/files/Applied_Stochastic_Processes_Exercises.pdf)
 
 ## Personal Interests
 Beyond my academic pursuits, I am a passionate explorer of life's diverse flavors and experiences:
 * **Culinary Arts & Mixology:** I enjoy cooking and am an aspiring mixologist with a keen interest in the craft of cocktails and coffee.
 * **Photography & Travel:** I love capturing the world through my lens; my recent journeys have taken me through the landscapes of Spain, Norway, Iceland, and Japan.
 * **Creativity & Leisure:** In my spare time, I find joy in assembling Gumdam models and LEGO, exploring immersive video game and film worlds.
-
-Also, more meanings of sl in future: First for self love; Second for slow learner but still learning; Third for social life.
 
 Follow me on xiaohongshu (Rednote) for more of my personal updates! [Twist.](https://xhslink.com/m/9dxau6bGaAh)
 
