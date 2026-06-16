@@ -52,7 +52,7 @@ I take pride in crafting polished LaTeX lecture notes for courses that spark my 
 * **Statistical Thinking** (Peking University Spring 2025)  
   *Instructor: [Prof. Wei Lin], Peking University* [**[Lecture Notes (PDF)]**](/files/Lecture_Notes_Statistical_Thinking.pdf)
 
-* Ongoing work: **Applied Stochastic Processes** (Peking University Press, in Chinese)  
+* **Applied Stochastic Processes** (Peking University Press, in Chinese)  
   *Author: [Prof. Dayue Chen] and [Prof. Fuxi Zhang], Peking University* [**[Solution Manual (PDF)]**](/files/Applied_Stochastic_Processes_Exercises.pdf)
 
 ## Personal Interests
