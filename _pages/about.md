@@ -20,21 +20,22 @@ I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus 
 ## Education
 * **Peking University**, B.S. in Mathematics (SMS) & B.A. in Economics (NSD), Aug. 2023 – Jun. 2028 (Expected)
 * **University of Copenhagen**, Exchange Student in Department of SCIENCE, Sep. 2025 – Jan. 2026
-* **University of Wisconsin–Madison**, Student Research Assistant in Statistics & Computer Science, Jul. 2026 – Sep. 2026
 
 ## Research Highlights
 
 ### Task Vector Geometry and Context Compression
-**Advisor:** Prof. Yiqiao Zhong (UW–Madison) | *Apr. 2026 – Present*
+**Advisor:** Prof. Yiqiao Zhong (UW–Madison) | *Apr. 2026 – Present* | *Hybrid*
 
-This project studies how sequence models compress task-relevant information into hidden states.
+This project studies how Chain-of-Thought Reasoning helps large language models compress task-relevant information into hidden states, especially counting tasks.
 
-See the ongoing research on [GitHub](https://github.com/Twist-Shan/Hidden_State_Evaluation).
+See the ongoing research on [GitHub](https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count).
+
+Also, we are curious about some hidden states geometry properties, here are some toy experiments: [GitHub](https://github.com/Twist-Shan/Hidden_State_Evaluation).
 
 ### Active Pareto Set Identification from Binary Pairwise Feedback
-**Advisor:** Prof. Zhimei Ren (UPenn) | *May. 2026 – Present*
+**Advisor:** Prof. Zhimei Ren (UPenn) | *May. 2026 – Present* | *Remote*
 
-This project focuses on developing active evaluation algorithms for identifying Pareto-optimal LLMs from noisy binary pairwise comparisons.
+This project focuses around bandits algorithms using Bradley-Terry model for identifying Pareto-optimal LLMs from noisy binary pairwise comparisons, applicating to Chatbot Arena.
 
 ### Algorithm Implementation for Partially Observed Dynamic Tensor Regression
 **Advisor:** Prof. Yi Chen (HKUST) & Prof. Biao Cai (CityU) | *Jul. 2025 – Feb. 2026*
