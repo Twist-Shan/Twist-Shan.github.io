@@ -14,4 +14,4 @@ This course project focused on building a professional-grade backtesting engine 
 * **Strategies:** Designed and implemented diverse quantitative strategies, including Momentum, Mean Reversion (Bollinger Bands), Cross-Sectional, and Time-Series, utilizing `pandas` and `NumPy` for vectorized processing.
 * **Analytics:** Developed an analytics module to compute key performance indicators (e.g., Sharpe Ratio, Annualized Returns) and automated the generation of visual performance reports.
 
-[View on GitHub](https://github.com/Twist-Shan/Quantitative-Trading-Backtesting-Framework)
+[View on GitHub](https://github.com/Twist-Shan/Quantitative_Trading_Backtesting_Framework)
