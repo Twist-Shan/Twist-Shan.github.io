@@ -23,28 +23,21 @@ I am actively seeking PhD opportunities starting in **Fall 2028**, with a focus 
 
 ## Research Highlights
 
-### Task Vector Geometry and Context Compression
+### LLMs Interpretability and Hidden States Representation
 **Advisor:** Prof. Yiqiao Zhong (UW–Madison) | *Apr. 2026 – Present* | *Hybrid*
 
-This project studies how Chain-of-Thought Reasoning helps large language models compress task-relevant information into hidden states, especially counting tasks.
+The current project studies how Chain-of-Thought reasoning helps large language models compress task-relevant information into hidden states, especially counting tasks.
 
 See the ongoing research on [GitHub](https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count).
 
 Also, we are curious about some hidden states geometry properties, here are some toy experiments: [GitHub](https://github.com/Twist-Shan/Hidden_State_Evaluation).
 
-### Active Pareto Set Identification from Binary Pairwise Feedback
+### Pareto Set Identification from Binary Pairwise Feedback
 **Advisor:** Prof. Zhimei Ren (UPenn) | *May. 2026 – Present* | *Remote*
 
-This project focuses around bandits algorithms using Bradley-Terry model for identifying Pareto-optimal LLMs from noisy binary pairwise comparisons, applicating to Chatbot Arena.
+This project focuses on bandits algorithms using Bradley-Terry model for identifying Pareto-optimal LLMs from noisy binary pairwise comparisons, with applications to Chatbot Arena.
 
-### Algorithm Implementation for Partially Observed Dynamic Tensor Regression
-**Advisor:** Prof. Yi Chen (HKUST) & Prof. Biao Cai (CityU) | *Jul. 2025 – Feb. 2026*
-
-This project focused on developing efficient optimization frameworks for ultra-high-dimensional dynamic tensor regression tasks.
-
-* **POSTER Framework:** Investigated and implemented the POSTER framework to handle complex random and block missing data patterns in dynamic tensor structures.
-* **Theoretical Analysis:** Initiated convergence analysis of the non-convex alternating minimization framework. I am currently utilizing tools from **High-Dimensional Probability** to establish statistical guarantees and error bounds under structural sparsity constraints.
-* **Simulations:** Designed robust simulation pipelines in R to evaluate tensor structure recovery and validate theoretical rates of convergence.
+See the ongoing research on [GitHub](https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn)
 
 ## Selected Coursework & Notes
 
