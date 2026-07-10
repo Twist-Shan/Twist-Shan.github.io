@@ -10,20 +10,29 @@ redirect_from:
 <section class="hero shell">
   <div class="hero-index" aria-hidden="true">01 — ABOUT</div>
   <div class="hero-copy reveal">
-    <p class="eyebrow"><span class="status-dot"></span> Undergraduate researcher · Peking University</p>
-    <h1>I study the <em>statistical structure</em> behind modern learning systems.</h1>
-    <p class="hero-intro">I’m <strong>Liang (Twist) Shan</strong>, an undergraduate at Peking University pursuing Statistics in the School of Mathematical Sciences and Economics in the National School of Development.</p>
-    <p>My research sits between statistical foundations, optimization, and operations research, with a particular interest in deep learning, reinforcement learning, and large language models. I am seeking PhD opportunities beginning in Fall 2028.</p>
+    <p class="eyebrow"><span class="status-dot"></span> Undergraduate student · Peking University</p>
+    <h1>Liang <em>(Twist)</em> Shan</h1>
+    <div class="about-copy">
+      <h2>About</h2>
+      <p class="hero-intro">I’m an undergraduate at Peking University pursuing a double major in Statistics in the School of Mathematical Sciences and Economics in the National School of Development.</p>
+      <p>My research interests focus on the applications of statistics and optimization in modern machine learning, especially in Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs). I am seeking PhD opportunities beginning in Fall 2028.</p>
+    </div>
     <div class="hero-actions">
       <a class="text-link" href="{{ '/research/' | relative_url }}">Explore my research <span>↗</span></a>
       <a class="text-link quiet" href="{{ '/files/cv_Liang_Shan.pdf' | relative_url }}">Read my CV <span>↓</span></a>
     </div>
+    <nav class="hero-socials" aria-label="Social profiles">
+      <a href="https://github.com/Twist-Shan">GitHub <span>↗</span></a>
+      <a href="https://www.linkedin.com/in/liang-twist-shan">LinkedIn <span>↗</span></a>
+      <a href="https://instagram.com/twist_shan">Instagram <span>↗</span></a>
+      <a href="https://x.com/LiangTwistShan">X <span>↗</span></a>
+    </nav>
   </div>
   <figure class="portrait-wrap reveal delay-1">
     <div class="portrait-frame">
       <img src="{{ '/images/profile.jpg' | relative_url }}" alt="Portrait of Liang Shan" width="720" height="900">
     </div>
-    <figcaption><span>Liang Shan</span><span>Beijing / Copenhagen</span></figcaption>
+    <figcaption><span>Liang Shan</span><span>Madison</span></figcaption>
   </figure>
 </section>
 
@@ -59,5 +68,14 @@ redirect_from:
 </section>
 
 <aside class="contact-band">
-  <div class="shell reveal"><p>Questions, ideas, or a good paper?</p><a href="mailto:twistshan1218@gmail.com">Let’s talk <span>↗</span></a></div>
+  <div class="shell reveal">
+    <div class="contact-heading">
+      <p>Questions, ideas, or a good paper?</p>
+      <h2>Let’s keep in touch.</h2>
+    </div>
+    <div class="contact-details">
+      <a href="mailto:twistshan1218@gmail.com"><span class="email-text">twistshan1218<wbr>@gmail.com</span> <span aria-hidden="true">↗</span></a>
+      <p><span>WeChat</span> Twist_SsLl</p>
+    </div>
+  </div>
 </aside>
