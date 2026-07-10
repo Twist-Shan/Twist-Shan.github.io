@@ -1,0 +1,39 @@
+---
+layout: studio
+title: Miscellany
+permalink: /misc/
+slug: misc
+---
+
+<header class="page-hero shell reveal">
+  <p class="eyebrow">03 — Miscellany</p>
+  <h1>A life beyond <em>the loss function.</em></h1>
+  <p>Cooking, cameras, careful drinks, small plastic pieces, and the places in between.</p>
+</header>
+
+<section class="misc-grid shell">
+  <article class="misc-lead reveal">
+    <p class="project-number">M / 01</p>
+    <h2>Things I return to</h2>
+    <p>I enjoy cooking and learning the craft behind cocktails and coffee. Photography gives me an excuse to look more slowly; recent journeys have taken me through Spain, Norway, Iceland, and Japan.</p>
+  </article>
+  <div class="misc-list reveal delay-1">
+    <div><span>01</span><h3>Culinary arts</h3><p>Cooking, mixology, coffee</p></div>
+    <div><span>02</span><h3>Photography</h3><p>Travel, light, everyday scenes</p></div>
+    <div><span>03</span><h3>Making</h3><p>Gundam models and LEGO</p></div>
+    <div><span>04</span><h3>Stories</h3><p>Video games and film</p></div>
+  </div>
+</section>
+
+<section class="notes-strip shell ruled-section reveal">
+  <header class="section-label"><span>04</span><h2>Course notes</h2><p>Materials I made while learning.</p></header>
+  <div class="note-links">
+    <a href="{{ '/files/Lecture_Notes_Statistical_Thinking.pdf' | relative_url }}"><span>Statistical Thinking</span><small>Lecture notes · PDF</small><b>↓</b></a>
+    <a href="{{ '/files/Applied_Stochastic_Processes_Exercises.pdf' | relative_url }}"><span>Applied Stochastic Processes</span><small>Solution manual · PDF</small><b>↓</b></a>
+  </div>
+</section>
+
+<section class="social-note shell ruled-section reveal">
+  <p>For less academic updates, find me on Rednote.</p>
+  <a href="https://xhslink.com/m/9dxau6bGaAh">Follow Twist. <span>↗</span></a>
+</section>
