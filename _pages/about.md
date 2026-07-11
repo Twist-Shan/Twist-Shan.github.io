@@ -43,7 +43,7 @@ redirect_from:
   <div class="timeline">
     <article>
       <time>2023 — 2028</time>
-      <div><h3>Peking University</h3><p>B.S. in Mathematics (Statistics) · School of Mathematical Sciences<br>B.A. in Economics · National School of Development</p></div>
+      <div><h3>Peking University</h3><p>B.S. in Statistics · School of Mathematical Sciences<br>B.A. in Economics · National School of Development</p></div>
       <span class="place">Beijing</span>
     </article>
     <article>
