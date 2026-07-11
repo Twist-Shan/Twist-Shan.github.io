@@ -12,14 +12,14 @@ redirect_from:
   <div class="hero-copy reveal">
     <p class="eyebrow"><span class="status-dot"></span> Undergraduate student · Peking University</p>
     <h1>Liang <em>(Twist)</em> Shan</h1>
+    <blockquote class="personal-motto">
+      <p>Be Humble, Romantic, Measured, Rosy and Shoot for the Moon.</p>
+    </blockquote>
     <div class="about-copy">
       <h2>About</h2>
       <p class="hero-intro">I’m an undergraduate at Peking University pursuing a double major in Statistics in the School of Mathematical Sciences and Economics in the National School of Development.</p>
       <p>My research interests focus on the applications of statistics and optimization in modern machine learning, especially in Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs). I am seeking PhD opportunities beginning in Fall 2028 in Statistics, Computer Science, or Operations Research.</p>
     </div>
-    <blockquote class="personal-motto">
-      <p>Be Humble, Romantic, Measured, Rosy and Shoot for the Moon.</p>
-    </blockquote>
     <div class="hero-actions">
       <a class="text-link" href="{{ '/research/' | relative_url }}">Explore my research <span>↗</span></a>
       <a class="text-link quiet" href="{{ '/files/cv_Liang_Shan.pdf' | relative_url }}">Read my CV <span>↓</span></a>
@@ -41,7 +41,7 @@ redirect_from:
 
 <section class="education shell ruled-section reveal">
   <header class="section-label">
-    <span>02</span><h2>Education</h2>
+    <span>02</span><h2>Education</h2><i class="heading-mark heading-mark--education" aria-hidden="true"></i>
   </header>
   <div class="timeline">
     <article>
@@ -59,7 +59,7 @@ redirect_from:
 
 <section class="news shell ruled-section reveal">
   <header class="section-label">
-    <span>03</span><h2>Short notes</h2><p>Small updates from my desk.</p>
+    <span>03</span><h2>Short notes</h2><i class="heading-mark heading-mark--notes" aria-hidden="true"></i><p>Small updates from my desk.</p>
   </header>
   <div class="news-list">
     {% for item in site.data.news limit:3 %}

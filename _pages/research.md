@@ -18,11 +18,11 @@ slug: research
     <header class="research-domain-header">
       <p class="project-number">R / 01</p>
       <h2>Reinforcement Learning</h2>
+      <i class="heading-mark heading-mark--rl" aria-hidden="true"></i>
     </header>
 
     <div class="research-track">
       <header class="research-track-header research-track-header--rl">
-        <div class="research-track-mark" aria-hidden="true"><span></span><span></span><span></span></div>
         <div class="research-track-title">
           <p>RL / Theory</p>
         </div>
@@ -44,11 +44,11 @@ slug: research
     <header class="research-domain-header">
       <p class="project-number">R / 02</p>
       <h2>Large Language Model</h2>
+      <i class="heading-mark heading-mark--llm" aria-hidden="true"></i>
     </header>
 
     <div class="research-track">
       <header class="research-track-header research-track-header--llm">
-        <div class="research-track-mark" aria-hidden="true"><span></span><span></span><span></span></div>
         <div class="research-track-title">
           <p>LLM / Interpretability</p>
         </div>
