@@ -29,8 +29,8 @@ slug: research
       </header>
 
       <article class="research-entry" id="chatbot-arena-ranking">
-        <h4>Chatbot Arena Ranking Algorithm</h4>
-        <p>We study ranking and Pareto-set identification in Chatbot Arena through binary pairwise feedback, developing algorithms for both synthetic and realistic preference settings.</p>
+        <h4>AI Arena Ranking Algorithm</h4>
+        <p>We study ranking and Pareto-set identification in AI Arena through binary pairwise feedback bandits, developing algorithms for both synthetic and realistic preference settings.</p>
         <div class="research-links">
           <a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn">Synthetic repo <span>↗</span></a>
           <a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Rea_Arena">Realistic repo <span>↗</span></a>
@@ -56,7 +56,7 @@ slug: research
 
       <article class="research-entry" id="cot-counting-mechanism">
         <h4>CoT for Counting Mechanism</h4>
-        <p>We investigate how chain-of-thought supports counting by tracing the mechanism from controlled synthetic tasks to realistic needle-in-a-haystack settings.</p>
+        <p>We investigate how chain-of-thought improves LLMs'counting ability by tracing the mechanism from controlled synthetic tasks to realistic needle-in-a-haystack settings.</p>
         <div class="research-links">
           <a href="https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count">Synthetic repo <span>↗</span></a>
           <a href="https://github.com/Twist-Shan/Realistic_CoT_NiaH_Count">Realistic repo <span>↗</span></a>
