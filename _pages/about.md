@@ -17,6 +17,9 @@ redirect_from:
       <p class="hero-intro">I’m an undergraduate at Peking University pursuing a double major in Statistics in the School of Mathematical Sciences and Economics in the National School of Development.</p>
       <p>My research interests focus on the applications of statistics and optimization in modern machine learning, especially in Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs). I am seeking PhD opportunities beginning in Fall 2028 in Statistics, Computer Science, or Operations Research.</p>
     </div>
+    <blockquote class="personal-motto">
+      <p>Be Humble, Romantic, Measured, Rosy and Shoot for the Moon.</p>
+    </blockquote>
     <div class="hero-actions">
       <a class="text-link" href="{{ '/research/' | relative_url }}">Explore my research <span>↗</span></a>
       <a class="text-link quiet" href="{{ '/files/cv_Liang_Shan.pdf' | relative_url }}">Read my CV <span>↓</span></a>

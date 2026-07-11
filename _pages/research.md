@@ -8,6 +8,7 @@ slug: research
 <header class="page-hero shell reveal">
   <p class="eyebrow">01 — Research</p>
   <h1>Questions I’m <em>interested in.</em></h1>
+  <p>I’m a slow learner, but I keep learning and moving forward.</p>
 </header>
 
 <main class="research-catalog shell">
@@ -20,13 +21,14 @@ slug: research
     </header>
 
     <div class="research-track">
-      <header class="research-track-header">
-        <p>RL / Theory</p>
-        <h3>RL Theory</h3>
+      <header class="research-track-header research-track-header--rl">
+        <div class="research-track-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="research-track-title">
+          <p>RL / Theory</p>
+        </div>
       </header>
 
       <article class="research-entry" id="chatbot-arena-ranking">
-        <p class="research-entry-label">Pairwise feedback</p>
         <h4>Chatbot Arena Ranking Algorithm</h4>
         <p>We study ranking and Pareto-set identification in Chatbot Arena through binary pairwise feedback, developing algorithms for both synthetic and realistic preference settings.</p>
         <div class="research-links">
@@ -45,13 +47,14 @@ slug: research
     </header>
 
     <div class="research-track">
-      <header class="research-track-header">
-        <p>LLM / Interpretability</p>
-        <h3>LLM Interpretability</h3>
+      <header class="research-track-header research-track-header--llm">
+        <div class="research-track-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="research-track-title">
+          <p>LLM / Interpretability</p>
+        </div>
       </header>
 
       <article class="research-entry" id="cot-counting-mechanism">
-        <p class="research-entry-label">Mechanistic study</p>
         <h4>CoT for Counting Mechanism</h4>
         <p>We investigate how chain-of-thought supports counting by tracing the mechanism from controlled synthetic tasks to realistic needle-in-a-haystack settings.</p>
         <div class="research-links">
