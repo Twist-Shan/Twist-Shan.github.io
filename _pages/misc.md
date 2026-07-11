@@ -7,21 +7,20 @@ slug: misc
 
 <header class="page-hero shell reveal">
   <p class="eyebrow">03 — Miscellany</p>
-  <h1>A life beyond <em>the loss function.</em></h1>
-  <p>Cooking, cameras, careful drinks, small plastic pieces, and the places in between.</p>
+  <h1>My life beyond <em>the loss function.</em></h1>
+  <p>About experiences, recording and sharing, about the meaning of life.</p>
 </header>
 
 <section class="misc-grid shell">
   <article class="misc-lead reveal">
     <p class="project-number">M / 01</p>
     <h2>Things I return to</h2>
-    <p>I enjoy cooking and learning the craft behind cocktails and coffee. Photography gives me an excuse to look more slowly; recent journeys have taken me through Spain, Norway, Iceland, and Japan.</p>
+    <p>I love traveling and experiencing new things. I enjoy and appreciate delicious food, fine wine and cocktails. Also, photography gives me an excuse to look more slowly. Recent journeys have taken me through Spain, Norway, Iceland, and Japan.</p>
   </article>
   <div class="misc-list reveal delay-1">
     <div><span>01</span><h3>Culinary arts</h3><p>Cooking, mixology, coffee</p></div>
-    <div><span>02</span><h3>Photography</h3><p>Travel, light, everyday scenes</p></div>
-    <div><span>03</span><h3>Making</h3><p>Gundam models and LEGO</p></div>
-    <div><span>04</span><h3>Stories</h3><p>Video games and film</p></div>
+    <div><span>03</span><h3>Models</h3><p>Gundam and LEGO</p></div>
+    <div><span>04</span><h3>Stories</h3><p>RPG-like games and film</p></div>
   </div>
 </section>
 

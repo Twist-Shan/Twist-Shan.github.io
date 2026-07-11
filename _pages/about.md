@@ -15,7 +15,7 @@ redirect_from:
     <div class="about-copy">
       <h2>About</h2>
       <p class="hero-intro">I’m an undergraduate at Peking University pursuing a double major in Statistics in the School of Mathematical Sciences and Economics in the National School of Development.</p>
-      <p>My research interests focus on the applications of statistics and optimization in modern machine learning, especially in Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs). I am seeking PhD opportunities beginning in Fall 2028.</p>
+      <p>My research interests focus on the applications of statistics and optimization in modern machine learning, especially in Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs). I am seeking PhD opportunities beginning in Fall 2028 in Statistics, Computer Science, or Operations Research.</p>
     </div>
     <div class="hero-actions">
       <a class="text-link" href="{{ '/research/' | relative_url }}">Explore my research <span>↗</span></a>
@@ -59,7 +59,7 @@ redirect_from:
     <span>03</span><h2>Short notes</h2><p>Small updates from my desk.</p>
   </header>
   <div class="news-list">
-    {% for item in site.data.news %}
+    {% for item in site.data.news limit:3 %}
       {% if item.link != '' %}<a class="news-item" href="{{ item.link }}">{% else %}<div class="news-item">{% endif %}
         <time>{{ item.date }}</time><p>{{ item.text }}</p><span aria-hidden="true">{% if item.link != '' %}↗{% endif %}</span>
       {% if item.link != '' %}</a>{% else %}</div>{% endif %}
@@ -70,12 +70,12 @@ redirect_from:
 <aside class="contact-band">
   <div class="shell reveal">
     <div class="contact-heading">
-      <p>Questions, ideas, or a good paper?</p>
-      <h2>Let’s keep in touch.</h2>
+      <p>Questions, ideas, or collaboration?</p>
+      <h2>Feel free to contact.</h2>
     </div>
     <div class="contact-details">
       <a href="mailto:twistshan1218@gmail.com"><span class="email-text">twistshan1218<wbr>@gmail.com</span> <span aria-hidden="true">↗</span></a>
-      <p><span>WeChat</span> Twist_SsLl</p>
+      <p><span>Wechat ID:</span> Twist_SsLl</p>
     </div>
   </div>
 </aside>
