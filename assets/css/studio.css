@@ -115,11 +115,11 @@ html[data-theme="dark"] .moon-icon { opacity: 1; transform: rotate(0) scale(1); 
 .heading-mark--notes::before { content: ""; position: absolute; width: 40px; height: 1px; background: currentColor; left: 50%; top: 27px; transform: translateX(-50%); box-shadow: 0 11px 0 currentColor, 0 22px 0 currentColor; }
 .heading-mark--notes::after { content: ""; position: absolute; width: 11px; aspect-ratio: 1; border: 2px solid var(--page); border-radius: 50%; background: var(--mint); right: 6px; top: 6px; box-shadow: -51px 51px 0 -3px var(--accent); }
 .heading-mark--rl { border: 1px solid var(--line); border-radius: 50%; background: var(--motto-bg); }
-.heading-mark--rl::before { content: ""; position: absolute; inset: 12px 18px; border: 1px solid currentColor; border-radius: 50%; transform: rotate(35deg) scaleX(1.5); box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 7%, transparent); }
-.heading-mark--rl::after { content: ""; position: absolute; width: 12px; aspect-ratio: 1; border-radius: 50%; background: var(--accent); left: 50%; top: 50%; transform: translate(-50%,-50%); box-shadow: 22px -22px 0 -3px var(--mint); }
-.heading-mark--llm { background: radial-gradient(circle at 82% 18%, var(--mint) 0 5px, transparent 6px); }
-.heading-mark--llm::before, .heading-mark--llm::after { content: ""; position: absolute; width: 38px; height: 29px; border: 1px solid currentColor; left: 4px; top: 8px; transform: rotate(-3deg); }
-.heading-mark--llm::after { left: 17px; top: 21px; border-color: var(--accent); background: color-mix(in srgb, var(--mint) 18%, transparent); transform: rotate(2deg); }
+.heading-mark--rl::before { content: ""; position: absolute; inset: 15px 23px; border: 1px solid currentColor; border-radius: 50%; transform: rotate(35deg) scaleX(1.5); box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 7%, transparent); }
+.heading-mark--rl::after { content: ""; position: absolute; width: 15px; aspect-ratio: 1; border-radius: 50%; background: var(--accent); left: 50%; top: 50%; transform: translate(-50%,-50%); box-shadow: 30px -30px 0 -4px var(--mint); }
+.heading-mark--llm { background: radial-gradient(circle at 84% 16%, var(--mint) 0 6px, transparent 7px); }
+.heading-mark--llm::before, .heading-mark--llm::after { content: ""; position: absolute; width: 50px; height: 38px; border: 1px solid currentColor; left: 5px; top: 10px; transform: rotate(-3deg); }
+.heading-mark--llm::after { left: 23px; top: 29px; border-color: var(--accent); background: color-mix(in srgb, var(--mint) 18%, transparent); transform: rotate(2deg); }
 .heading-mark--things { border-radius: 54% 46% 38% 62%; background: var(--fresh); transform: rotate(-5deg); }
 .heading-mark--things::before { content: ""; position: absolute; width: 46px; aspect-ratio: 1; border: 1px solid currentColor; left: 9px; top: 12px; transform: rotate(17deg); }
 .heading-mark--things::after { content: ""; position: absolute; width: 14px; aspect-ratio: 1; border-radius: 50%; background: var(--mint); right: 1px; top: 2px; box-shadow: -37px 41px 0 -4px var(--accent); }
@@ -165,9 +165,9 @@ a.news-item:hover { color: var(--accent); padding-left: 9px; }
 .project-links a:hover { color: var(--accent); border-color: var(--accent); }
 .research-catalog { padding-bottom: 140px; }
 .research-domain { display: grid; grid-template-columns: 1fr 2.2fr; gap: 6vw; padding: 54px 0 72px; border-bottom: 1px solid var(--ink); }
-.research-domain-header { align-self: start; position: sticky; top: 36px; display: grid; grid-template-columns: minmax(0, 1fr) 68px; column-gap: 16px; }
+.research-domain-header { align-self: start; position: sticky; top: 36px; display: grid; grid-template-columns: minmax(0, 1fr) 94px; column-gap: 16px; }
 .research-domain-header .project-number, .research-domain-header h2 { grid-column: 1; }
-.research-domain-header .heading-mark { grid-column: 2; grid-row: 2; align-self: start; margin-top: 14px; }
+.research-domain-header .heading-mark { grid-column: 2; grid-row: 2; align-self: start; width: 82px; margin-top: 10px; }
 .research-domain-header h2 { max-width: 13ch; margin: 22px 0 0; font: 400 clamp(2rem, 2.7vw, 3rem)/1 var(--serif); letter-spacing: -.04em; }
 .research-track { min-width: 0; }
 .research-track-header { padding: 2px 0 18px; }
