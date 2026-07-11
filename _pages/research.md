@@ -7,29 +7,63 @@ slug: research
 
 <header class="page-hero shell reveal">
   <p class="eyebrow">01 — Research</p>
-  <h1>Questions I’m <em>working through.</em></h1>
-  <p>Statistical foundations and optimization algorithms for modern machine learning, with current work spanning LLM representations and preference feedback.</p>
+  <h1>Questions I’m <em>interested in.</em></h1>
 </header>
 
-<section class="project-list shell">
-  <article class="project reveal" id="hidden-state-representations">
-    <div class="project-meta"><span>Ongoing</span><time>Apr. 2026 — Present</time></div>
-    <div class="project-main">
+<main class="research-catalog shell">
+  <!-- Deep Learning is reserved as a future research direction and remains hidden until it has content. -->
+
+  <section class="research-domain reveal" id="reinforcement-learning">
+    <header class="research-domain-header">
       <p class="project-number">R / 01</p>
-      <h2>Chain-of-thought and hidden-state representations</h2>
-      <p>How does chain-of-thought reasoning help large language models compress task-relevant information into hidden states? We study this question through controlled counting tasks and representation geometry.</p>
-      <p class="advisor">With Prof. Yiqiao Zhong · UW–Madison</p>
-      <div class="project-links"><a href="https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count">Main repository ↗</a><a href="https://github.com/Twist-Shan/Hidden_State_Evaluation">Geometry experiments ↗</a></div>
+      <h2>Reinforcement Learning</h2>
+    </header>
+
+    <div class="research-track">
+      <header class="research-track-header">
+        <p>RL / Theory</p>
+        <h3>RL Theory</h3>
+      </header>
+
+      <article class="research-entry" id="chatbot-arena-ranking">
+        <p class="research-entry-label">Pairwise feedback</p>
+        <h4>Chatbot Arena Ranking Algorithm</h4>
+        <p>We study ranking and Pareto-set identification in Chatbot Arena through binary pairwise feedback, developing algorithms for both synthetic and realistic preference settings.</p>
+        <div class="research-links">
+          <a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn">Synthetic repo <span>↗</span></a>
+          <a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Rea_Arena">Realistic repo <span>↗</span></a>
+          <a class="research-advisor" href="https://zhimeir.github.io/">Advisor · Prof. Zhimei Ren <span>↗</span></a>
+        </div>
+      </article>
     </div>
-  </article>
-  <article class="project reveal" id="pairwise-feedback">
-    <div class="project-meta"><span>Ongoing</span><time>May 2026 — Present</time></div>
-    <div class="project-main">
+  </section>
+
+  <section class="research-domain reveal" id="large-language-model">
+    <header class="research-domain-header">
       <p class="project-number">R / 02</p>
-      <h2>Pareto set identification from pairwise feedback</h2>
-      <p>Bandit algorithms under the Bradley–Terry model for identifying Pareto-optimal LLMs from noisy binary comparisons, motivated by evaluation systems such as Chatbot Arena.</p>
-      <p class="advisor">With Prof. Zhimei Ren · University of Pennsylvania</p>
-      <div class="project-links"><a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn">Repository ↗</a></div>
+      <h2>Large Language Model</h2>
+    </header>
+
+    <div class="research-track">
+      <header class="research-track-header">
+        <p>LLM / Interpretability</p>
+        <h3>LLM Interpretability</h3>
+      </header>
+
+      <article class="research-entry" id="cot-counting-mechanism">
+        <p class="research-entry-label">Mechanistic study</p>
+        <h4>CoT for Counting Mechanism</h4>
+        <p>We investigate how chain-of-thought supports counting by tracing the mechanism from controlled synthetic tasks to realistic needle-in-a-haystack settings.</p>
+        <div class="research-links">
+          <a href="https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count">Synthetic repo <span>↗</span></a>
+          <a href="https://github.com/Twist-Shan/Realistic_CoT_NiaH_Count">Realistic repo <span>↗</span></a>
+          <a class="research-advisor" href="https://pages.stat.wisc.edu/~zhong35/">Advisor · Prof. Yiqiao Zhong <span>↗</span></a>
+        </div>
+      </article>
+
+      <aside class="research-aside">
+        <p>We are also interested in the geometry and compression of hidden-state representations; some toy experiments are available in <a href="https://github.com/Twist-Shan/Hidden_State_Evaluation">Hidden State Evaluation <span>↗</span></a>.</p>
+      </aside>
     </div>
-  </article>
-</section>
+  </section>
+</main>
