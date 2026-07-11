@@ -44,12 +44,12 @@ redirect_from:
   </header>
   <div class="timeline">
     <article>
-      <time>2023 — 2028</time>
+      <time>2023.08 — 2028.06</time>
       <div><h3>Peking University</h3><p>B.S. in Statistics · School of Mathematical Sciences<br>B.A. in Economics · National School of Development</p></div>
       <span class="place">Beijing</span>
     </article>
     <article>
-      <time>2025 — 2026</time>
+      <time>2025.8 — 2026.1</time>
       <div><h3>University of Copenhagen</h3><p>Exchange student · Department of SCIENCE</p></div>
       <span class="place">Copenhagen</span>
     </article>
