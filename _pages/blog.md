@@ -8,7 +8,7 @@ slug: blog
 <header class="page-hero shell reveal">
   <p class="eyebrow">02 — Blog</p>
   <h1>Notes from the <em>learning process.</em></h1>
-  <p>Occasional writing about research, tools, places, and things I want to remember.</p>
+  <p>Writings about research, people, places, and things I want to remember.</p>
 </header>
 
 <section class="post-list shell reveal">
