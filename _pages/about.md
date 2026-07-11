@@ -8,7 +8,6 @@ redirect_from:
 ---
 
 <section class="hero shell">
-  <div class="hero-index" aria-hidden="true">01 — ABOUT</div>
   <div class="hero-copy reveal">
     <p class="eyebrow"><span class="status-dot"></span> Undergraduate student · Peking University</p>
     <h1>Liang <em>(Twist)</em> Shan</h1>
