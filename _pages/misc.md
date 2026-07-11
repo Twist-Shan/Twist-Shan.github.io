@@ -16,7 +16,7 @@ slug: misc
     <p class="project-number">M / 01</p>
     <h2>Things I return to</h2>
     <i class="heading-mark heading-mark--things" aria-hidden="true"></i>
-    <p>I love traveling and experiencing new things. I enjoy and appreciate delicious food, fine wine and cocktails. Also, photography gives me an excuse to look more slowly. Recent journeys have taken me through Spain, Norway, Iceland, and Japan.</p>
+    <p>I love traveling and experiencing new things. I enjoy and appreciate delicious food, fine wine and cocktails. Photography then gives me the chance to remember the moments. Recent journeys have taken me through Spain, Norway, Iceland, and Japan.</p>
   </article>
   <div class="misc-list reveal delay-1">
     <div><span>01</span><h3>Culinary arts</h3><p>Cooking, mixology, coffee</p></div>

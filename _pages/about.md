@@ -58,7 +58,7 @@ redirect_from:
 
 <section class="news shell ruled-section reveal">
   <header class="section-label">
-    <span>03</span><h2>Short notes</h2><i class="heading-mark heading-mark--notes" aria-hidden="true"></i><p>Small updates from my desk.</p>
+    <span>03</span><h2>Short news</h2><i class="heading-mark heading-mark--notes" aria-hidden="true"></i><p>Small updates from my desk.</p>
   </header>
   <div class="news-list">
     {% for item in site.data.news limit:3 %}
