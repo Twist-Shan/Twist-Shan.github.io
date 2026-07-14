@@ -29,7 +29,7 @@ slug: research
       </header>
 
       <article class="research-entry" id="chatbot-arena-ranking">
-        <h4>AI Arena Ranking Algorithm</h4>
+        <h4>Pareto AI Identification Algorithm</h4>
         <p>We study Pareto-set identification algorithm for evaluating models from human preferences, especially in AI Arena, through binary pairwise feedback bandits with Bradley-Terry model and Borda score successive elimination.</p>
         <div class="research-links">
           <a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn">Synthetic repo <span>↗</span></a>
