@@ -1,0 +1,3617 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.">
+  <meta name="author" content="Liang (Twist) Shan">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f7f7f2">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer">
+  <meta property="og:description" content="Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.">
+  <meta property="article:published_time" content="2026-07-11">
+  <meta name="twitter:card" content="summary">
+  <title>Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer — Liang (Twist) Shan</title>
+  <style>
+/*
+ * Shared visual contract for every long-form note.
+ * Topic-specific styles may add components, but must not redefine this scale.
+ */
+:root {
+  --type-hero: clamp(48px, 5.5vw, 82px);
+  --type-hero-tablet: clamp(47px, 5.8vw, 69px);
+  --type-hero-mobile: clamp(43px, 12.5vw, 61px);
+  --type-hero-phone: 42px;
+  --type-hero-description: clamp(17px, 1.35vw, 21px);
+  --type-article-body: 17px;
+  --type-article-body-mobile: 16px;
+  --type-article-lede: clamp(21px, 2vw, 26px);
+  --type-section-title: clamp(35px, 4vw, 50px);
+  --type-subsection-title: clamp(25px, 2.4vw, 31px);
+
+  --hero-columns: minmax(0, 1.45fr) minmax(300px, 0.68fr);
+  --hero-gap: clamp(52px, 7vw, 132px);
+  --hero-padding: clamp(78px, 9vw, 142px) clamp(78px, 8vw, 126px);
+  --hero-title-width: 990px;
+  --hero-card-height: 440px;
+}
+
+/*
+ * Desktop reading rail contract.
+ *
+ * The topic styles place `.toc-sticky` inside a CSS Grid item. Because the
+ * article grid uses `align-items: start`, that item otherwise collapses to the
+ * TOC's own height and leaves no containing-block travel for `position: sticky`.
+ * Stretching only the desktop rail gives the sticky child the full article
+ * height while the existing max-height keeps long TOCs scrollable in-view.
+ */
+@media (min-width: 931px) {
+  .article-layout > .desktop-toc {
+    align-self: stretch;
+  }
+
+  .article-layout > .desktop-toc > .toc-sticky {
+    top: 30px;
+    max-height: calc(100vh - 60px);
+    max-height: calc(100dvh - 60px);
+  }
+}
+
+:root {
+  --paper: #f7f7f2;
+  --paper-soft: #f2ede4;
+  --paper-raised: rgba(255, 255, 251, 0.78);
+  --ink: #20231f;
+  --muted: #666a63;
+  --faint: #6f726b;
+  --line: rgba(32, 35, 31, 0.19);
+  --line-strong: rgba(32, 35, 31, 0.34);
+  --accent: #a84c3e;
+  --accent-ink: #7f372e;
+  --peach: #efb09e;
+  --apricot: #f2cd85;
+  --mint: #82cdb1;
+  --fresh: linear-gradient(145deg, #eeaa9a 7%, #f3ce82 49%, #7dceb1 94%);
+  --fresh-soft: linear-gradient(135deg, rgba(239, 176, 158, 0.25), rgba(242, 205, 133, 0.16) 48%, rgba(130, 205, 177, 0.24));
+  --panel: #222825;
+  --panel-soft: #2d3430;
+  --panel-text: #f5f3ea;
+  --selection: rgba(239, 176, 158, 0.55);
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: Aptos, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --site-shell: min(1540px, calc(100vw - 80px));
+  --content-width: 850px;
+  --header-height: 98px;
+  --radius-small: 10px;
+  --radius-medium: 18px;
+  --radius-large: 30px;
+  --ease: cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 112px;
+  overflow-x: hidden;
+  background: var(--paper);
+}
+
+@supports (overflow: clip) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--selection);
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active,
+.button:active,
+.filter-chip:active {
+  transform: translateY(1px);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: 12px;
+  left: 16px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+  transform: translateY(-180%);
+  transition: transform 180ms var(--ease);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.reading-progress {
+  position: fixed;
+  z-index: 999;
+  inset: 0 0 auto;
+  height: 3px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.reading-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--fresh);
+  will-change: transform;
+}
+
+.site-shell {
+  width: var(--site-shell);
+  margin-inline: auto;
+}
+
+.site-header {
+  position: relative;
+  z-index: 30;
+  background: color-mix(in srgb, var(--paper) 91%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.header-inner {
+  min-height: var(--header-height);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.wordmark {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  gap: 14px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.wordmark-mark {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  border-radius: 50%;
+  background: var(--fresh);
+  color: #23302a;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.site-navigation {
+  display: flex;
+  align-items: center;
+  gap: 44px;
+}
+
+.site-navigation a {
+  position: relative;
+  color: var(--muted);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.site-navigation a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 220ms var(--ease);
+}
+
+.site-navigation a:hover,
+.site-navigation a[aria-current="page"] {
+  color: var(--ink);
+}
+
+.site-navigation a:hover::after,
+.site-navigation a[aria-current="page"]::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  justify-self: end;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms var(--ease);
+}
+
+.theme-toggle:hover {
+  border-color: var(--line-strong);
+  background: var(--paper-soft);
+}
+
+.theme-toggle svg {
+  width: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.45;
+}
+
+.moon-icon {
+  display: none;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+.article-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--hero-columns);
+  gap: var(--hero-gap);
+  align-items: end;
+  padding-block: var(--hero-padding);
+}
+
+.article-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: var(--line);
+}
+
+.hero-copy,
+.token-anatomy,
+.mobile-toc {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-orb {
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  background: var(--fresh);
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+.hero-orb--left {
+  width: clamp(150px, 18vw, 320px);
+  height: clamp(150px, 18vw, 320px);
+  left: max(-230px, -15vw);
+  top: 28%;
+  animation: orb-drift 14s var(--ease) infinite alternate;
+}
+
+.hero-orb--right {
+  width: 118px;
+  height: 118px;
+  right: -36px;
+  top: 74px;
+  opacity: 0.64;
+  animation: orb-drift 11s var(--ease) 900ms infinite alternate-reverse;
+}
+
+@keyframes orb-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to { transform: translate3d(8px, -13px, 0) rotate(8deg); }
+}
+
+.article-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 44px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.article-breadcrumbs a {
+  text-decoration: none;
+}
+
+.article-breadcrumbs a:hover {
+  color: var(--accent);
+}
+
+.article-breadcrumbs time::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  margin-right: 14px;
+  vertical-align: middle;
+  background: var(--line-strong);
+}
+
+.hero-eyebrow,
+.eyebrow {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.hero-eyebrow > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fresh);
+}
+
+.article-hero h1 {
+  max-width: var(--hero-title-width);
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--type-hero);
+  font-weight: 400;
+  letter-spacing: -0.052em;
+  line-height: 0.99;
+  text-wrap: balance;
+}
+
+.article-hero h1 em {
+  color: var(--accent);
+  font-weight: 400;
+}
+
+.hero-description {
+  max-width: 720px;
+  margin: 30px 0 0;
+  color: var(--muted);
+  font-size: var(--type-hero-description);
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 26px;
+  margin-top: 38px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 47px;
+  padding: 11px 18px;
+  border: 1px solid transparent;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms var(--ease);
+}
+
+.button--primary {
+  border-color: var(--accent-ink);
+  background: var(--accent-ink);
+  color: #fffaf3;
+}
+
+.button--primary:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.button--quiet {
+  border-bottom-color: var(--line-strong);
+  padding-inline: 2px;
+}
+
+.button--quiet:hover {
+  border-bottom-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.article-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 50px 0 0;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.article-facts > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-right: 24px;
+  margin-right: 24px;
+  border-right: 1px solid var(--line);
+}
+
+.article-facts > div:last-child {
+  padding-right: 0;
+  margin-right: 0;
+  border-right: 0;
+}
+
+.article-facts dt {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.article-facts dd {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.token-anatomy {
+  align-self: center;
+  min-height: var(--hero-card-height);
+  padding: 28px;
+  border: 1px solid rgba(168, 76, 62, 0.22);
+  border-radius: var(--radius-large);
+  background: var(--paper-raised);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62), 0 26px 60px -42px rgba(126, 78, 52, 0.42);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.token-anatomy-head,
+.lab-canvas-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.status-dot i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mint);
+  animation: breathe 2.8s var(--ease) infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(0.82); opacity: 0.65; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+.anatomy-source {
+  margin: 46px 0 0;
+  font-family: var(--serif);
+  font-size: clamp(35px, 3vw, 48px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.anatomy-arrow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+  margin: 28px 0 16px;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.anatomy-arrow span {
+  height: 1px;
+  background: var(--line);
+}
+
+.anatomy-tokens {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.anatomy-tokens > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(168, 76, 62, 0.24);
+  border-radius: 999px;
+  background: rgba(239, 176, 158, 0.17);
+  font-family: var(--mono);
+  font-size: 12px;
+  opacity: 0;
+  animation: token-in 500ms var(--ease) forwards;
+  animation-delay: calc(var(--delay) * 120ms + 260ms);
+}
+
+.anatomy-tokens small {
+  color: var(--accent-ink);
+  font-size: 8px;
+}
+
+@keyframes token-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anatomy-arrow--reverse {
+  margin-top: 24px;
+}
+
+.anatomy-bytes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.anatomy-bytes span {
+  min-width: 32px;
+  padding: 7px 6px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  text-align: center;
+}
+
+.anatomy-note {
+  margin: 24px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.mobile-toc {
+  display: none;
+}
+
+.article-layout {
+  width: min(1190px, calc(100vw - 80px));
+  display: grid;
+  grid-template-columns: 218px minmax(0, var(--content-width));
+  gap: clamp(54px, 7vw, 104px);
+  justify-content: center;
+  align-items: start;
+  padding-block: 74px 150px;
+}
+
+.desktop-toc {
+  min-width: 0;
+}
+
+.toc-sticky {
+  position: sticky;
+  top: 30px;
+  max-height: calc(100dvh - 60px);
+  display: flex;
+  flex-direction: column;
+  padding-right: 8px;
+}
+
+.toc-title {
+  margin: 0 0 20px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.desktop-toc nav {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.toc-list,
+.toc-sublist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-list > li {
+  position: relative;
+  border-left: 1px solid var(--line);
+}
+
+.toc-list > li > a {
+  display: block;
+  padding: 7px 0 7px 15px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.toc-list > li.is-active {
+  border-left-color: var(--accent);
+}
+
+.toc-list > li.is-active > a,
+.toc-list > li > a:hover {
+  color: var(--ink);
+}
+
+.toc-sublist {
+  display: none;
+  padding: 2px 0 10px 16px;
+}
+
+.toc-list > li.is-active .toc-sublist {
+  display: block;
+}
+
+.toc-sublist a {
+  display: block;
+  padding: 5px 8px;
+  color: var(--faint);
+  font-size: 11px;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.toc-sublist a:hover,
+.toc-sublist a.is-current {
+  color: var(--accent-ink);
+}
+
+.toc-footer {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.toc-footer a {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.toc-footer a:hover {
+  color: var(--accent);
+}
+
+.article {
+  min-width: 0;
+}
+
+.article-prose {
+  color: var(--ink);
+  font-size: var(--type-article-body);
+  line-height: 1.78;
+}
+
+.article-prose > p {
+  margin: 0;
+}
+
+.article-prose p,
+.article-prose li {
+  max-width: 72ch;
+}
+
+.article-prose p {
+  margin: 0 0 1.25em;
+}
+
+.article-prose strong {
+  color: var(--ink);
+  font-weight: 670;
+}
+
+.article-prose em {
+  text-underline-offset: 0.18em;
+}
+
+.article-prose a {
+  color: var(--accent-ink);
+  text-decoration-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color 160ms ease, text-decoration-color 160ms ease;
+}
+
+.article-prose a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.article-prose .external-link::after {
+  content: " ↗";
+  font-family: var(--mono);
+  font-size: 0.7em;
+  text-decoration: none;
+}
+
+.article-lede,
+.evidence-note {
+  max-width: 790px;
+  margin: 0;
+}
+
+.article-lede {
+  padding: 0 0 42px;
+  border: 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--type-article-lede);
+  line-height: 1.52;
+}
+
+.article-lede p {
+  max-width: none;
+  margin: 0;
+}
+
+.evidence-note {
+  position: relative;
+  padding: 23px 26px 23px 55px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  background: var(--fresh-soft);
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.evidence-note::before {
+  content: "i";
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--accent-ink);
+  font-family: var(--serif);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.evidence-note p {
+  max-width: none;
+  margin: 0;
+}
+
+.article-section {
+  position: relative;
+  padding-block: 92px 18px;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 54px;
+}
+
+.article-prose > .article-section:first-of-type {
+  margin-top: 66px;
+}
+
+.section-label {
+  margin: 0 0 18px !important;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.article-section h2 {
+  max-width: 780px;
+  margin: 0 0 36px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--type-section-title);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  scroll-margin-top: 70px;
+  text-wrap: balance;
+}
+
+.article-section h3 {
+  max-width: 760px;
+  margin: 58px 0 22px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--type-subsection-title);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  scroll-margin-top: 76px;
+}
+
+.article-section h4 {
+  margin: 38px 0 18px;
+  font-family: var(--sans);
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.article-section > h2 + p,
+.article-section > .section-label + h2 + p {
+  font-size: 18px;
+}
+
+.article-section ul,
+.article-section ol {
+  margin: 1.25em 0 1.6em;
+  padding-left: 1.35em;
+}
+
+.article-section li {
+  padding-left: 0.4em;
+  margin: 0.55em 0;
+}
+
+.article-section li::marker {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.82em;
+}
+
+.article-section blockquote:not(.article-lede):not(.evidence-note) {
+  margin: 34px 0;
+  padding: 5px 0 5px 26px;
+  border-left: 2px solid var(--peach);
+  color: var(--muted);
+  font-family: var(--serif);
+  font-size: 20px;
+  line-height: 1.55;
+}
+
+.article-section blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.key-ideas {
+  padding-top: 72px;
+}
+
+.key-ideas > ol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 42px;
+  margin: 8px 0 0;
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+  counter-reset: idea;
+  list-style: none;
+}
+
+.key-ideas > ol > li {
+  position: relative;
+  display: block;
+  margin: 0;
+  padding: 24px 0 26px 48px;
+  border-top: 1px solid var(--line);
+  counter-increment: idea;
+}
+
+.key-ideas > ol > li::before {
+  content: "0" counter(idea);
+  position: absolute;
+  top: 28px;
+  left: 0;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.key-ideas > ol > li > strong {
+  display: block;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.key-ideas > ol > li::marker {
+  content: "";
+}
+
+.article-prose code {
+  padding: 0.14em 0.34em;
+  border: 1px solid rgba(168, 76, 62, 0.15);
+  border-radius: 5px;
+  background: rgba(239, 176, 158, 0.14);
+  color: var(--accent-ink);
+  font-family: var(--mono);
+  font-size: 0.84em;
+  overflow-wrap: anywhere;
+}
+
+.equation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 18px;
+  margin: 34px 0;
+  padding: 27px 24px;
+  border-block: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(19px, 2.4vw, 27px);
+  line-height: 1.35;
+  text-align: center;
+}
+
+.equation--compact {
+  font-size: 26px;
+}
+
+.fraction {
+  display: inline-grid;
+  grid-template-rows: auto auto;
+  align-items: center;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.fraction > span:first-child {
+  padding: 0 8px 4px;
+  border-bottom: 1px solid currentColor;
+}
+
+.fraction > span:last-child {
+  padding-top: 3px;
+}
+
+.code-block {
+  margin: 34px 0 42px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-medium);
+  background: var(--panel);
+  color: var(--panel-text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.code-block figcaption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 42px;
+  padding: 8px 12px 8px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  background: var(--panel-soft);
+}
+
+.code-language {
+  color: rgba(245, 243, 234, 0.62);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.copy-code {
+  min-width: 58px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(245, 243, 234, 0.78);
+  font-family: var(--mono);
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.copy-code:hover,
+.copy-code.is-copied {
+  border-color: var(--mint);
+  color: var(--panel-text);
+}
+
+.code-block pre {
+  max-width: 100%;
+  margin: 0;
+  padding: 24px;
+  overflow: auto;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.code-block pre code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--panel-text);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  overflow-wrap: normal;
+}
+
+.table-scroll {
+  max-width: 100%;
+  margin: 34px 0 42px;
+  overflow-x: auto;
+  border-block: 1px solid var(--line-strong);
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.table-scroll:focus-visible {
+  outline-offset: 3px;
+}
+
+.article-prose table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.article-prose th,
+.article-prose td {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.article-prose thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--paper-soft);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.article-prose tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.article-prose tbody tr:hover {
+  background: rgba(239, 176, 158, 0.08);
+}
+
+.bpe-lab {
+  position: relative;
+  margin: 66px 0 28px;
+  padding: clamp(24px, 4vw, 42px);
+  overflow: hidden;
+  border: 1px solid rgba(168, 76, 62, 0.23);
+  border-radius: var(--radius-large);
+  background: var(--fresh-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62), 0 28px 60px -48px rgba(126, 78, 52, 0.5);
+}
+
+.bpe-lab::before {
+  content: "";
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  top: -144px;
+  right: -90px;
+  border-radius: 50%;
+  background: var(--fresh);
+  opacity: 0.52;
+}
+
+.lab-heading,
+.lab-intro,
+.lab-mode-tabs,
+.lab-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.lab-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 28px;
+}
+
+.lab-heading .eyebrow {
+  margin-bottom: 10px;
+}
+
+.lab-heading h3 {
+  margin: 0;
+  font-size: clamp(27px, 3vw, 36px);
+}
+
+.lab-external {
+  align-self: center;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--ink) !important;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none !important;
+}
+
+.lab-external::after {
+  display: none;
+}
+
+.lab-external:hover {
+  border-bottom-color: var(--accent);
+  color: var(--accent-ink) !important;
+}
+
+.lab-intro {
+  max-width: 72ch;
+  margin: 22px 0 30px !important;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.lab-mode-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+}
+
+.lab-tab {
+  flex: 1;
+  min-height: 40px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.lab-tab.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.lab-panel[hidden] {
+  display: none;
+}
+
+.lab-input-group {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.lab-input-group label,
+.reading-filter label {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lab-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.lab-input-row input,
+.reading-filter input {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--paper) 84%, transparent);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.lab-input-row input:focus,
+.reading-filter input:focus {
+  border-color: var(--accent);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(168, 76, 62, 0.12);
+}
+
+.field-help,
+.field-error {
+  max-width: none !important;
+  margin: 0 !important;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.field-help {
+  color: var(--faint);
+}
+
+.field-error {
+  color: var(--accent-ink);
+}
+
+.lab-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(190px, 0.72fr);
+  gap: 14px;
+}
+
+.lab-canvas,
+.rule-ledger {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.44);
+}
+
+.token-sequence {
+  min-height: 122px;
+  display: flex;
+  align-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.bpe-token {
+  position: relative;
+  min-width: 46px;
+  display: inline-grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 9px 10px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  animation: token-in 260ms var(--ease) both;
+}
+
+.bpe-token small {
+  color: var(--faint);
+  font-size: 8px;
+}
+
+.bpe-token.is-merged {
+  border-color: var(--accent);
+  background: rgba(239, 176, 158, 0.19);
+}
+
+.bpe-token.is-merged::after {
+  content: "new";
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: var(--accent-ink);
+  color: #fffaf3;
+  font-size: 6px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.lab-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.lab-button,
+.filter-chip {
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 630;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms var(--ease);
+}
+
+.lab-button:hover:not(:disabled),
+.filter-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.lab-button--accent {
+  border-color: var(--accent-ink);
+  background: var(--accent-ink);
+  color: #fffaf3;
+}
+
+.lab-button--accent:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fffaf3;
+}
+
+.lab-button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.rule-ledger ol,
+.encode-trace {
+  max-height: 222px;
+  margin: 17px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.rule-ledger li,
+.encode-trace li {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 8px;
+  margin: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.rule-ledger li:last-child,
+.encode-trace li:last-child {
+  border-bottom: 0;
+}
+
+.rule-ledger li::before,
+.encode-trace li::before {
+  content: attr(data-rank);
+  color: var(--accent);
+}
+
+.rule-ledger .empty-rule {
+  display: block;
+  color: var(--faint);
+  font-family: var(--sans);
+  font-size: 11px;
+}
+
+.rule-ledger .empty-rule::before {
+  content: none;
+}
+
+.lab-canvas--encode {
+  min-height: 210px;
+}
+
+.reading-filter {
+  margin: 38px 0 50px;
+  padding: 27px;
+  border-block: 1px solid var(--line-strong);
+  background: var(--fresh-soft);
+}
+
+.reading-filter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.reading-filter-head .eyebrow {
+  margin-bottom: 5px;
+}
+
+.reading-filter-title {
+  margin: 0 !important;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+.reading-count {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.reading-filter > label {
+  display: block;
+  margin-bottom: 7px;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.filter-chip {
+  border-radius: 999px;
+}
+
+.filter-chip.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.reading-empty {
+  max-width: none !important;
+  margin: 20px 0 0 !important;
+  color: var(--accent-ink);
+  font-size: 13px;
+}
+
+[data-reading-item][hidden],
+[data-reading-heading][hidden] {
+  display: none !important;
+}
+
+.conclusion-section {
+  margin-top: 42px;
+  padding: 74px clamp(22px, 5vw, 52px) 54px;
+  border: 1px solid rgba(168, 76, 62, 0.24);
+  border-radius: var(--radius-large);
+  background: var(--fresh-soft);
+}
+
+.conclusion-section h2 {
+  margin-bottom: 28px;
+}
+
+.back-to-top {
+  position: fixed;
+  z-index: 25;
+  right: 24px;
+  bottom: 24px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+  color: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  backdrop-filter: blur(10px);
+  transition: opacity 180ms ease, transform 180ms var(--ease), border-color 180ms ease;
+  cursor: pointer;
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  border-color: var(--accent);
+}
+
+.back-to-top svg {
+  width: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  background: var(--paper-soft);
+}
+
+.footer-inner {
+  min-height: 126px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 30px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.footer-inner p {
+  margin: 0;
+}
+
+.footer-inner > p:last-child {
+  justify-self: end;
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+html[data-theme="dark"] {
+  --paper: #202421;
+  --paper-soft: #282d29;
+  --paper-raised: rgba(45, 51, 47, 0.78);
+  --ink: #f2efe6;
+  --muted: #b9b7ae;
+  --faint: #8f938c;
+  --line: rgba(242, 239, 230, 0.16);
+  --line-strong: rgba(242, 239, 230, 0.3);
+  --accent: #f0aa98;
+  --accent-ink: #f2b8a8;
+  --panel: #171b19;
+  --panel-soft: #242a27;
+  --selection: rgba(130, 205, 177, 0.38);
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] .sun-icon {
+  display: none;
+}
+
+html[data-theme="dark"] .moon-icon {
+  display: block;
+}
+
+html[data-theme="dark"] .wordmark-mark {
+  color: #243029;
+}
+
+html[data-theme="dark"] .button--primary,
+html[data-theme="dark"] .lab-button--accent {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #292420;
+}
+
+html[data-theme="dark"] .bpe-token {
+  background: var(--paper-soft);
+}
+
+html[data-theme="dark"] .bpe-token.is-merged {
+  background: rgba(240, 170, 152, 0.14);
+}
+
+html[data-theme="dark"] .bpe-token.is-merged::after {
+  background: var(--accent);
+  color: #292420;
+}
+
+@media (max-width: 1180px) {
+  :root {
+    --site-shell: min(100% - 56px, 1120px);
+  }
+
+  .article-hero {
+    grid-template-columns: minmax(0, 1.25fr) minmax(290px, 0.75fr);
+    gap: 52px;
+  }
+
+  .article-hero h1 {
+    font-size: var(--type-hero-tablet);
+  }
+
+  .article-layout {
+    width: min(1060px, calc(100vw - 56px));
+    grid-template-columns: 190px minmax(0, 780px);
+    gap: 58px;
+  }
+
+  .article-facts > div {
+    padding-right: 16px;
+    margin-right: 16px;
+  }
+}
+
+@media (max-width: 930px) {
+  :root {
+    --header-height: 82px;
+  }
+
+  .header-inner {
+    grid-template-columns: 1fr auto auto;
+    gap: 14px;
+  }
+
+  .site-navigation {
+    position: absolute;
+    top: calc(100% - 1px);
+    left: 0;
+    right: 0;
+    display: none;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 12px max(28px, calc((100vw - var(--site-shell)) / 2));
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .site-navigation.is-open {
+    display: grid;
+  }
+
+  .site-navigation a {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-navigation a:last-child {
+    border-bottom: 0;
+  }
+
+  .site-navigation a::after {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 9px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .menu-lines {
+    width: 17px;
+    display: grid;
+    gap: 4px;
+  }
+
+  .menu-lines i {
+    display: block;
+    height: 1px;
+    background: currentColor;
+    transition: transform 180ms ease;
+  }
+
+  .menu-toggle[aria-expanded="true"] .menu-lines i:first-child {
+    transform: translateY(2.5px) rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded="true"] .menu-lines i:last-child {
+    transform: translateY(-2.5px) rotate(-45deg);
+  }
+
+  .article-hero {
+    grid-template-columns: 1fr;
+    gap: 54px;
+  }
+
+  .token-anatomy {
+    width: min(100%, 620px);
+    min-height: auto;
+  }
+
+  .desktop-toc {
+    display: none;
+  }
+
+  .mobile-toc {
+    display: block;
+    border-block: 1px solid var(--line);
+  }
+
+  .mobile-toc summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 17px 0;
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    list-style: none;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .mobile-toc summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .mobile-toc[open] summary span {
+    transform: rotate(45deg);
+  }
+
+  .mobile-toc nav {
+    max-height: 52dvh;
+    padding: 0 0 18px;
+    overflow-y: auto;
+  }
+
+  .mobile-toc .toc-list {
+    columns: 2;
+    column-gap: 30px;
+  }
+
+  .mobile-toc .toc-list > li {
+    break-inside: avoid;
+    border-left: 0;
+  }
+
+  .mobile-toc .toc-list > li > a {
+    padding-left: 0;
+  }
+
+  .mobile-toc .toc-sublist {
+    display: none;
+  }
+
+  .article-layout {
+    width: min(100% - 56px, var(--content-width));
+    display: block;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --site-shell: calc(100% - 36px);
+    --radius-large: 23px;
+  }
+
+  .wordmark {
+    gap: 9px;
+    font-size: 13px;
+  }
+
+  .wordmark-mark {
+    width: 33px;
+    height: 33px;
+  }
+
+  .article-hero {
+    padding-block: 58px 72px;
+  }
+
+  .article-breadcrumbs {
+    margin-bottom: 34px;
+  }
+
+  .article-hero h1 {
+    font-size: var(--type-hero-mobile);
+    letter-spacing: -0.048em;
+    line-height: 1.01;
+  }
+
+  .hero-description {
+    margin-top: 23px;
+    font-size: 17px;
+  }
+
+  .hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: 30px;
+  }
+
+  .button {
+    width: 100%;
+  }
+
+  .button--quiet {
+    justify-content: flex-start;
+  }
+
+  .article-facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px 0;
+    margin-top: 38px;
+  }
+
+  .article-facts > div,
+  .article-facts > div:last-child {
+    padding: 0 12px 0 0;
+    margin: 0;
+    border-right: 1px solid var(--line);
+  }
+
+  .article-facts > div:nth-child(2n) {
+    padding-left: 14px;
+    border-right: 0;
+  }
+
+  .token-anatomy {
+    padding: 23px;
+  }
+
+  .hero-orb--right {
+    right: -18px;
+  }
+
+  .mobile-toc .toc-list {
+    columns: 1;
+  }
+
+  .article-layout {
+    width: calc(100% - 36px);
+    padding-block: 54px 100px;
+  }
+
+  .article-prose {
+    font-size: var(--type-article-body-mobile);
+    line-height: 1.75;
+  }
+
+  .article-lede {
+    font-size: var(--type-article-lede);
+  }
+
+  .evidence-note {
+    padding: 50px 20px 21px;
+  }
+
+  .evidence-note::before {
+    top: 19px;
+    left: 20px;
+  }
+
+  .article-section {
+    padding-top: 69px;
+  }
+
+  .article-section h2 {
+    margin-bottom: 28px;
+    font-size: clamp(32px, 10vw, 43px);
+  }
+
+  .article-section h3 {
+    margin-top: 46px;
+    font-size: 26px;
+  }
+
+  .key-ideas > ol {
+    grid-template-columns: 1fr;
+  }
+
+  .equation {
+    justify-content: flex-start;
+    overflow-x: auto;
+    font-size: 19px;
+    text-align: left;
+  }
+
+  .code-block {
+    margin-inline: -8px;
+  }
+
+  .code-block pre {
+    padding: 20px 18px;
+  }
+
+  .bpe-lab {
+    margin-inline: -8px;
+    padding: 22px 18px;
+  }
+
+  .lab-heading {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .lab-external {
+    justify-self: start;
+  }
+
+  .lab-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-input-row .lab-button {
+    width: 100%;
+  }
+
+  .lab-controls .lab-button {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  .reading-filter {
+    margin-inline: -8px;
+    padding: 22px 18px;
+  }
+
+  .reading-filter-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .conclusion-section {
+    margin-inline: -8px;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1fr;
+    gap: 17px;
+    padding-block: 32px;
+  }
+
+  .footer-inner > p:last-child {
+    justify-self: start;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    gap: 10px 20px;
+  }
+}
+
+@media (max-width: 430px) {
+  .menu-toggle > span:first-child {
+    display: none;
+  }
+
+  .article-hero h1 {
+    font-size: var(--type-hero-phone);
+  }
+
+  .article-breadcrumbs {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .article-breadcrumbs time::before {
+    display: none;
+  }
+
+  .anatomy-source {
+    font-size: 35px;
+  }
+
+  .lab-mode-tabs {
+    flex-direction: column;
+  }
+
+  .lab-controls .lab-button {
+    flex-basis: 100%;
+  }
+
+  .filter-chip {
+    flex: 1 1 auto;
+  }
+
+  .back-to-top {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  :root {
+    --paper: #ffffff;
+    --ink: #171917;
+    --muted: #454945;
+  }
+
+  .site-header,
+  .reading-progress,
+  .hero-orb,
+  .token-anatomy,
+  .hero-actions,
+  .article-facts,
+  .desktop-toc,
+  .mobile-toc,
+  .bpe-lab,
+  .reading-filter,
+  .back-to-top,
+  .site-footer,
+  .copy-code {
+    display: none !important;
+  }
+
+  .article-hero {
+    display: block;
+    padding: 24px 0 40px;
+  }
+
+  .article-hero h1 {
+    font-size: 44px;
+  }
+
+  .article-layout {
+    width: 100%;
+    display: block;
+    padding: 30px 0;
+  }
+
+  .article-section {
+    break-inside: auto;
+  }
+
+  .article-section h2,
+  .article-section h3,
+  .code-block,
+  .table-scroll {
+    break-inside: avoid;
+  }
+
+  .table-scroll,
+  .code-block pre {
+    overflow: visible;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+  </style>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer", "description": "Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.", "datePublished": "2026-07-11", "dateModified": "2026-07-11", "author": {"@type": "Person", "name": "Liang (Twist) Shan", "url": "https://twist-shan.github.io/"}, "inLanguage": "en"}</script>
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to the article</a>
+  <div class="reading-progress" role="progressbar" aria-label="Article reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <span data-progress-bar></span>
+  </div>
+
+  <header class="site-header" data-site-header>
+    <div class="site-shell header-inner">
+      <a class="wordmark" href="https://twist-shan.github.io/" aria-label="Liang Shan, home">
+        <span class="wordmark-mark" aria-hidden="true">LS</span>
+        <span>Liang Shan</span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-navigation" data-menu-toggle>
+        <span>Menu</span>
+        <span class="menu-lines" aria-hidden="true"><i></i><i></i></span>
+      </button>
+
+      <nav class="site-navigation" id="site-navigation" aria-label="Main navigation" data-navigation>
+        <a href="https://twist-shan.github.io/research/">Research</a>
+        <a href="https://twist-shan.github.io/blog/" aria-current="page">Blog</a>
+        <a href="https://twist-shan.github.io/misc/">Misc.</a>
+      </nav>
+
+      <button class="theme-toggle" type="button" aria-label="Switch to dark mode" data-theme-toggle>
+        <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56"></path></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.2A8.4 8.4 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <header class="article-hero site-shell">
+      <div class="hero-orb hero-orb--left" aria-hidden="true"></div>
+      <div class="hero-orb hero-orb--right" aria-hidden="true"></div>
+
+      <div class="hero-copy">
+        <div class="article-breadcrumbs">
+          <a href="https://twist-shan.github.io/blog/">← All notes</a>
+          <time datetime="2026-07-11">July 11, 2026</time>
+        </div>
+        <p class="hero-eyebrow"><span></span> Language modeling · implementation notes</p>
+        <h1 id="article-title"><em>Tokenization</em>: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer</h1>
+        <p class="hero-description">Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.</p>
+        <div class="hero-actions">
+          <a class="button button--primary" href="https://tiktokenizer.vercel.app/?encoder=gpt2" target="_blank" rel="noopener noreferrer">Explore the GPT-2 tokenizer <span aria-hidden="true">↗</span></a>
+          <a class="button button--quiet" href="./tokenization_bpe_from_scratch.py">Companion Python <span aria-hidden="true">↓</span></a>
+        </div>
+        <dl class="article-facts" aria-label="Article facts">
+          <div><dt>Reading</dt><dd>28 min</dd></div>
+          <div><dt>Chapters</dt><dd>13</dd></div>
+          <div><dt>Sources</dt><dd>43</dd></div>
+          <div><dt>Words</dt><dd>6,257</dd></div>
+        </dl>
+      </div>
+
+      <aside class="token-anatomy" aria-label="Tokenization concept preview">
+        <div class="token-anatomy-head">
+          <span>One string, several interfaces</span>
+          <span class="status-dot"><i></i> UTF-8</span>
+        </div>
+        <p class="anatomy-source">tokenization</p>
+        <div class="anatomy-arrow" aria-hidden="true"><span></span><small>segment</small></div>
+        <div class="anatomy-tokens" aria-label="Illustrative token segmentation">
+          <span style="--delay: 0">token<small>18493</small></span>
+          <span style="--delay: 1">ization<small>1634</small></span>
+        </div>
+        <div class="anatomy-arrow anatomy-arrow--reverse" aria-hidden="true"><span></span><small>decode bytes</small></div>
+        <div class="anatomy-bytes" aria-label="UTF-8 bytes for token">
+          <span>74</span><span>6f</span><span>6b</span><span>65</span><span>6e</span><span>…</span>
+        </div>
+        <p class="anatomy-note">The boundary is a modeling decision—not a fact about the word.</p>
+      </aside>
+
+      <details class="mobile-toc">
+        <summary>On this page <span aria-hidden="true">+</span></summary>
+        <nav aria-label="Mobile table of contents"><ol class="toc-list"><li data-toc-section="four-ideas-to-remember"><a href="#four-ideas-to-remember">Four ideas to remember</a></li><li data-toc-section="1-what-does-a-tokenizer-actually-do"><a href="#1-what-does-a-tokenizer-actually-do">What does a tokenizer actually do?</a><ol class="toc-sublist"><li><a href="#a-tokenizer-acts-as-a-static-compute-allocation-mechanism">A tokenizer acts as a static compute-allocation mechanism</a></li></ol></li><li data-toc-section="2-why-not-use-characters-bytes-or-words-directly"><a href="#2-why-not-use-characters-bytes-or-words-directly">Why not use characters, bytes, or words directly?</a></li><li data-toc-section="3-the-full-pipeline-of-a-modern-tokenizer"><a href="#3-the-full-pipeline-of-a-modern-tokenizer">The full pipeline of a modern tokenizer</a></li><li data-toc-section="4-bpe-fundamentals-training-and-encoding-are-different-operations"><a href="#4-bpe-fundamentals-training-and-encoding-are-different-operations">BPE fundamentals: training and encoding are different operations</a><ol class="toc-sublist"><li><a href="#41-training-repeatedly-merge-the-most-frequent-adjacent-pair">Training: repeatedly merge the most frequent adjacent pair</a></li><li><a href="#42-a-hand-worked-example-aaabdaaabac">A hand-worked example: aaabdaaabac</a></li><li><a href="#43-encoding-replay-learned-rules-by-rank">Encoding: replay learned rules by rank</a></li><li><a href="#44-decoding-concatenate-bytes-before-decoding-utf-8">Decoding: concatenate bytes before decoding UTF-8</a></li></ol></li><li data-toc-section="5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch"><a href="#5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch">Implementing a working byte-level BPE tokenizer from scratch</a><ol class="toc-sublist"><li><a href="#from-basic-self-checks-to-a-complete-test-suite">From basic self-checks to a complete test suite</a></li><li><a href="#special-tokens-are-control-plane-data-not-ordinary-vocabulary">Special tokens are control-plane data, not ordinary vocabulary</a></li></ol></li><li data-toc-section="6-from-teaching-code-to-a-cs336-grade-implementation"><a href="#6-from-teaching-code-to-a-cs336-grade-implementation">From teaching code to a CS336-grade implementation</a><ol class="toc-sublist"><li><a href="#do-not-cargo-cult-a-frontier-models-regex">Do not cargo-cult a frontier model's regex</a></li></ol></li><li data-toc-section="7-bpe-wordpiece-and-unigram"><a href="#7-bpe-wordpiece-and-unigram">BPE, WordPiece, and Unigram</a></li><li data-toc-section="8-the-central-problems-with-fixed-tokenization"><a href="#8-the-central-problems-with-fixed-tokenization">The central problems with fixed tokenization</a><ol class="toc-sublist"><li><a href="#81-characters-inside-a-token-are-not-directly-visible-to-the-main-model">Characters inside a token are not directly visible to the main model</a></li><li><a href="#82-digit-grouping-imposes-an-arbitrary-coordinate-system-on-arithmetic">Digit grouping imposes an arbitrary coordinate system on arithmetic</a></li><li><a href="#83-a-one-character-typo-can-trigger-a-discontinuous-retokenization">A one-character typo can trigger a discontinuous retokenization</a></li><li><a href="#84-cross-lingual-inequity-the-same-content-can-carry-very-different-token-costs">Cross-lingual inequity: the same content can carry very different token costs</a></li><li><a href="#85-data-and-domain-shifts-make-a-vocabulary-stale">Data and domain shifts make a vocabulary stale</a></li><li><a href="#86-a-single-canonical-encoding-is-brittleand-can-become-a-safety-blind-spot">A single canonical encoding is brittle—and can become a safety blind spot</a></li><li><a href="#87-prompt-boundaries-can-make-token-level-sampling-differ-from-string-level-conditioning">Prompt boundaries can make token-level sampling differ from string-level conditioning</a></li><li><a href="#88-the-tokenizer-is-not-learned-end-to-end">The tokenizer is not learned end to end</a></li></ol></li><li data-toc-section="9-is-stronger-compression-always-better"><a href="#9-is-stronger-compression-always-better">Is stronger compression always better?</a><ol class="toc-sublist"><li><a href="#why-per-token-perplexity-is-not-comparable-across-tokenizers">Why per-token perplexity is not comparable across tokenizers</a></li><li><a href="#a-practical-evaluation-matrix">A practical evaluation matrix</a></li></ol></li><li data-toc-section="10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation"><a href="#10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation">Future directions: from fixed tokens to dynamic, hierarchical computation</a><ol class="toc-sublist"><li><a href="#101-near-term-design-better-static-tokenizers">Near term: design better static tokenizers</a></li><li><a href="#102-medium-term-keep-a-byte-interface-and-compress-inside-the-model">Medium term: keep a byte interface and compress inside the model</a></li><li><a href="#103-the-key-architectural-contrast-blt-versus-h-net">The key architectural contrast: BLT versus H-Net</a></li><li><a href="#104-open-questions">Open questions</a></li></ol></li><li data-toc-section="11-if-you-were-training-a-tokenizer-today"><a href="#11-if-you-were-training-a-tokenizer-today">If you were training a tokenizer today</a><ol class="toc-sublist"><li><a href="#111-before-training">Before training</a></li><li><a href="#112-run-small-controlled-sweeps">Run small controlled sweeps</a></li><li><a href="#113-audit-before-freezing-the-artifact">Audit before freezing the artifact</a></li></ol></li><li data-toc-section="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions"><a href="#12-exercises-from-karpathy-to-cs336-and-then-to-research-questions">Exercises: from Karpathy to CS336 and then to research questions</a></li><li data-toc-section="13-an-annotated-reading-path"><a href="#13-an-annotated-reading-path">An annotated reading path</a><ol class="toc-sublist"><li><a href="#stage-1-learn-by-implementing">Stage 1: learn by implementing</a></li><li><a href="#stage-2-understand-the-classic-algorithms">Stage 2: understand the classic algorithms</a></li><li><a href="#stage-3-understand-where-tokenizers-fail">Stage 3: understand where tokenizers fail</a></li><li><a href="#stage-4-follow-the-tokenizer-free-and-latent-tokenization-frontier">Stage 4: follow the tokenizer-free and latent-tokenization frontier</a></li></ol></li><li data-toc-section="conclusion"><a href="#conclusion">Conclusion</a></li></ol></nav>
+      </details>
+    </header>
+
+    <div class="article-layout site-shell">
+      <aside class="desktop-toc">
+        <div class="toc-sticky">
+          <p class="toc-title">On this page</p>
+          <nav aria-label="Table of contents"><ol class="toc-list"><li data-toc-section="four-ideas-to-remember"><a href="#four-ideas-to-remember">Four ideas to remember</a></li><li data-toc-section="1-what-does-a-tokenizer-actually-do"><a href="#1-what-does-a-tokenizer-actually-do">What does a tokenizer actually do?</a><ol class="toc-sublist"><li><a href="#a-tokenizer-acts-as-a-static-compute-allocation-mechanism">A tokenizer acts as a static compute-allocation mechanism</a></li></ol></li><li data-toc-section="2-why-not-use-characters-bytes-or-words-directly"><a href="#2-why-not-use-characters-bytes-or-words-directly">Why not use characters, bytes, or words directly?</a></li><li data-toc-section="3-the-full-pipeline-of-a-modern-tokenizer"><a href="#3-the-full-pipeline-of-a-modern-tokenizer">The full pipeline of a modern tokenizer</a></li><li data-toc-section="4-bpe-fundamentals-training-and-encoding-are-different-operations"><a href="#4-bpe-fundamentals-training-and-encoding-are-different-operations">BPE fundamentals: training and encoding are different operations</a><ol class="toc-sublist"><li><a href="#41-training-repeatedly-merge-the-most-frequent-adjacent-pair">Training: repeatedly merge the most frequent adjacent pair</a></li><li><a href="#42-a-hand-worked-example-aaabdaaabac">A hand-worked example: aaabdaaabac</a></li><li><a href="#43-encoding-replay-learned-rules-by-rank">Encoding: replay learned rules by rank</a></li><li><a href="#44-decoding-concatenate-bytes-before-decoding-utf-8">Decoding: concatenate bytes before decoding UTF-8</a></li></ol></li><li data-toc-section="5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch"><a href="#5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch">Implementing a working byte-level BPE tokenizer from scratch</a><ol class="toc-sublist"><li><a href="#from-basic-self-checks-to-a-complete-test-suite">From basic self-checks to a complete test suite</a></li><li><a href="#special-tokens-are-control-plane-data-not-ordinary-vocabulary">Special tokens are control-plane data, not ordinary vocabulary</a></li></ol></li><li data-toc-section="6-from-teaching-code-to-a-cs336-grade-implementation"><a href="#6-from-teaching-code-to-a-cs336-grade-implementation">From teaching code to a CS336-grade implementation</a><ol class="toc-sublist"><li><a href="#do-not-cargo-cult-a-frontier-models-regex">Do not cargo-cult a frontier model's regex</a></li></ol></li><li data-toc-section="7-bpe-wordpiece-and-unigram"><a href="#7-bpe-wordpiece-and-unigram">BPE, WordPiece, and Unigram</a></li><li data-toc-section="8-the-central-problems-with-fixed-tokenization"><a href="#8-the-central-problems-with-fixed-tokenization">The central problems with fixed tokenization</a><ol class="toc-sublist"><li><a href="#81-characters-inside-a-token-are-not-directly-visible-to-the-main-model">Characters inside a token are not directly visible to the main model</a></li><li><a href="#82-digit-grouping-imposes-an-arbitrary-coordinate-system-on-arithmetic">Digit grouping imposes an arbitrary coordinate system on arithmetic</a></li><li><a href="#83-a-one-character-typo-can-trigger-a-discontinuous-retokenization">A one-character typo can trigger a discontinuous retokenization</a></li><li><a href="#84-cross-lingual-inequity-the-same-content-can-carry-very-different-token-costs">Cross-lingual inequity: the same content can carry very different token costs</a></li><li><a href="#85-data-and-domain-shifts-make-a-vocabulary-stale">Data and domain shifts make a vocabulary stale</a></li><li><a href="#86-a-single-canonical-encoding-is-brittleand-can-become-a-safety-blind-spot">A single canonical encoding is brittle—and can become a safety blind spot</a></li><li><a href="#87-prompt-boundaries-can-make-token-level-sampling-differ-from-string-level-conditioning">Prompt boundaries can make token-level sampling differ from string-level conditioning</a></li><li><a href="#88-the-tokenizer-is-not-learned-end-to-end">The tokenizer is not learned end to end</a></li></ol></li><li data-toc-section="9-is-stronger-compression-always-better"><a href="#9-is-stronger-compression-always-better">Is stronger compression always better?</a><ol class="toc-sublist"><li><a href="#why-per-token-perplexity-is-not-comparable-across-tokenizers">Why per-token perplexity is not comparable across tokenizers</a></li><li><a href="#a-practical-evaluation-matrix">A practical evaluation matrix</a></li></ol></li><li data-toc-section="10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation"><a href="#10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation">Future directions: from fixed tokens to dynamic, hierarchical computation</a><ol class="toc-sublist"><li><a href="#101-near-term-design-better-static-tokenizers">Near term: design better static tokenizers</a></li><li><a href="#102-medium-term-keep-a-byte-interface-and-compress-inside-the-model">Medium term: keep a byte interface and compress inside the model</a></li><li><a href="#103-the-key-architectural-contrast-blt-versus-h-net">The key architectural contrast: BLT versus H-Net</a></li><li><a href="#104-open-questions">Open questions</a></li></ol></li><li data-toc-section="11-if-you-were-training-a-tokenizer-today"><a href="#11-if-you-were-training-a-tokenizer-today">If you were training a tokenizer today</a><ol class="toc-sublist"><li><a href="#111-before-training">Before training</a></li><li><a href="#112-run-small-controlled-sweeps">Run small controlled sweeps</a></li><li><a href="#113-audit-before-freezing-the-artifact">Audit before freezing the artifact</a></li></ol></li><li data-toc-section="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions"><a href="#12-exercises-from-karpathy-to-cs336-and-then-to-research-questions">Exercises: from Karpathy to CS336 and then to research questions</a></li><li data-toc-section="13-an-annotated-reading-path"><a href="#13-an-annotated-reading-path">An annotated reading path</a><ol class="toc-sublist"><li><a href="#stage-1-learn-by-implementing">Stage 1: learn by implementing</a></li><li><a href="#stage-2-understand-the-classic-algorithms">Stage 2: understand the classic algorithms</a></li><li><a href="#stage-3-understand-where-tokenizers-fail">Stage 3: understand where tokenizers fail</a></li><li><a href="#stage-4-follow-the-tokenizer-free-and-latent-tokenization-frontier">Stage 4: follow the tokenizer-free and latent-tokenization frontier</a></li></ol></li><li data-toc-section="conclusion"><a href="#conclusion">Conclusion</a></li></ol></nav>
+          <div class="toc-footer">
+            <a href="./tokenization_notes_en.md">Markdown source <span aria-hidden="true">↗</span></a>
+            <a href="#13-an-annotated-reading-path">Reading path <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+      </aside>
+
+      <article id="article" class="article" aria-labelledby="article-title" tabindex="-1" data-article>
+        <div class="article-prose"><blockquote class="article-lede">
+<p>This article is written for readers who want to understand tokenization deeply enough to implement it. Its main thread comes from <a class="external-link" href="https://cs336.stanford.edu/" rel="noopener noreferrer" target="_blank">Stanford CS336: Language Modeling from Scratch</a>, the executable <a class="external-link" href="https://github.com/stanford-cs336/lectures/blob/main/lecture_01.py" rel="noopener noreferrer" target="_blank">CS336 Lecture 1 notes</a>, Andrej Karpathy's <a class="external-link" href="https://www.youtube.com/watch?v=zduSFxRajkE" rel="noopener noreferrer" target="_blank">Let's build the GPT Tokenizer</a>, and <a class="external-link" href="https://github.com/karpathy/minbpe" rel="noopener noreferrer" target="_blank">minBPE</a>. The research survey is current through <strong>July 11, 2026</strong>.</p>
+
+</blockquote><blockquote class="evidence-note"><p>A note on evidence: the article explicitly labels selected arXiv papers and preprints. Reported scale, speedups, and downstream results are the authors' findings; they have not necessarily been independently reproduced across hardware, languages, and training recipes. “Recent” identifies the research frontier—it does not imply that every conclusion is settled.</p></blockquote>
+<section aria-labelledby="four-ideas-to-remember" class="article-section key-ideas" data-section-number="00" id="section-four-ideas-to-remember"><p aria-hidden="true" class="section-label">00</p><h2 id="four-ideas-to-remember">Four ideas to remember</h2>
+<ol>
+<li><strong>A token is not a word, and it need not have linguistic meaning.</strong> A token ID indexes rows in the embedding table and LM head, and it represents one unit of autoregressive prediction.</li>
+<li><strong>BPE is a greedy compression heuristic, not a semantic or linguistic segmenter.</strong> It favors byte or character sequences that occur next to each other frequently in its training corpus.</li>
+<li><strong>A tokenizer is part of the model design.</strong> It determines sequence length, vocabulary parameters, how much compute a passage receives, how much content fits in the context window, and the relative cost of different languages.</li>
+<li><strong>The future is probably not “no chunks at all,” but no fixed external subword vocabulary.</strong> Models will still need larger computational units, but their boundaries may become dynamic, hierarchical, and jointly learned with the language model.</li>
+</ol>
+
+</section><section aria-labelledby="1-what-does-a-tokenizer-actually-do" class="article-section" data-chapter="foundations" data-section-number="01" id="section-1-what-does-a-tokenizer-actually-do"><p aria-hidden="true" class="section-label">01</p><h2 id="1-what-does-a-tokenizer-actually-do">1. What does a tokenizer actually do?</h2>
+<p>For a lossless byte-level tokenizer, we can write:</p>
+<div aria-label="E maps byte strings to token ID sequences, and decoding the encoding of x equals x" class="equation" role="img"><span><i>E</i>: Bytes<sup>*</sup> → {0, …, <i>V</i> − 1}<sup>*</sup>,</span><span><i>D</i>(<i>E</i>(<i>x</i>)) = <i>x</i>.</span></div>
+<p>Here:</p>
+<ul>
+<li><code>E</code> (encode) maps raw bytes to token IDs;</li>
+<li><code>D</code> (decode) concatenates the bytes associated with those IDs and reconstructs the input;</li>
+<li><code>V</code> is the vocabulary size.</li>
+</ul>
+<p>A standard training pipeline maximizes the likelihood of the token sequence produced by the canonical encoding <code>t = E(x)</code>:</p>
+<div aria-label="q sub E of t equals the product from i equals one to T of p of t i conditioned on earlier tokens" class="equation" role="img"><span><i>q</i><sub>E</sub>(<i>t</i>) = ∏<sub><i>i</i>=1</sub><sup><i>T</i></sup> <i>p</i>(<i>t</i><sub>i</sub> | <i>t</i><sub>&lt;i</sub>),</span><span>(<i>t</i><sub>1</sub>, …, <i>t</i><sub>T</sub>) = <i>E</i>(<i>x</i>).</span></div>
+<p>This quantity is not necessarily the exact probability of the decoded string. Multiple non-canonical ID sequences can decode to the same bytes, so a true string probability would have to sum over all such paths with consistent EOS handling. Standard training exposes only the canonical path. Even so, the tokenizer changes the factorization used for training: <code>E</code> decides how many prediction steps a passage requires and how much text each step covers.</p>
+<p>If the pipeline applies lossy or non-invertible normalization such as lowercasing or NFKC, it can guarantee only <code>D(E(x)) = N(x)</code>, not reconstruction of the original string. “Every tokenizer is lossless” and “byte-level BPE can be designed to be lossless” are different claims.</p>
+<h3 id="a-tokenizer-acts-as-a-static-compute-allocation-mechanism">A tokenizer acts as a static compute-allocation mechanism</h3>
+<p>Suppose a passage contains <code>B</code> UTF-8 bytes and becomes <code>T</code> tokens. A common <strong>sequence-shortening metric</strong> is:</p>
+<div aria-label="bytes per token equals B divided by T" class="equation equation--compact" role="img"><span>bytes / token = </span><span class="fraction"><span><i>B</i></span><span><i>T</i></span></span><span>.</span></div>
+<p>A higher value usually means a shorter sequence. It is often called a compression ratio informally, but it is not an information-theoretic code length: it does not include vocabulary storage, code probabilities, or model loss. For a standard Transformer, the main attention cost grows with <code>T²</code>, while FFNs, the KV cache, and many position-wise operations grow linearly with <code>T</code>. During generation, every token is also an autoregressive step. The tokenizer therefore decides statically which spans of bytes receive one step of expensive model computation.</p>
+<p>Increasing the vocabulary size <code>V</code> is not free. The embedding and output matrices contain roughly <code>O(Vd)</code> parameters, the softmax becomes more expensive, and the vocabulary may accumulate many low-frequency, poorly estimated embedding and output rows. The central tradeoff is:</p>
+<blockquote>
+<p>Small vocabulary, long sequence, fine granularity, often greater robustness to rare strings and spelling perturbations  ↔  Large vocabulary, short sequence, more rare rows, less direct access to within-token character structure.</p>
+</blockquote>
+
+</section><section aria-labelledby="2-why-not-use-characters-bytes-or-words-directly" class="article-section" data-chapter="foundations" data-section-number="02" id="section-2-why-not-use-characters-bytes-or-words-directly"><p aria-hidden="true" class="section-label">02</p><h2 id="2-why-not-use-characters-bytes-or-words-directly">2. Why not use characters, bytes, or words directly?</h2>
+<div aria-label="Representation units and their trade-offs" class="table-scroll" role="region" tabindex="0"><table><caption class="sr-only">Representation units and their trade-offs</caption>
+<thead>
+<tr>
+<th>Unit</th>
+<th>Advantages</th>
+<th>Main problems</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unicode code point</td>
+<td>Intuitive; natural for many character-level tasks</td>
+<td>A code point is not necessarily a user-perceived character; combining marks and emoji may use several code points, and the vocabulary is large</td>
+</tr>
+<tr>
+<td>Grapheme cluster</td>
+<td>Closer to what a reader perceives as a character</td>
+<td>Segmentation rules are complex; long sequences and morphology remain unresolved</td>
+</tr>
+<tr>
+<td>UTF-8 byte</td>
+<td>Only 256 values, no OOV, covers arbitrary text</td>
+<td>Non-ASCII characters often require several bytes; sequences are long and an individual byte has little meaning</td>
+</tr>
+<tr>
+<td>Word</td>
+<td>Short sequences and interpretable units</td>
+<td>Vocabulary explosion, rare and unknown words, and no simple whitespace boundary for languages such as Chinese or Thai</td>
+</tr>
+<tr>
+<td>Subword</td>
+<td>A compromise between vocabulary size and sequence length</td>
+<td>Static heuristic boundaries; characters inside a token are not directly visible; highly dependent on corpus, language, and domain</td>
+</tr>
+</tbody>
+</table></div>
+<p>This is why subword methods such as BPE, WordPiece, and Unigram exist: common strings can become one token, rare strings can fall back to smaller units, and the model still has a fixed vocabulary.</p>
+<p>Three concepts are especially easy to conflate:</p>
+<ul>
+<li><strong>Byte-level BPE</strong> starts from all 256 byte values and learns merges, so it has no OOV by construction.</li>
+<li><strong>Unicode subwords with byte fallback</strong> normally operate on Unicode pieces and use byte tokens only for characters not otherwise covered.</li>
+<li><strong>SentencePiece</strong> is a tokenizer framework, not one specific algorithm. It can train BPE or Unigram models and also handles normalization, whitespace representation, special tokens, byte fallback, and related pipeline concerns.</li>
+</ul>
+
+</section><section aria-labelledby="3-the-full-pipeline-of-a-modern-tokenizer" class="article-section" data-chapter="foundations" data-section-number="03" id="section-3-the-full-pipeline-of-a-modern-tokenizer"><p aria-hidden="true" class="section-label">03</p><h2 id="3-the-full-pipeline-of-a-modern-tokenizer">3. The full pipeline of a modern tokenizer</h2>
+<p>The Hugging Face <a class="external-link" href="https://huggingface.co/docs/tokenizers/main/api/tokenizer" rel="noopener noreferrer" target="_blank">Tokenizers documentation</a> describes a tokenizer as a pipeline of components. A useful mental model for GPT-style byte-level BPE is:</p>
+<figure class="code-block"><figcaption><span class="code-language">Text</span><button aria-label="Copy Text code" class="copy-code" data-copy-target="code-0" type="button">Copy</button></figcaption><pre><code class="language-text" id="code-0">Unicode string
+  ├─ optional normalization
+  ├─ isolate explicitly allowed special tokens
+  ├─ regex pre-tokenization
+  ├─ encode every normal chunk as UTF-8 bytes
+  ├─ apply ranked BPE merges inside each chunk
+  ├─ map pieces to integer IDs
+  └─ optional post-processing / BOS / EOS
+
+IDs
+  └─ token ID → bytes → concatenate → UTF-8 decode
+</code></pre></figure>
+<p>The most frequently overlooked stage is <strong>pre-tokenization</strong>. A GPT-style regex first separates contractions, letters, numbers, punctuation, line breaks, and whitespace; BPE is then applied independently inside each chunk. As a result:</p>
+<ul>
+<li>a merge cannot cross a regex boundary;</li>
+<li><code>hello</code> and <code>hello</code> can be distinct tokens;</li>
+<li>grouping numbers by one, two, or three digits may be an explicit regex policy rather than something BPE discovered;</li>
+<li>an English-friendly regex may be a poor fit for Chinese, agglutinative languages, source code, or mathematical notation.</li>
+</ul>
+<p>Karpathy's <a class="external-link" href="https://github.com/karpathy/minbpe/blob/master/exercise.md" rel="noopener noreferrer" target="_blank">minBPE exercise</a> offers an excellent progression: implement <code>BasicTokenizer</code>, add <code>RegexTokenizer</code>, and finally reproduce the exact IDs emitted by <code>tiktoken</code>. Stanford CS336 <a class="external-link" href="https://github.com/stanford-cs336/assignment1-basics" rel="noopener noreferrer" target="_blank">Assignment 1</a> likewise emphasizes pre-tokenization, special tokens, performance, and correctness.</p>
+<p>The engineering conclusion is important:</p>
+<blockquote>
+<p><strong>The vocabulary, merge ranks, normalizer, pre-tokenizer regex, special-token table, and decoder jointly define the tokenizer model. They must be serialized and versioned together.</strong></p>
+</blockquote>
+
+</section><section aria-labelledby="4-bpe-fundamentals-training-and-encoding-are-different-operations" class="article-section" data-chapter="implementation" data-section-number="04" id="section-4-bpe-fundamentals-training-and-encoding-are-different-operations"><p aria-hidden="true" class="section-label">04</p><h2 id="4-bpe-fundamentals-training-and-encoding-are-different-operations">4. BPE fundamentals: training and encoding are different operations</h2>
+<p>BPE began with Philip Gage's <a class="external-link" href="http://www.pennelynn.com/Documents/CUJ/HTML/94HTML/19940045.HTM" rel="noopener noreferrer" target="_blank">1994 compression algorithm</a>. <a class="external-link" href="https://aclanthology.org/P16-1162/" rel="noopener noreferrer" target="_blank">Sennrich et al. 2016</a> adapted it to subwords for neural machine translation, and <a class="external-link" href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf" rel="noopener noreferrer" target="_blank">§2.2 of the GPT-2 report</a> popularized byte-level BPE for language models.</p>
+<p>The GPT-2 reference implementation first maps the 256 byte values bijectively to printable Unicode symbols, then runs BPE over those symbols. This is a reversible implementation device, not natural-language segmentation over Unicode characters. <code>tiktoken</code> and the accompanying implementation in this article can instead store vocabulary entries directly as <code>bytes</code>. The concepts are equivalent, but their concrete byte mappings and ranks cannot be mixed when reproducing an existing model.</p>
+<h3 id="41-training-repeatedly-merge-the-most-frequent-adjacent-pair">4.1 Training: repeatedly merge the most frequent adjacent pair</h3>
+<p>The simplest byte-level BPE training algorithm is:</p>
+<ol>
+<li>Convert each pre-token to UTF-8 byte IDs.</li>
+<li>Initialize the vocabulary with IDs <code>0..255</code>.</li>
+<li>Count adjacent token pairs.</li>
+<li>Select the most frequent pair <code>(a,b)</code>.</li>
+<li>Create a new token <code>c = a + b</code> and record the rule <code>(a,b) → c</code>.</li>
+<li>Replace non-overlapping occurrences of that pair in the corpus.</li>
+<li>Repeat until the target vocabulary size is reached.</li>
+</ol>
+<p>Training uses adjacent-pair frequency as a proxy for local sequence compression and makes a greedy choice. Counts may include overlapping pairs while replacements must be non-overlapping, so the highest raw count does not always identify the pair that would remove the most tokens in that round. BPE is not a globally optimal compressor, nor does it directly optimize semantic boundaries, downstream loss, fairness, or robustness.</p>
+<p>This reliance on heuristics is not merely an implementation shortcut. <a class="external-link" href="https://openreview.net/forum?id=Xhf9YqwlM4" rel="noopener noreferrer" target="_blank">Tokenisation over Bounded Alphabets is Hard (ICLR 2026)</a> shows that even over a binary alphabet, the corresponding optimal bottom-up merge and direct vocabulary-selection problems are NP-complete and APX-hard.</p>
+<h3 id="42-a-hand-worked-example-aaabdaaabac">4.2 A hand-worked example: <code>aaabdaaabac</code></h3>
+<p>This <a class="external-link" href="https://github.com/karpathy/minbpe" rel="noopener noreferrer" target="_blank">minBPE README</a> example is ideal for working through by hand. IDs <code>0..255</code> are already reserved for bytes. With three merges:</p>
+<div aria-label="Byte-pair encoding merge trace for aaabdaaabac" class="table-scroll" role="region" tabindex="0"><table><caption class="sr-only">Byte-pair encoding merge trace for aaabdaaabac</caption>
+<thead>
+<tr>
+<th>Step</th>
+<th>New rule</th>
+<th>Symbolic sequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Initial</td>
+<td>—</td>
+<td><code>a a a b d a a a b a c</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>(a,a) → 256</code>, representing <code>aa</code></td>
+<td><code>256 a b d 256 a b a c</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>(256,a) → 257</code>, representing <code>aaa</code></td>
+<td><code>257 b d 257 b a c</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>(257,b) → 258</code>, representing <code>aaab</code></td>
+<td><code>258 d 258 a c</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The resulting encoding is:</p>
+<figure class="code-block"><figcaption><span class="code-language">Python</span><button aria-label="Copy Python code" class="copy-code" data-copy-target="code-1" type="button">Copy</button></figcaption><pre><code class="language-python" id="code-1">[258, 100, 258, 97, 99]
+</code></pre></figure>
+<p>Two implementation details matter:</p>
+<ul>
+<li>In <code>aaa</code>, the pair <code>(a,a)</code> has two overlapping positions, but a left-to-right non-overlapping replacement can merge it only once.</li>
+<li>Ties between equally frequent pairs require an explicit deterministic policy. The table and companion script follow the CS336 rule: choose the lexicographically larger tuple of token byte strings. On the second merge, another tie-break could choose <code>ab</code> and still produce the same final IDs, which is why asserting only the final output does not verify the internal merge tree.</li>
+</ul>
+<h3 id="43-encoding-replay-learned-rules-by-rank">4.3 Encoding: replay learned rules by rank</h3>
+<p>When encoding new text, <strong>do not recount the most frequent pair in that input</strong>. Instead:</p>
+<ol>
+<li>Begin with byte IDs.</li>
+<li>Find adjacent pairs that occur in the merge table.</li>
+<li>Select the pair with the smallest rank—the rule learned earliest during training.</li>
+<li>Merge its non-overlapping occurrences.</li>
+<li>Continue until no rule applies.</li>
+</ol>
+<p>The BPE model is therefore not just an <code>id → bytes</code> vocabulary. <strong>Merge order is also a model parameter.</strong></p>
+<h3 id="44-decoding-concatenate-bytes-before-decoding-utf-8">4.4 Decoding: concatenate bytes before decoding UTF-8</h3>
+<figure class="code-block"><figcaption><span class="code-language">Python</span><button aria-label="Copy Python code" class="copy-code" data-copy-target="code-2" type="button">Copy</button></figcaption><pre><code class="language-python" id="code-2">text = b"".join(vocab[token_id] for token_id in ids).decode("utf-8")
+</code></pre></figure>
+<p>The bytes of one token need not form valid UTF-8; a Chinese character or emoji may span several tokens. Always concatenate the full byte sequence before decoding. <code>errors="replace"</code> can display an arbitrary invalid ID sequence, but that visualization is lossy—the resulting <code>�</code> must never be used to reconstruct vocabulary bytes.</p>
+
+
+<aside aria-labelledby="bpe-lab-title" class="bpe-lab" data-bpe-lab="" id="bpe-lab">
+<div class="lab-heading">
+<div>
+<p class="eyebrow">Interactive field note · basic byte-level BPE</p>
+<h3 id="bpe-lab-title">Train a merge, then replay its rank</h3>
+</div>
+<a class="lab-external" href="https://tiktokenizer.vercel.app/?encoder=gpt2" rel="noopener noreferrer" target="_blank">Open the GPT-2 tokenizer playground <span aria-hidden="true">↗</span></a>
+</div>
+<p class="lab-intro">This miniature trainer uses raw UTF-8 bytes, no regex pre-tokenization, overlapping pair counts, and left-to-right non-overlapping replacement. Its deterministic tie-break matches the companion implementation.</p>
+<div aria-label="BPE lab mode" class="lab-mode-tabs" role="tablist">
+<button aria-controls="train-panel" aria-selected="true" class="lab-tab is-active" data-lab-tab="train" id="train-tab" role="tab" type="button">Train merges</button>
+<button aria-controls="encode-panel" aria-selected="false" class="lab-tab" data-lab-tab="encode" id="encode-tab" role="tab" tabindex="-1" type="button">Encode with rules</button>
+</div>
+<section aria-labelledby="train-tab" class="lab-panel" data-lab-panel="train" id="train-panel" role="tabpanel">
+<div class="lab-input-group">
+<label for="bpe-training-input">Training text</label>
+<div class="lab-input-row">
+<input aria-describedby="bpe-training-help bpe-training-error" aria-invalid="false" autocomplete="off" id="bpe-training-input" maxlength="80" spellcheck="false" type="text" value="aaabdaaabac"/>
+<button class="lab-button lab-button--accent" data-action="load-training" type="button">Load text</button>
+</div>
+<p class="field-help" id="bpe-training-help">Up to 64 UTF-8 bytes. The default reproduces the article trace.</p>
+<p class="field-error" data-training-error="" hidden="" id="bpe-training-error" role="alert"></p>
+</div>
+<div class="lab-workspace">
+<div class="lab-canvas">
+<div class="lab-canvas-head">
+<span>Current symbol sequence</span>
+<span data-step-label="">Step 0 · bytes only</span>
+</div>
+<div aria-live="polite" class="token-sequence" data-token-sequence=""></div>
+<div class="lab-controls">
+<button class="lab-button" data-action="reset" type="button">Reset</button>
+<button class="lab-button" data-action="previous" disabled="" type="button">Previous</button>
+<button class="lab-button lab-button--accent" data-action="next" type="button">Learn next merge</button>
+<button class="lab-button" data-action="play" type="button">Play three steps</button>
+</div>
+</div>
+<div class="rule-ledger">
+<div class="lab-canvas-head"><span>Learned rank</span><span data-rule-count="">0 rules</span></div>
+<ol data-rule-list="">
+<li class="empty-rule">No merges yet. Learn the highest-frequency adjacent pair.</li>
+</ol>
+</div>
+</div>
+</section>
+<section aria-labelledby="encode-tab" class="lab-panel" data-lab-panel="encode" hidden="" id="encode-panel" role="tabpanel">
+<div class="lab-input-group">
+<label for="bpe-encode-input">Text to encode with the learned rules</label>
+<div class="lab-input-row">
+<input aria-describedby="bpe-encode-help bpe-encode-error" aria-invalid="false" autocomplete="off" id="bpe-encode-input" maxlength="80" spellcheck="false" type="text" value="aaabac"/>
+<button class="lab-button lab-button--accent" data-action="encode" type="button">Replay ranks</button>
+</div>
+<p class="field-help" id="bpe-encode-help">Encoding selects the applicable learned pair with the smallest rank; it does not recount frequencies.</p>
+<p class="field-error" data-encode-error="" hidden="" id="bpe-encode-error" role="alert"></p>
+</div>
+<div class="lab-canvas lab-canvas--encode">
+<div class="lab-canvas-head"><span>Encoded sequence</span><span data-encode-summary="">Learn at least one rule</span></div>
+<div class="token-sequence" data-encoded-sequence=""></div>
+<ol class="encode-trace" data-encode-trace=""></ol>
+</div>
+</section>
+</aside>
+</section><section aria-labelledby="5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch" class="article-section" data-chapter="implementation" data-section-number="05" id="section-5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch"><p aria-hidden="true" class="section-label">05</p><h2 id="5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch">5. Implementing a working byte-level BPE tokenizer from scratch</h2>
+<p>The single-file teaching implementation and basic self-checks are in <a href="./tokenization_bpe_from_scratch.py">tokenization_bpe_from_scratch.py</a>. Its only non-standard dependency is <code>regex</code>:</p>
+<figure class="code-block"><figcaption><span class="code-language">Shell</span><button aria-label="Copy Shell code" class="copy-code" data-copy-target="code-3" type="button">Copy</button></figcaption><pre><code class="language-bash" id="code-3">pip install regex
+python tokenization_bpe_from_scratch.py
+</code></pre></figure>
+<p>One API difference is worth noting. The target <code>vocab_size</code> in CS336 includes the 256 byte tokens, special tokens, and learned merge tokens. For clarity, the companion script accepts <code>num_merges</code> directly and assigns special IDs after the merge IDs. When adapting it to the assignment interface, use <code>num_merges = vocab_size - 256 - len(special_tokens)</code>, while remembering that training may stop early if no mergeable pair remains.</p>
+<p>The core training loop is below. The complete file also implements regex pre-tokenization, special-token handling, a stable tie-break, and decoding:</p>
+<figure class="code-block"><figcaption><span class="code-language">Python</span><button aria-label="Copy Python code" class="copy-code" data-copy-target="code-4" type="button">Copy</button></figcaption><pre><code class="language-python" id="code-4">vocab = {i: bytes([i]) for i in range(256)}
+ordered_merges = []
+
+for _ in range(num_merges):
+    pair_counts = Counter()
+    for ids, frequency in piece_counts.items():
+        for pair in zip(ids, ids[1:]):
+            pair_counts[pair] += frequency
+
+    if not pair_counts:
+        break
+
+    pair = max(
+        pair_counts,
+        key=lambda p: (pair_counts[p], vocab[p[0]], vocab[p[1]]),
+    )
+    new_id = len(vocab)
+    vocab[new_id] = vocab[pair[0]] + vocab[pair[1]]
+    ordered_merges.append((pair, new_id))
+
+    updated = Counter()
+    for ids, frequency in piece_counts.items():
+        updated[merge_pair(ids, pair, new_id)] += frequency
+    piece_counts = updated
+</code></pre></figure>
+<p>The following simplified pseudocode considers only merge rules present in the current sequence:</p>
+<figure class="code-block"><figcaption><span class="code-language">Python</span><button aria-label="Copy Python code" class="copy-code" data-copy-target="code-5" type="button">Copy</button></figcaption><pre><code class="language-python" id="code-5">while len(ids) &gt;= 2:
+    candidates = {
+        pair for pair in zip(ids, ids[1:]) if pair in rule_by_pair
+    }
+    if not candidates:
+        break
+    pair = min(candidates, key=lambda p: rule_by_pair[p].rank)
+    ids = merge_pair(ids, pair, rule_by_pair[pair].new_id)
+</code></pre></figure>
+<p>The companion script stores each rule internally as a <code>(rank, new_id)</code> tuple; the named fields above are used only to make the pseudocode easier to read.</p>
+<h3 id="from-basic-self-checks-to-a-complete-test-suite">From basic self-checks to a complete test suite</h3>
+<figure class="code-block"><figcaption><span class="code-language">Python</span><button aria-label="Copy Python code" class="copy-code" data-copy-target="code-6" type="button">Copy</button></figcaption><pre><code class="language-python" id="code-6">assert decode(encode(text)) == text
+</code></pre></figure>
+<p>The companion script checks the toy merge tree and IDs, the empty string, regex boundaries, multilingual and emoji round trips, ordinary/allowed/unknown special-token behavior, and strict decoding of a partial UTF-8 token. A production implementation should additionally cover:</p>
+<ul>
+<li>empty input, repeated strings such as <code>aaa</code>, whitespace, line breaks, and control characters;</li>
+<li>Chinese, Korean, combining marks, emoji, and mixed scripts;</li>
+<li>allowed, ordinary-literal, and reject policies for special-token strings;</li>
+<li>deterministic pair-frequency tie-breaking;</li>
+<li>proof that merges never cross regex boundaries;</li>
+<li>exact golden token IDs from the target implementation, such as <code>tiktoken</code>;</li>
+<li>stable serialization, loading, and artifact hashes;</li>
+<li>tokens that are individually invalid UTF-8 but valid after concatenation.</li>
+</ul>
+<p>The script intentionally accepts only Python strings that can be encoded as strict UTF-8. A production API must also define what happens to lone surrogates or directly supplied invalid byte sequences: reject, replace, or preserve them. The choice changes the exact byte-level round-trip contract.</p>
+<p>Only <code>decode(encode(text)) == text</code> is guaranteed. For an arbitrary hand-constructed, non-canonical ID sequence, <code>encode(decode(ids))</code> need not reproduce the same IDs.</p>
+<h3 id="special-tokens-are-control-plane-data-not-ordinary-vocabulary">Special tokens are control-plane data, not ordinary vocabulary</h3>
+<p><code>&lt;|endoftext|&gt;</code>, BOS, EOS, role delimiters, and tool delimiters should occupy a separate special-token namespace. Parsing them must require explicit permission; otherwise, a reserved string inside user-controlled text can silently become a control instruction. Both minBPE and <code>tiktoken</code> expose an explicit <code>allowed_special</code> choice. This is a security boundary, not decorative API design.</p>
+<p>“Not allowed” still requires a concrete policy. The companion script encodes a reserved string as ordinary bytes, similar to <code>encode_ordinary</code>; <code>tiktoken.encode</code> rejects a known but unallowed special string by default. Either policy can be reasonable. The important requirements are that user text must never be silently interpreted as a control token and that callers and tests know which policy is active.</p>
+
+</section><section aria-labelledby="6-from-teaching-code-to-a-cs336-grade-implementation" class="article-section" data-chapter="implementation" data-section-number="06" id="section-6-from-teaching-code-to-a-cs336-grade-implementation"><p aria-hidden="true" class="section-label">06</p><h2 id="6-from-teaching-code-to-a-cs336-grade-implementation">6. From teaching code to a CS336-grade implementation</h2>
+<p>The simple trainer rescans the entire corpus after every merge, giving roughly <code>O(number_of_merges × corpus_length)</code> work. That is ideal for learning and poor for large-scale training. Production implementations typically:</p>
+<ul>
+<li>collapse repeated pre-tokens into <code>piece → frequency</code> and weight pair counts by occurrence frequency;</li>
+<li>represent token occurrences with adjacency structures and update only pairs affected by a merge;</li>
+<li>use a heap or priority queue for high-frequency candidates while handling stale entries;</li>
+<li>parallelize pre-tokenization and local counting, then reduce counters globally;</li>
+<li>cut shards only at document or special-token boundaries, never at an arbitrary point inside UTF-8 or a regex chunk;</li>
+<li>use Rust or C++, caching, batching, and vectorization for inference;</li>
+<li>attach versions, hashes, normalization metadata, and compatibility tests to the tokenizer artifact.</li>
+</ul>
+<p>The CS336 Lecture 1 implementation intentionally scans every merge rule. The assignment asks students to consider only currently relevant merges, preserve special tokens, use GPT-style pre-tokenization, and make the implementation as fast as practical. Karpathy's later <a class="external-link" href="https://github.com/karpathy/nanochat/blob/master/nanochat/tokenizer.py" rel="noopener noreferrer" target="_blank">nanochat tokenizer</a> likewise moves from readable Python minBPE to Rust training and <code>tiktoken.Encoding</code> inference, and evaluates compression separately on news, code, mathematics, science, Korean, and other slices.</p>
+<h3 id="do-not-cargo-cult-a-frontier-models-regex">Do not cargo-cult a frontier model's regex</h3>
+<p>Karpathy's GPT-4 reproduction exercise uses <code>\p{N}{1,3}</code>, while versions of the nanochat experiments selected <code>\p{N}{1,2}</code> for their own setup. This is exactly the point: digit grouping, vocabulary size, and data distribution must be designed together. “Three digits per chunk” is not a law of nature.</p>
+
+</section><section aria-labelledby="7-bpe-wordpiece-and-unigram" class="article-section" data-chapter="implementation" data-section-number="07" id="section-7-bpe-wordpiece-and-unigram"><p aria-hidden="true" class="section-label">07</p><h2 id="7-bpe-wordpiece-and-unigram">7. BPE, WordPiece, and Unigram</h2>
+<div aria-label="BPE, WordPiece, Unigram, and SentencePiece compared" class="table-scroll" role="region" tabindex="0"><table><caption class="sr-only">BPE, WordPiece, Unigram, and SentencePiece compared</caption>
+<thead>
+<tr>
+<th>Method</th>
+<th>How the vocabulary is built</th>
+<th>How inference segments text</th>
+<th>Typical properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BPE</td>
+<td>Start small and repeatedly merge frequent adjacent pairs</td>
+<td>Replay merges by rank</td>
+<td>Simple, fast, strong sequence compression; greedy and static</td>
+</tr>
+<tr>
+<td>WordPiece</td>
+<td>Historical implementations vary; common descriptions use frequency- or likelihood-gain-style vocabulary construction</td>
+<td>Greedy longest-match-first / MaxMatch</td>
+<td>Common in BERT-family models; may emit <code>[UNK]</code> without byte fallback</td>
+</tr>
+<tr>
+<td>Unigram LM</td>
+<td>Start with a large candidate vocabulary, then remove pieces using a probabilistic model, EM, and loss-based pruning</td>
+<td>Viterbi for the best segmentation, or posterior sampling</td>
+<td>Naturally supports multiple segmentations and subword regularization</td>
+</tr>
+<tr>
+<td>SentencePiece</td>
+<td>Not a separate algorithm; wraps BPE/Unigram plus the text pipeline</td>
+<td>Depends on the selected model</td>
+<td>Trains directly on raw sentences, often represents space with <code>▁</code>, and can provide byte fallback</td>
+</tr>
+</tbody>
+</table></div>
+<p>The WordPiece row is a conceptual summary, not a recipe for reproducing an arbitrary BERT tokenizer. Historical training details differ across codebases; exact compatibility still requires the original vocabulary, normalizer, pre-tokenizer, and implementation-level tests.</p>
+<p>The key insight in <a class="external-link" href="https://aclanthology.org/P18-1007/" rel="noopener noreferrer" target="_blank">Kudo 2018</a> is that one string admits many valid segmentations, and sampling several of them during training can serve as regularization. <a class="external-link" href="https://aclanthology.org/2020.acl-main.170/" rel="noopener noreferrer" target="_blank">BPE-Dropout</a> obtains a similar effect by randomly skipping BPE merges.</p>
+<p>For a deeper look at WordPiece inference, <a class="external-link" href="https://aclanthology.org/2021.emnlp-main.160/" rel="noopener noreferrer" target="_blank">Fast WordPiece Tokenization</a> uses a trie with failure links to implement longest-match-first in strict linear time. For a recent and particularly clear simplified Unigram implementation, see <a class="external-link" href="https://aclanthology.org/2026.findings-acl.316/" rel="noopener noreferrer" target="_blank">Which Pieces Does Unigram Tokenization Really Need? (Findings ACL 2026)</a>.</p>
+
+</section><section aria-labelledby="8-the-central-problems-with-fixed-tokenization" class="article-section" data-chapter="problems" data-section-number="08" id="section-8-the-central-problems-with-fixed-tokenization"><p aria-hidden="true" class="section-label">08</p><h2 id="8-the-central-problems-with-fixed-tokenization">8. The central problems with fixed tokenization</h2>
+<h3 id="81-characters-inside-a-token-are-not-directly-visible-to-the-main-model">8.1 Characters inside a token are not directly visible to the main model</h3>
+<p>The model receives one embedding ID, not a short sequence of the characters inside that token. It can learn token spellings indirectly from data, but that knowledge may not compose reliably for letter counting, string reversal, rhyme, or editing.</p>
+<p>Karpathy emphasizes this issue with spelling and string-manipulation examples. <a class="external-link" href="https://aclanthology.org/2024.emnlp-main.177/" rel="noopener noreferrer" target="_blank">CUTE (EMNLP 2024)</a> provides more systematic evidence: models appear to know the spelling of many tokens but often fail to use that information reliably in character-level operations.</p>
+<p>Not every failure on a character task should be blamed on the tokenizer. Model scale, data, positional mechanisms, and task difficulty matter too. The precise claim is that <strong>fixed subword tokens impose an unfavorable inductive bias on character-level tasks.</strong></p>
+<h3 id="82-digit-grouping-imposes-an-arbitrary-coordinate-system-on-arithmetic">8.2 Digit grouping imposes an arbitrary coordinate system on arithmetic</h3>
+<p>The strings <code>127</code>, <code>677</code>, and <code>8041</code> may be divided into unrelated groups of one to three digits. Before performing arithmetic, the model must recover decimal place structure from these irregular token boundaries. <a class="external-link" href="https://arxiv.org/abs/2402.14903" rel="noopener noreferrer" target="_blank">Tokenization Counts</a> finds that forcing right-aligned number grouping can substantially change GPT-3.5/4 arithmetic performance and error patterns.</p>
+<p>The conclusion is not that tokenization is the only cause of arithmetic failure. Rather, <strong>number granularity and alignment determine the coordinate system in which the model must learn an algorithm.</strong></p>
+<h3 id="83-a-one-character-typo-can-trigger-a-discontinuous-retokenization">8.3 A one-character typo can trigger a discontinuous retokenization</h3>
+<p>In a character representation, a typo changes one position. Under subword tokenization, the same typo may turn one common token into several rare fragments, changing both the embeddings and the sequence length. <a class="external-link" href="https://aclanthology.org/2024.findings-emnlp.86/" rel="noopener noreferrer" target="_blank">Tokenization Falling Short</a> reports that scaling the model mitigates but does not eliminate biases associated with typos, length variation, and within-token structure; training with alternative segmentations such as BPE-dropout can improve some forms of robustness.</p>
+<p>Unicode confusables, zero-width characters, combining-mark order, and normalization can also create inputs that look identical but produce different IDs. Security filters, user-visible logs, and the byte stream sent to the model must agree.</p>
+<h3 id="84-cross-lingual-inequity-the-same-content-can-carry-very-different-token-costs">8.4 Cross-lingual inequity: the same content can carry very different token costs</h3>
+<p>When a tokenizer allocates more vocabulary capacity to high-resource languages, low-resource languages are often segmented more finely. This can lead to:</p>
+<ul>
+<li>higher API prices when billing is token-based and potentially higher serving latency;</li>
+<li>less effective content in a fixed token context window;</li>
+<li>fewer source bytes covered by the same training-token budget;</li>
+<li>longer dependency paths and, in some settings, lower task quality.</li>
+</ul>
+<p>On parallel text, languages can require dramatically different numbers of tokens to express approximately the same content. <a class="external-link" href="https://proceedings.neurips.cc/paper_files/paper/2023/hash/74bb24dca8334adce292883b4b651eda-Abstract-Conference.html" rel="noopener noreferrer" target="_blank">Petrov et al., NeurIPS 2023</a> report disparities of up to roughly 15× among tested language pairs; even character- and byte-level representations exceed 4× for some pairs. These are maxima in the study, not universal constants. <a class="external-link" href="https://aclanthology.org/2023.emnlp-main.614/" rel="noopener noreferrer" target="_blank">Ahia et al., EMNLP 2023</a> connect such disparities to token-billed API cost, regional affordability, and task utility.</p>
+<p>Byte-level modeling is not automatically fair. UTF-8 has writing-system-dependent byte overhead, and translations can differ intrinsically in orthography, morphology, and expression length. For languages without whitespace-delimited words, <code>tokens/word</code> also depends on an external segmenter. A fairness audit should therefore report several measures: token-length ratios on parallel text, tokens per extended grapheme cluster, bytes per token, latency, context occupancy, and downstream quality. A cost Gini, when used, is a Gini coefficient over per-language token costs.</p>
+<h3 id="85-data-and-domain-shifts-make-a-vocabulary-stale">8.5 Data and domain shifts make a vocabulary stale</h3>
+<p>A tokenizer trained on English web pages may handle code indentation, scientific notation, DNA, medical terminology, or another language poorly. A second failure mode appears when a string was frequent during tokenizer training but nearly absent after the LM corpus was cleaned. Its embedding receives little training and may become a so-called glitch token.</p>
+<p><a class="external-link" href="https://arxiv.org/abs/2402.01035" rel="noopener noreferrer" target="_blank">Getting the most out of your tokenizer</a> studies how vocabulary size, regex design, and training data affect code-model generation speed, effective context, memory, and downstream performance. In practice, a tokenizer should be trained on a sample close to the final LM data mixture and evaluated separately by language and domain.</p>
+<p>A pretrained model cannot simply swap tokenizers. Token IDs are indices into the embedding table and output head. Changing the vocabulary requires remapping or initializing those rows and enough continued pretraining to teach their new semantics.</p>
+<h3 id="86-a-single-canonical-encoding-is-brittleand-can-become-a-safety-blind-spot">8.6 A single canonical encoding is brittle—and can become a safety blind spot</h3>
+<p>A deterministic encoder returns one canonical segmentation even though the vocabulary may admit many alternative token sequences that decode to the same bytes. For some strings, the number of such alternatives grows exponentially with length. Because decoding is many-to-one, the likelihood of <code>E(x)</code> is not generally the full likelihood of byte string <code>x</code>; the latter must marginalize over the token paths considered valid by the chosen semantics.</p>
+<p><a class="external-link" href="https://aclanthology.org/2025.acl-long.1012/" rel="noopener noreferrer" target="_blank">Adversarial Tokenization (ACL 2025)</a> reports that alternative tokenizations of a malicious string can evade safety behavior trained primarily on canonical encodings. The attack generally requires control over token IDs or an internal retokenization path; an ordinary closed text API may not expose that interface. The broader lesson remains: a safety pipeline should not assume that a string has only one discrete representation.</p>
+<h3 id="87-prompt-boundaries-can-make-token-level-sampling-differ-from-string-level-conditioning">8.7 Prompt boundaries can make token-level sampling differ from string-level conditioning</h3>
+<p>BPE encodings are generally not prefix-consistent: even when byte string <code>x</code> is a prefix of <code>xy</code>, <code>E(x)</code> need not be a token-sequence prefix of <code>E(xy)</code>. Sampling after <code>E(x)</code> conditions on a token boundary immediately after <code>x</code>; conditioning on byte prefix <code>x</code> does not. The standard interface therefore excludes paths in which a token covering the end of the prompt extends beyond that boundary. Trailing spaces, partial words, source code, Chinese text, and streaming input can expose the problem.</p>
+<p>Token healing is a useful heuristic rather than an exact correction. <a class="external-link" href="https://openreview.net/forum?id=COQV7D1dAW" rel="noopener noreferrer" target="_blank">Sampling from Your Language Model One Byte at a Time (ICML 2026)</a> uses online BPE and model logits to compute an exact next-byte distribution under the paper's validity semantics, without retraining the original autoregressive BPE model. This suggests an intermediate direction: even if a model remains token-based internally, it can expose a more principled byte-level sampling interface.</p>
+<h3 id="88-the-tokenizer-is-not-learned-end-to-end">8.8 The tokenizer is not learned end to end</h3>
+<p>The conventional pipeline trains a tokenizer first, often on a separate corpus and a separate compression objective, freezes it permanently, and only then trains the much larger LM. The tokenizer does not know which boundaries are easy to predict, which matter for reasoning, or when context should change a boundary.</p>
+<p>Architectures such as BLT and H-Net aim to align the formation of computational units with the amount of modeling work the input actually requires.</p>
+
+</section><section aria-labelledby="9-is-stronger-compression-always-better" class="article-section" data-chapter="problems" data-section-number="09" id="section-9-is-stronger-compression-always-better"><p aria-hidden="true" class="section-label">09</p><h2 id="9-is-stronger-compression-always-better">9. Is stronger compression always better?</h2>
+<p>Several research results appear to disagree, but they fit together:</p>
+<ul>
+<li><a class="external-link" href="https://arxiv.org/abs/2403.06265" rel="noopener noreferrer" target="_blank">Unpacking Tokenization (2024)</a> finds a correlation between sequence compression and downstream performance, especially for generation and smaller models.</li>
+<li><a class="external-link" href="https://aclanthology.org/2024.emnlp-main.40/" rel="noopener noreferrer" target="_blank">Tokenization Is More Than Compression (EMNLP 2024)</a> introduces PathPiece, which minimizes token count for a fixed vocabulary, but does not produce better downstream models. Pre-tokenization and vocabulary construction remain important.</li>
+<li><a class="external-link" href="https://arxiv.org/abs/2310.08754" rel="noopener noreferrer" target="_blank">Tokenizer Choice For LLM Training</a> trains multiple 2.6B-parameter models and finds that tokenizers significantly affect downstream performance and cost, while simple metrics such as fertility and parity do not always predict final quality. Here, fertility is the average number of tokens per word or reference unit; parity is a cross-language token-length or cost ratio.</li>
+</ul>
+<p>The synthesis is:</p>
+<blockquote>
+<p>Sequence compression is a useful baseline, not a sufficient objective. Token-frequency balance, learnable boundaries, morphological and domain alignment, pre-tokenization policy, robustness, and cross-lingual fairness all matter.</p>
+</blockquote>
+<h3 id="why-per-token-perplexity-is-not-comparable-across-tokenizers">Why per-token perplexity is not comparable across tokenizers</h3>
+<p>A token carries a different amount of source-text information under each tokenizer. The denominator in per-token perplexity therefore changes, so the raw numbers are not directly comparable. A more useful metric is bits per byte:</p>
+<div aria-label="Bits per byte equals negative sum of token log probabilities divided by the number of source bytes" class="equation" role="img"><span>BPB = </span><span class="fraction"><span>−∑<sub>i</sub> log<sub>2</sub> <i>p</i>(<i>t</i><sub>i</sub> | <i>t</i><sub>&lt;i</sub>)</span><span><i>N</i><sub>bytes</sub></span></span><span>.</span></div>
+<p>If the implementation accumulates natural-log losses, divide by <code>ln 2</code> before reporting bits. In the same way, “trained on 1T tokens” is not a tokenizer-independent amount of data; report source bytes, documents, the language mixture, and training FLOPs as well.</p>
+<p>BPB is directly comparable only with the same raw-byte test corpus; identical or explicitly reconciled normalization; consistent document, BOS/EOS, special-token, masking, truncation, stride, and context accounting; and a clear statement of whether it is the usual teacher-forced canonical-path BPB or a marginalized string-level quantity. Controlled tokenizer experiments should also match the model, data, FLOPs, and optimization as closely as possible.</p>
+<h3 id="a-practical-evaluation-matrix">A practical evaluation matrix</h3>
+<div aria-label="A practical tokenizer evaluation matrix" class="table-scroll" role="region" tabindex="0"><table><caption class="sr-only">A practical tokenizer evaluation matrix</caption>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Suggested measurements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reversibility</td>
+<td>Exact byte-level round trip; randomized Unicode and byte fuzzing</td>
+</tr>
+<tr>
+<td>Sequence compression</td>
+<td>Bytes/token, characters/token, p50/p95 tokenized length</td>
+</tr>
+<tr>
+<td>Vocabulary health</td>
+<td>Token frequencies, dead or unreachable tokens, long-tail share, scaffold tokens</td>
+</tr>
+<tr>
+<td>Cross-lingual fairness</td>
+<td>Parallel-text token ratios, tokens/grapheme, per-language cost Gini</td>
+</tr>
+<tr>
+<td>Modeling quality</td>
+<td>BPB from small controlled LMs and downstream tasks</td>
+</tr>
+<tr>
+<td>Robustness</td>
+<td>Typos, whitespace, case, Unicode confusables, and code formatting</td>
+</tr>
+<tr>
+<td>Systems</td>
+<td>Training/encoding throughput, peak memory, prefill latency, decode latency</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>Special-token injection and canonical/non-canonical representation tests</td>
+</tr>
+</tbody>
+</table></div>
+<p>A <strong>dead token</strong> is present in the vocabulary but effectively absent from LM training. An <strong>unreachable token</strong> is never emitted by the canonical encoder. A <strong>scaffold token</strong> is mainly an intermediate node in a BPE merge hierarchy and is rarely emitted by itself.</p>
+
+</section><section aria-labelledby="10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation" class="article-section" data-chapter="future" data-section-number="10" id="section-10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation"><p aria-hidden="true" class="section-label">10</p><h2 id="10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation">10. Future directions: from fixed tokens to dynamic, hierarchical computation</h2>
+<h3 id="101-near-term-design-better-static-tokenizers">10.1 Near term: design better static tokenizers</h3>
+<p>Static BPE remains a strong engineering baseline. Near-term improvements include:</p>
+<ul>
+<li><strong>Co-designing data, vocabulary size, and regex rules</strong> instead of borrowing another model's tokenizer.</li>
+<li><strong>Training on multiple segmentations</strong> through Unigram sampling or BPE-dropout.</li>
+<li><strong>Healthier vocabularies</strong> that remove scaffold tokens used mainly as intermediate merge nodes.</li>
+<li><strong>Linguistic constraints</strong> such as grapheme- or morphology-aware merges.</li>
+<li><strong>Fairness-aware objectives</strong> that explicitly improve compression for the worst-served languages or reduce cross-language disparity.</li>
+<li><strong>Domain adaptation and tokenizer transfer</strong> through continued BPE or hypernetworks that initialize embeddings for new tokens.</li>
+</ul>
+<p>Representative 2026 work includes <a class="external-link" href="https://aclanthology.org/2026.acl-long.342/" rel="noopener noreferrer" target="_blank">Parity-Aware BPE</a>, <a class="external-link" href="https://aclanthology.org/2026.findings-acl.2068/" rel="noopener noreferrer" target="_blank">MorphBPE</a>, and <a class="external-link" href="https://aclanthology.org/2026.findings-eacl.341/" rel="noopener noreferrer" target="_blank">Teaching Old Tokenizers New Words</a>. The research focus is shifting from a single universal BPE recipe toward joint tokenizer/model/data design.</p>
+<h3 id="102-medium-term-keep-a-byte-interface-and-compress-inside-the-model">10.2 Medium term: keep a byte interface and compress inside the model</h3>
+<p>“Tokenizer-free” is best read as <strong>without a fixed external subword vocabulary</strong>. These models still need to shorten the effective byte sequence; they move chunking into the architecture.</p>
+<div aria-label="Byte-level and dynamic-chunking model families compared" class="table-scroll" role="region" tabindex="0"><table><caption class="sr-only">Byte-level and dynamic-chunking model families compared</caption>
+<thead>
+<tr>
+<th>Work</th>
+<th>Basic idea</th>
+<th>What it addresses</th>
+<th>Remaining difficulty</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a class="external-link" href="https://aclanthology.org/2022.tacl-1.5/" rel="noopener noreferrer" target="_blank">CANINE</a></td>
+<td>Character input, downsampling, then a deep encoder</td>
+<td>Open vocabulary and multilingual encoding</td>
+<td>Primarily an encoder-only path</td>
+</tr>
+<tr>
+<td><a class="external-link" href="https://aclanthology.org/2022.tacl-1.17/" rel="noopener noreferrer" target="_blank">ByT5</a></td>
+<td>A 256-value UTF-8 byte alphabet plus special/sentinel IDs</td>
+<td>No OOV and stronger noise/spelling robustness</td>
+<td>Long sequences and slow byte-wise generation</td>
+</tr>
+<tr>
+<td><a class="external-link" href="https://arxiv.org/abs/2305.07185" rel="noopener noreferrer" target="_blank">MEGABYTE</a></td>
+<td>Fixed-length byte patches with local and global models</td>
+<td>Shorter global sequences and very long byte contexts</td>
+<td>Fixed patches ignore boundaries and information density</td>
+</tr>
+<tr>
+<td><a class="external-link" href="https://arxiv.org/abs/2401.13660" rel="noopener noreferrer" target="_blank">MambaByte</a></td>
+<td>Byte input with a linear state-space model</td>
+<td>Makes long byte sequences more tractable</td>
+<td>Many output steps; evidence remains scale- and task-dependent</td>
+</tr>
+<tr>
+<td><a class="external-link" href="https://arxiv.org/abs/2404.14408" rel="noopener noreferrer" target="_blank">SpaceByte</a></td>
+<td>Invoke larger blocks after spaces and similar boundaries</td>
+<td>Concentrates compute near plausible word boundaries</td>
+<td>Does not generalize naturally to languages without spaces or other modalities</td>
+</tr>
+<tr>
+<td><a class="external-link" href="https://arxiv.org/abs/2412.09871" rel="noopener noreferrer" target="_blank">BLT</a></td>
+<td>Next-byte entropy determines variable patches; local encoder/decoder plus a latent Transformer</td>
+<td>Long patches in predictable regions, finer units in complex regions</td>
+<td>The entropy patcher is separately trained; serving is more complex</td>
+</tr>
+<tr>
+<td><a class="external-link" href="https://arxiv.org/abs/2507.07955" rel="noopener noreferrer" target="_blank">H-Net</a></td>
+<td>Jointly learned, recursive dynamic chunking</td>
+<td>Context-dependent end-to-end boundaries; larger gains on Chinese, code, and similar domains in reported experiments</td>
+<td>Training, kernels, batching, caching, and frontier-scale deployment remain immature</td>
+</tr>
+<tr>
+<td><a class="external-link" href="https://openreview.net/forum?id=mo6rHb1z82" rel="noopener noreferrer" target="_blank">Fast BLT (ICML 2026)</a></td>
+<td>Block diffusion, multi-byte draft/verification, and self-speculation</td>
+<td>Parallel byte generation and lower estimated memory-bandwidth cost</td>
+<td>Quality–parallelism tradeoffs and real end-to-end hardware gains require broader validation</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="103-the-key-architectural-contrast-blt-versus-h-net">10.3 The key architectural contrast: BLT versus H-Net</h3>
+<p><strong>BLT (Byte Latent Transformer)</strong> uses a small, separately trained next-byte model to estimate entropy and opens a new patch in difficult-to-predict regions. Lightweight local modules aggregate bytes into patches and decode them, while the expensive latent Transformer operates only over the patch sequence. The paper reports a FLOP-controlled study up to 8B parameters and 4T training bytes, performance comparable to token-based baselines in its settings, stronger noise and long-tail robustness, and a new tradeoff between longer patches and a larger main model.</p>
+<p>BLT is not fully jointly end to end: its patch boundaries come from an external entropy model.</p>
+<p><strong>H-Net (2025 arXiv; ICLR 2026)</strong> lets contextual hidden states determine boundaries jointly with the main sequence-modeling objective, using differentiable approximations and a downsampling loss. H-Net stages can be nested recursively, learning a hierarchy from bytes to subword-like chunks and then higher-level chunks. The paper reports that a one-stage H-Net can outperform a strong compute- and data-matched BPE Transformer, while deeper hierarchies match larger token-based models and show larger gains on Chinese, code, and DNA.</p>
+<p>The conceptual shift matters more than any one benchmark:</p>
+<blockquote>
+<p>BPE fixes boundaries from global frequency statistics; BLT allocates variable patches using local predictability; H-Net learns context-dependent boundaries jointly with the language-modeling objective.</p>
+</blockquote>
+<p>Fast BLT then targets the remaining decoding bottleneck with block diffusion and draft/verify variants. Its reported memory-bandwidth estimates should not be confused with universally measured wall-clock speedups.</p>
+<h3 id="104-open-questions">10.4 Open questions</h3>
+<ol>
+<li>Will learned boundaries reproduce the same cross-lingual disparities from imbalanced training data?</li>
+<li>Byte models remove OOV but still inherit writing-system-dependent UTF-8 overhead.</li>
+<li>Do lower FLOP counts translate into lower wall-clock latency, good GPU utilization, and higher throughput?</li>
+<li>How should dynamic patches interact with batch packing, the KV cache, prompt caching, quantization, and speculative decoding?</li>
+<li>Fast BLT and token-draft/byte-verify methods have begun to parallelize byte output. Can they preserve quality and the intended distribution while delivering real hardware gains?</li>
+<li>How can new tokenization schemes remain compatible with existing embeddings, output heads, safety training, and tooling?</li>
+<li>Fairness, sequence compression, linguistic alignment, robustness, and downstream quality are partly independent and often in tension. How should the system optimize them jointly?</li>
+</ol>
+<p>As of 2026, BPE is not obsolete. A more defensible conclusion is:</p>
+<blockquote>
+<p><strong>Static subword tokenization will remain a cheap and mature default, while frontier research builds dynamic, multiscale, learnable computation over raw bytes.</strong></p>
+</blockquote>
+<p>This is consistent with the summary in CS336 Lecture 1: a model still needs chunks or abstractions over a sequence, but those chunks should be variable so that more capacity is allocated to more informative regions.</p>
+
+</section><section aria-labelledby="11-if-you-were-training-a-tokenizer-today" class="article-section" data-chapter="practice" data-section-number="11" id="section-11-if-you-were-training-a-tokenizer-today"><p aria-hidden="true" class="section-label">11</p><h2 id="11-if-you-were-training-a-tokenizer-today">11. If you were training a tokenizer today</h2>
+<h3 id="111-before-training">11.1 Before training</h3>
+<ol>
+<li>Decide whether you require an exact byte-for-byte round trip and whether lossy Unicode normalization is allowed.</li>
+<li>Stratify samples from the final LM data mixture by language, domain, and format instead of training only on English web pages.</li>
+<li>Decide whether the universal fallback is a byte, code point, grapheme cluster, or morpheme. Bytes provide a closed universal alphabet; grapheme and morpheme boundaries require language-sensitive machinery.</li>
+<li>Define special tokens and their safe parsing policy early. Leave deliberate room for growth, but do not reserve a large set of tokens that the model will never train.</li>
+</ol>
+<h3 id="112-run-small-controlled-sweeps">11.2 Run small controlled sweeps</h3>
+<p>Vary these choices jointly:</p>
+<ul>
+<li>vocabulary size;</li>
+<li>the pre-tokenization regex, especially digit, space, newline, and code-symbol policies;</li>
+<li>BPE versus Unigram, with or without sampling/dropout;</li>
+<li>language and domain weights in the tokenizer data mixture.</li>
+</ul>
+<p>Do not simply choose the tokenizer with the highest bytes/token. Train several small, compute-matched LMs and use BPB, downstream tasks, and robustness as proxy evaluations.</p>
+<h3 id="113-audit-before-freezing-the-artifact">11.3 Audit before freezing the artifact</h3>
+<ul>
+<li>Report length distributions and worst-case slices by language and domain.</li>
+<li>Inspect the most frequent, least frequent, and longest tokens, including opaque byte tokens.</li>
+<li>Identify dead, unreachable, scaffold, and data-mismatch tokens.</li>
+<li>Fuzz Unicode, special-token strings, whitespace, and serialization.</li>
+<li>Benchmark CPU throughput, memory, and multiprocess determinism.</li>
+<li>Publish the normalizer, regex, merges, vocabulary, special-token table, version, and hash together.</li>
+</ul>
+<p>Once large-scale LM training begins, the tokenizer becomes similar to an ABI: replacing it is not an ordinary preprocessing change because token IDs already address rows in the embedding table and output head.</p>
+
+</section><section aria-labelledby="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions" class="article-section" data-chapter="practice" data-section-number="12" id="section-12-exercises-from-karpathy-to-cs336-and-then-to-research-questions"><p aria-hidden="true" class="section-label">12</p><h2 id="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions">12. Exercises: from Karpathy to CS336 and then to research questions</h2>
+<ol>
+<li><strong>Basic BPE:</strong> reproduce <code>aaabdaaabac → [258,100,258,97,99]</code> and assert the merge tree, not only the final IDs.</li>
+<li><strong>Regex BPE:</strong> add a GPT-style pre-tokenizer and verify that no merge crosses a category boundary.</li>
+<li><strong>Special tokens:</strong> implement <code>allowed_special</code> and write special-token injection tests.</li>
+<li><strong>Exact parity:</strong> load <code>tiktoken</code> merges and compare IDs on mixed English, digits, Korean, and emoji. Exact parity requires the same normalization, regex, merge ranks, special-token policy, library behavior, and version.</li>
+<li><strong>Efficient training:</strong> replace full rescans with occurrence lists and local pair-count updates.</li>
+<li><strong>English–Chinese fairness:</strong> train 1K, 4K, and 16K vocabularies on balanced and imbalanced bilingual corpora; compare bytes/token, tokens/grapheme, and p95 sequence length.</li>
+<li><strong>Digit policy:</strong> compare <code>\p{N}{1}</code>, <code>{1,2}</code>, and <code>{1,3}</code> on sequence compression and a tiny LM trained on elementary arithmetic.</li>
+<li><strong>Multiple segmentations:</strong> implement BPE-dropout and compare typo robustness against deterministic BPE.</li>
+<li><strong>Comparable metrics:</strong> train compute-matched tiny LMs under several tokenizers and compare carefully accounted BPB rather than per-token perplexity.</li>
+<li><strong>Frontier reproduction:</strong> implement a simple entropy patcher and inspect whether high-entropy boundaries appear near word starts, code symbols, typos, or language switches.</li>
+</ol>
+
+</section><section aria-labelledby="13-an-annotated-reading-path" class="article-section" data-chapter="practice" data-section-number="13" id="section-13-an-annotated-reading-path"><p aria-hidden="true" class="section-label">13</p><h2 id="13-an-annotated-reading-path">13. An annotated reading path</h2>
+<div class="reading-filter" data-reading-filter="">
+<div class="reading-filter-head">
+<div>
+<p class="eyebrow">Filter the syllabus</p>
+<p class="reading-filter-title">Find the next thing to read</p>
+</div>
+<span aria-live="polite" class="reading-count" data-reading-count=""></span>
+</div>
+<label for="reading-search">Search titles and annotations</label>
+<input autocomplete="off" data-reading-search="" id="reading-search" placeholder="Try “multilingual”, “BPE”, or “H-Net”" type="search"/>
+<div aria-label="Filter reading path by stage" class="filter-chips" role="group">
+<button aria-pressed="true" class="filter-chip is-active" data-stage-filter="all" type="button">All</button>
+<button aria-pressed="false" class="filter-chip" data-stage-filter="implement" type="button">Implement</button>
+<button aria-pressed="false" class="filter-chip" data-stage-filter="classic" type="button">Classic algorithms</button>
+<button aria-pressed="false" class="filter-chip" data-stage-filter="failures" type="button">Failure modes</button>
+<button aria-pressed="false" class="filter-chip" data-stage-filter="frontier" type="button">Byte &amp; dynamic models</button>
+</div>
+<p class="reading-empty" data-reading-empty="" hidden="">No reading matches that combination. Try a broader search.</p>
+</div>
+
+<h3 data-reading-heading="implement" id="stage-1-learn-by-implementing">Stage 1: learn by implementing</h3>
+<ol>
+<li data-reading-item="" data-stage="implement"><a class="external-link" href="https://github.com/stanford-cs336/lectures/blob/main/lecture_01.py" rel="noopener noreferrer" target="_blank">Stanford CS336 Lecture 1</a>: the tradeoffs among character, byte, word, and BPE tokenization, plus a minimal implementation.</li>
+<li data-reading-item="" data-stage="implement"><a class="external-link" href="https://github.com/stanford-cs336/assignment1-basics" rel="noopener noreferrer" target="_blank">CS336 Assignment 1</a>: turn the toy implementation into a tested, usable tokenizer.</li>
+<li data-reading-item="" data-stage="implement"><a class="external-link" href="https://www.youtube.com/watch?v=zduSFxRajkE" rel="noopener noreferrer" target="_blank">Karpathy's video</a>, <a class="external-link" href="https://github.com/karpathy/minbpe" rel="noopener noreferrer" target="_blank">minBPE</a>, and the <a class="external-link" href="https://github.com/karpathy/minbpe/blob/master/exercise.md" rel="noopener noreferrer" target="_blank">exercise</a>: the smoothest from-scratch implementation path. The written <a class="external-link" href="https://github.com/karpathy/minbpe/blob/master/lecture.md" rel="noopener noreferrer" target="_blank">lecture.md</a> does not cover the full video.</li>
+<li data-reading-item="" data-stage="implement"><a class="external-link" href="https://github.com/openai/tiktoken" rel="noopener noreferrer" target="_blank">OpenAI tiktoken</a>: production byte-level BPE plus the <code>_educational</code> module.</li>
+<li data-reading-item="" data-stage="implement"><a class="external-link" href="https://huggingface.co/docs/tokenizers/main/api/tokenizer" rel="noopener noreferrer" target="_blank">Hugging Face Tokenizers</a>: the component pipeline of normalizer, pre-tokenizer, model, post-processor, and decoder.</li>
+</ol>
+<h3 data-reading-heading="classic" id="stage-2-understand-the-classic-algorithms">Stage 2: understand the classic algorithms</h3>
+<ol>
+<li data-reading-item="" data-stage="classic"><a class="external-link" href="https://aclanthology.org/P16-1162/" rel="noopener noreferrer" target="_blank">Sennrich et al. 2016 — Neural Machine Translation of Rare Words with Subword Units</a>.</li>
+<li data-reading-item="" data-stage="classic"><a class="external-link" href="https://aclanthology.org/P18-1007/" rel="noopener noreferrer" target="_blank">Kudo 2018 — Subword Regularization</a>.</li>
+<li data-reading-item="" data-stage="classic"><a class="external-link" href="https://aclanthology.org/D18-2012/" rel="noopener noreferrer" target="_blank">SentencePiece, 2018</a>.</li>
+<li data-reading-item="" data-stage="classic"><a class="external-link" href="https://aclanthology.org/2020.acl-main.170/" rel="noopener noreferrer" target="_blank">BPE-Dropout, 2020</a>.</li>
+<li data-reading-item="" data-stage="classic"><a class="external-link" href="https://aclanthology.org/2021.emnlp-main.160/" rel="noopener noreferrer" target="_blank">Fast WordPiece Tokenization, 2021</a>.</li>
+</ol>
+<h3 data-reading-heading="failures" id="stage-3-understand-where-tokenizers-fail">Stage 3: understand where tokenizers fail</h3>
+<ol>
+<li data-reading-item="" data-stage="failures"><a class="external-link" href="https://proceedings.neurips.cc/paper_files/paper/2023/hash/74bb24dca8334adce292883b4b651eda-Abstract-Conference.html" rel="noopener noreferrer" target="_blank">Language Model Tokenizers Introduce Unfairness Between Languages, 2023</a>.</li>
+<li data-reading-item="" data-stage="failures"><a class="external-link" href="https://aclanthology.org/2023.emnlp-main.614/" rel="noopener noreferrer" target="_blank">Do All Languages Cost the Same?, 2023</a>.</li>
+<li data-reading-item="" data-stage="failures"><a class="external-link" href="https://arxiv.org/abs/2310.08754" rel="noopener noreferrer" target="_blank">Tokenizer Choice For LLM Training: Negligible or Crucial?, 2023/2024</a>.</li>
+<li data-reading-item="" data-stage="failures"><a class="external-link" href="https://arxiv.org/abs/2402.14903" rel="noopener noreferrer" target="_blank">Tokenization Counts: the Impact of Tokenization on Arithmetic in Frontier LLMs, 2024</a>.</li>
+<li data-reading-item="" data-stage="failures"><a class="external-link" href="https://aclanthology.org/2024.emnlp-main.177/" rel="noopener noreferrer" target="_blank">CUTE: Measuring LLMs' Understanding of Their Tokens, 2024</a>.</li>
+<li data-reading-item="" data-stage="failures"><a class="external-link" href="https://aclanthology.org/2024.findings-emnlp.86/" rel="noopener noreferrer" target="_blank">Tokenization Falling Short: On Subword Robustness in Large Language Models, 2024</a>.</li>
+<li data-reading-item="" data-stage="failures"><a class="external-link" href="https://aclanthology.org/2024.emnlp-main.40/" rel="noopener noreferrer" target="_blank">Tokenization Is More Than Compression, 2024</a>.</li>
+<li data-reading-item="" data-stage="failures"><a class="external-link" href="https://aclanthology.org/2025.acl-long.1012/" rel="noopener noreferrer" target="_blank">Adversarial Tokenization, 2025</a>.</li>
+<li data-reading-item="" data-stage="failures"><a class="external-link" href="https://aclanthology.org/2026.eacl-long.394/" rel="noopener noreferrer" target="_blank">Stop Taking Tokenizers for Granted: They Are Core Design Decisions in Large Language Models, EACL 2026</a>: a case for tokenizer/model co-design, standardized evaluation, and transparent reporting.</li>
+</ol>
+<h3 data-reading-heading="frontier" id="stage-4-follow-the-tokenizer-free-and-latent-tokenization-frontier">Stage 4: follow the tokenizer-free and latent-tokenization frontier</h3>
+<ol>
+<li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://aclanthology.org/2022.tacl-1.5/" rel="noopener noreferrer" target="_blank">CANINE, TACL 2022</a> and <a class="external-link" href="https://aclanthology.org/2022.tacl-1.17/" rel="noopener noreferrer" target="_blank">ByT5, TACL 2022</a>: foundational evidence for character- and byte-level modeling.</li>
+<li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://arxiv.org/abs/2305.07185" rel="noopener noreferrer" target="_blank">MEGABYTE, 2023</a>: fixed local/global byte patches.</li>
+<li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://arxiv.org/abs/2401.13660" rel="noopener noreferrer" target="_blank">MambaByte, 2024</a>: using a linear sequence architecture to handle bytes.</li>
+<li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://arxiv.org/abs/2404.14408" rel="noopener noreferrer" target="_blank">SpaceByte, 2024</a>: simple boundary-triggered global computation.</li>
+<li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://arxiv.org/abs/2412.09871" rel="noopener noreferrer" target="_blank">Byte Latent Transformer, 2024</a>: entropy-based variable patches and large-scale byte modeling.</li>
+<li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://arxiv.org/abs/2507.07955" rel="noopener noreferrer" target="_blank">H-Net, 2025 / ICLR 2026</a>: jointly learned, recursive dynamic chunking.</li>
+<li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://openreview.net/forum?id=mo6rHb1z82" rel="noopener noreferrer" target="_blank">Fast Byte Latent Transformer, ICML 2026</a>: block diffusion and multiple byte draft/verification paths.</li>
+<li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://openreview.net/forum?id=COQV7D1dAW" rel="noopener noreferrer" target="_blank">Sampling from Your Language Model One Byte at a Time, ICML 2026</a>: a correct byte-prefix sampling interface for an existing token-based autoregressive model without retraining.</li>
+</ol>
+
+</section><section aria-labelledby="conclusion" class="article-section conclusion-section" data-section-number="END" id="section-conclusion"><p aria-hidden="true" class="section-label">END</p><h2 id="conclusion">Conclusion</h2>
+<p>Thinking of tokens as “words” hides the problem. Thinking of them as a <strong>discrete interface, a sequence-compression device, and a unit of compute allocation</strong> connects the major observations:</p>
+<ul>
+<li>BPE works because it is a cheap, reversible, data-driven heuristic for shortening sequences.</li>
+<li>BPE behaves strangely because it optimizes frequency—not semantics, arithmetic, spelling, fairness, or downstream loss.</li>
+<li>A tokenizer cannot be swapped casually because token IDs already index learned model parameters.</li>
+<li>Bytes are attractive and expensive for the same reason: they eliminate OOV and a fixed subword vocabulary, but lengthen both sequences and generation.</li>
+<li>BLT and H-Net matter because they do not abandon chunks; they try to make chunks reflect how much computation the model should spend at a particular point.</li>
+</ul>
+<p>The most useful final mental model is:</p>
+<blockquote>
+<p><strong>Today's tokenizer sits outside the model and fixes boundaries in advance from global corpus statistics. Future systems are more likely to begin with a reversible byte interface and form dynamic, hierarchical units of computation inside the model, conditioned on content, context, and predictive difficulty.</strong></p>
+</blockquote></section></div>
+      </article>
+    </div>
+  </main>
+
+  <button class="back-to-top" type="button" aria-label="Back to top" data-back-to-top>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"></path></svg>
+  </button>
+
+  <footer class="site-footer">
+    <div class="site-shell footer-inner">
+      <p>Liang (Twist) Shan · Madison, WI</p>
+      <div class="footer-links">
+        <a href="https://twist-shan.github.io/">Home</a>
+        <a href="https://twist-shan.github.io/blog/">More notes</a>
+        <a href="https://tiktokenizer.vercel.app/?encoder=gpt2" target="_blank" rel="noopener noreferrer">Tokenizer playground ↗</a>
+      </div>
+      <p>Built with curiosity · 2026</p>
+    </div>
+  </footer>
+
+  <div class="sr-only" aria-live="polite" aria-atomic="true" data-live-status></div>
+  <script>
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+  var liveStatus = document.querySelector("[data-live-status]");
+  var themeButton = document.querySelector("[data-theme-toggle]");
+  var themeMeta = document.querySelector('meta[name="theme-color"]');
+
+  function announce(message) {
+    if (!liveStatus) return;
+    liveStatus.textContent = "";
+    window.setTimeout(function () {
+      liveStatus.textContent = message;
+    }, 20);
+  }
+
+  function storedTheme() {
+    try {
+      return window.localStorage.getItem("twist-theme");
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function setTheme(theme, persist) {
+    var next = theme === "dark" ? "dark" : "light";
+    root.dataset.theme = next;
+    if (themeButton) {
+      themeButton.setAttribute("aria-label", next === "dark" ? "Switch to light mode" : "Switch to dark mode");
+    }
+    if (themeMeta) {
+      themeMeta.setAttribute("content", next === "dark" ? "#202421" : "#f7f7f2");
+    }
+    if (persist) {
+      try {
+        window.localStorage.setItem("twist-theme", next);
+      } catch (error) {
+        return;
+      }
+    }
+  }
+
+  var preferredTheme = storedTheme();
+  setTheme(preferredTheme || "light", false);
+
+  if (themeButton) {
+    themeButton.addEventListener("click", function () {
+      var next = root.dataset.theme === "dark" ? "light" : "dark";
+      setTheme(next, true);
+      announce(next === "dark" ? "Dark theme enabled." : "Light theme enabled.");
+    });
+  }
+
+  var menuButton = document.querySelector("[data-menu-toggle]");
+  var navigation = document.querySelector("[data-navigation]");
+  if (menuButton && navigation) {
+    menuButton.addEventListener("click", function () {
+      var opening = menuButton.getAttribute("aria-expanded") !== "true";
+      menuButton.setAttribute("aria-expanded", String(opening));
+      menuButton.setAttribute("aria-label", opening ? "Close menu" : "Open menu");
+      navigation.classList.toggle("is-open", opening);
+    });
+    navigation.addEventListener("click", function (event) {
+      if (event.target.closest("a")) {
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.setAttribute("aria-label", "Open menu");
+        navigation.classList.remove("is-open");
+      }
+    });
+  }
+
+  var progress = document.querySelector("[data-progress-bar]");
+  var progressRegion = document.querySelector(".reading-progress");
+  var article = document.querySelector("[data-article]");
+  var backToTop = document.querySelector("[data-back-to-top]");
+  var scrollTicking = false;
+
+  function updateScrollState() {
+    scrollTicking = false;
+    var scrollY = window.scrollY || document.documentElement.scrollTop;
+    if (article && progress && progressRegion) {
+      var start = article.getBoundingClientRect().top + scrollY - window.innerHeight * 0.2;
+      var end = start + article.offsetHeight - window.innerHeight * 0.7;
+      var ratio = end > start ? (scrollY - start) / (end - start) : 0;
+      ratio = Math.max(0, Math.min(1, ratio));
+      progress.style.transform = "scaleX(" + ratio.toFixed(4) + ")";
+      progressRegion.setAttribute("aria-valuenow", String(Math.round(ratio * 100)));
+    }
+    if (backToTop) {
+      backToTop.classList.toggle("is-visible", scrollY > 900);
+    }
+  }
+
+  window.addEventListener("scroll", function () {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    window.requestAnimationFrame(updateScrollState);
+  }, { passive: true });
+  window.addEventListener("resize", updateScrollState);
+  updateScrollState();
+
+  if (backToTop) {
+    backToTop.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    });
+  }
+
+  var skipLink = document.querySelector(".skip-link");
+  if (skipLink && article) {
+    skipLink.addEventListener("click", function (event) {
+      event.preventDefault();
+      article.focus();
+      article.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start"
+      });
+    });
+  }
+
+  var headings = Array.from(document.querySelectorAll(".article-section > h2, .article-section > h3"));
+  var tocLinks = Array.from(document.querySelectorAll('.toc-list a[href^="#"]'));
+
+  function setActiveHeading(id) {
+    var heading = document.getElementById(id);
+    if (!heading) return;
+    var section = heading.closest(".article-section");
+    var sectionHeading = section ? section.querySelector(":scope > h2") : null;
+    var sectionId = sectionHeading ? sectionHeading.id : id;
+
+    document.querySelectorAll("[data-toc-section]").forEach(function (item) {
+      item.classList.toggle("is-active", item.dataset.tocSection === sectionId);
+    });
+    tocLinks.forEach(function (link) {
+      link.classList.toggle("is-current", link.getAttribute("href") === "#" + id);
+      if (link.getAttribute("href") === "#" + id) {
+        link.setAttribute("aria-current", "location");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  if ("IntersectionObserver" in window && headings.length) {
+    var visibleHeadings = new Map();
+    var headingObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          visibleHeadings.set(entry.target.id, entry.boundingClientRect.top);
+        } else {
+          visibleHeadings.delete(entry.target.id);
+        }
+      });
+      if (visibleHeadings.size) {
+        var closest = Array.from(visibleHeadings.entries()).sort(function (a, b) {
+          return Math.abs(a[1]) - Math.abs(b[1]);
+        })[0];
+        setActiveHeading(closest[0]);
+      }
+    }, { rootMargin: "-12% 0px -72% 0px", threshold: [0, 1] });
+    headings.forEach(function (heading) { headingObserver.observe(heading); });
+    setActiveHeading(headings[0].id);
+  }
+
+  document.querySelectorAll(".mobile-toc a").forEach(function (link) {
+    link.addEventListener("click", function () {
+      var details = link.closest("details");
+      if (details) details.open = false;
+    });
+  });
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy") ? resolve() : reject(new Error("Copy failed"));
+      } catch (error) {
+        reject(error);
+      } finally {
+        textarea.remove();
+      }
+    });
+  }
+
+  document.querySelectorAll("[data-copy-target]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var target = document.getElementById(button.dataset.copyTarget);
+      if (!target) return;
+      copyText(target.textContent || "").then(function () {
+        button.textContent = "Copied";
+        button.classList.add("is-copied");
+        announce("Code copied to the clipboard.");
+        window.setTimeout(function () {
+          button.textContent = "Copy";
+          button.classList.remove("is-copied");
+        }, 1600);
+      }).catch(function () {
+        button.textContent = "Select text";
+        announce("Copy was unavailable. Select the code manually.");
+      });
+    });
+  });
+
+  var readingFilter = document.querySelector("[data-reading-filter]");
+  if (readingFilter) {
+    var readingItems = Array.from(document.querySelectorAll("[data-reading-item]"));
+    var readingHeadings = Array.from(document.querySelectorAll("[data-reading-heading]"));
+    var readingSearch = readingFilter.querySelector("[data-reading-search]");
+    var filterButtons = Array.from(readingFilter.querySelectorAll("[data-stage-filter]"));
+    var readingCount = readingFilter.querySelector("[data-reading-count]");
+    var readingEmpty = readingFilter.querySelector("[data-reading-empty]");
+    var activeStage = "all";
+
+    function applyReadingFilter() {
+      var query = (readingSearch.value || "").trim().toLocaleLowerCase();
+      var visibleCount = 0;
+      readingItems.forEach(function (item) {
+        var stageMatches = activeStage === "all" || item.dataset.stage === activeStage;
+        var queryMatches = !query || item.textContent.toLocaleLowerCase().includes(query);
+        var visible = stageMatches && queryMatches;
+        item.hidden = !visible;
+        if (visible) visibleCount += 1;
+      });
+      readingHeadings.forEach(function (heading) {
+        heading.hidden = !readingItems.some(function (item) {
+          return item.dataset.stage === heading.dataset.readingHeading && !item.hidden;
+        });
+      });
+      if (readingCount) readingCount.textContent = visibleCount + (visibleCount === 1 ? " item" : " items");
+      if (readingEmpty) readingEmpty.hidden = visibleCount !== 0;
+    }
+
+    filterButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        activeStage = button.dataset.stageFilter;
+        filterButtons.forEach(function (candidate) {
+          var active = candidate === button;
+          candidate.classList.toggle("is-active", active);
+          candidate.setAttribute("aria-pressed", String(active));
+        });
+        applyReadingFilter();
+      });
+    });
+    readingSearch.addEventListener("input", applyReadingFilter);
+    applyReadingFilter();
+  }
+
+  function initializeBpeLab(lab) {
+    var encoder = new TextEncoder();
+    var decoder = new TextDecoder("utf-8", { fatal: true });
+    var input = lab.querySelector("#bpe-training-input");
+    var encodeInput = lab.querySelector("#bpe-encode-input");
+    var sequenceElement = lab.querySelector("[data-token-sequence]");
+    var encodedSequenceElement = lab.querySelector("[data-encoded-sequence]");
+    var ruleList = lab.querySelector("[data-rule-list]");
+    var ruleCount = lab.querySelector("[data-rule-count]");
+    var stepLabel = lab.querySelector("[data-step-label]");
+    var encodeSummary = lab.querySelector("[data-encode-summary]");
+    var encodeTrace = lab.querySelector("[data-encode-trace]");
+    var trainingError = lab.querySelector("[data-training-error]");
+    var encodeError = lab.querySelector("[data-encode-error]");
+    var nextButton = lab.querySelector('[data-action="next"]');
+    var previousButton = lab.querySelector('[data-action="previous"]');
+    var playButton = lab.querySelector('[data-action="play"]');
+    var encodeButton = lab.querySelector('[data-action="encode"]');
+    var history = [];
+    var historyIndex = 0;
+    var playTimer = null;
+    var remainingPlaySteps = 0;
+
+    function cloneRules(rules) {
+      return rules.map(function (rule) {
+        return {
+          left: rule.left,
+          right: rule.right,
+          newId: rule.newId,
+          rank: rule.rank,
+          bytes: rule.bytes.slice()
+        };
+      });
+    }
+
+    function currentState() {
+      return history[historyIndex];
+    }
+
+    function vocabulary(rules) {
+      var vocab = new Map();
+      for (var value = 0; value < 256; value += 1) vocab.set(value, [value]);
+      rules.forEach(function (rule) { vocab.set(rule.newId, rule.bytes.slice()); });
+      return vocab;
+    }
+
+    function compareBytes(left, right) {
+      var length = Math.min(left.length, right.length);
+      for (var index = 0; index < length; index += 1) {
+        if (left[index] !== right[index]) return left[index] - right[index];
+      }
+      return left.length - right.length;
+    }
+
+    function safeByteLabel(bytes) {
+      var text = "";
+      try {
+        text = decoder.decode(new Uint8Array(bytes));
+      } catch (error) {
+        text = "";
+      }
+      var usable = text && !/[\u0000-\u001f\u007f]/.test(text);
+      var label = usable ? text : bytes.map(function (byte) {
+        if (byte >= 32 && byte <= 126) return String.fromCharCode(byte);
+        return "\\x" + byte.toString(16).padStart(2, "0");
+      }).join("");
+      return label.length > 16 ? label.slice(0, 13) + "…" : label;
+    }
+
+    function pairKey(left, right) {
+      return String(left) + "," + String(right);
+    }
+
+    function choosePair(tokens, rules) {
+      if (tokens.length < 2) return null;
+      var counts = new Map();
+      for (var index = 0; index < tokens.length - 1; index += 1) {
+        var key = pairKey(tokens[index], tokens[index + 1]);
+        var record = counts.get(key);
+        if (record) {
+          record.count += 1;
+        } else {
+          counts.set(key, { left: tokens[index], right: tokens[index + 1], count: 1 });
+        }
+      }
+      var vocab = vocabulary(rules);
+      var best = null;
+      counts.forEach(function (candidate) {
+        if (!best || candidate.count > best.count) {
+          best = candidate;
+          return;
+        }
+        if (candidate.count < best.count) return;
+        var leftComparison = compareBytes(vocab.get(candidate.left), vocab.get(best.left));
+        if (leftComparison > 0) {
+          best = candidate;
+          return;
+        }
+        if (leftComparison < 0) return;
+        if (compareBytes(vocab.get(candidate.right), vocab.get(best.right)) > 0) best = candidate;
+      });
+      return best;
+    }
+
+    function replacePair(tokens, left, right, newId) {
+      var output = [];
+      var index = 0;
+      while (index < tokens.length) {
+        if (index + 1 < tokens.length && tokens[index] === left && tokens[index + 1] === right) {
+          output.push(newId);
+          index += 2;
+        } else {
+          output.push(tokens[index]);
+          index += 1;
+        }
+      }
+      return output;
+    }
+
+    function renderTokens(container, tokens, rules, newestId) {
+      container.replaceChildren();
+      var vocab = vocabulary(rules);
+      tokens.forEach(function (tokenId, index) {
+        var token = document.createElement("span");
+        token.className = "bpe-token" + (tokenId === newestId ? " is-merged" : "");
+        token.style.animationDelay = String(Math.min(index, 12) * 18) + "ms";
+        var value = document.createElement("strong");
+        value.textContent = safeByteLabel(vocab.get(tokenId));
+        var id = document.createElement("small");
+        id.textContent = "id " + String(tokenId);
+        token.append(value, id);
+        container.appendChild(token);
+      });
+    }
+
+    function renderRules(rules) {
+      ruleList.replaceChildren();
+      var vocab = vocabulary(rules);
+      if (!rules.length) {
+        var empty = document.createElement("li");
+        empty.className = "empty-rule";
+        empty.textContent = "No merges yet. Learn the highest-frequency adjacent pair.";
+        ruleList.appendChild(empty);
+      } else {
+        rules.forEach(function (rule) {
+          var item = document.createElement("li");
+          item.dataset.rank = String(rule.rank).padStart(2, "0");
+          var description = document.createElement("span");
+          description.textContent = safeByteLabel(vocab.get(rule.left)) + " + " + safeByteLabel(vocab.get(rule.right)) + " → " + safeByteLabel(rule.bytes) + " (id " + rule.newId + ")";
+          item.appendChild(description);
+          ruleList.appendChild(item);
+        });
+      }
+      ruleCount.textContent = rules.length + (rules.length === 1 ? " rule" : " rules");
+    }
+
+    function renderState() {
+      var state = currentState();
+      if (!state) return;
+      var newestId = state.rules.length ? state.rules[state.rules.length - 1].newId : null;
+      renderTokens(sequenceElement, state.tokens, state.rules, newestId);
+      renderRules(state.rules);
+      stepLabel.textContent = state.rules.length ? "Step " + state.rules.length + " · id " + newestId + " learned" : "Step 0 · bytes only";
+      previousButton.disabled = historyIndex === 0;
+      nextButton.disabled = state.tokens.length < 2;
+      encodeButton.disabled = state.rules.length === 0;
+      encodedSequenceElement.replaceChildren();
+      encodeTrace.replaceChildren();
+      encodeSummary.textContent = state.rules.length ? state.rules.length + (state.rules.length === 1 ? " learned rule" : " learned rules") : "Learn at least one rule";
+    }
+
+    function showError(element, message, inputElement) {
+      element.hidden = !message;
+      element.textContent = message || "";
+      if (inputElement) inputElement.setAttribute("aria-invalid", message ? "true" : "false");
+    }
+
+    function loadTrainingText() {
+      stopPlaying();
+      var bytes = Array.from(encoder.encode(input.value));
+      if (!bytes.length) {
+        showError(trainingError, "Enter at least one character before loading the trainer.", input);
+        return false;
+      }
+      if (bytes.length > 64) {
+        showError(trainingError, "That input uses " + bytes.length + " UTF-8 bytes. Keep the lab input at 64 bytes or fewer.", input);
+        return false;
+      }
+      showError(trainingError, "", input);
+      history = [{ tokens: bytes, rules: [] }];
+      historyIndex = 0;
+      renderState();
+      encodedSequenceElement.replaceChildren();
+      encodeTrace.replaceChildren();
+      announce("BPE trainer loaded " + bytes.length + " bytes.");
+      return true;
+    }
+
+    function learnNextMerge(announceStep) {
+      var state = currentState();
+      if (!state) return false;
+      var best = choosePair(state.tokens, state.rules);
+      if (!best) {
+        showError(trainingError, "No adjacent pair remains to merge.", input);
+        stopPlaying();
+        return false;
+      }
+      showError(trainingError, "", input);
+      history = history.slice(0, historyIndex + 1);
+      var vocab = vocabulary(state.rules);
+      var newId = 256 + state.rules.length;
+      var mergedBytes = vocab.get(best.left).concat(vocab.get(best.right));
+      var nextRules = cloneRules(state.rules);
+      nextRules.push({ left: best.left, right: best.right, newId: newId, rank: state.rules.length, bytes: mergedBytes });
+      var nextTokens = replacePair(state.tokens, best.left, best.right, newId);
+      history.push({ tokens: nextTokens, rules: nextRules });
+      historyIndex += 1;
+      renderState();
+      if (announceStep !== false) {
+        announce("Learned merge " + safeByteLabel(vocab.get(best.left)) + " plus " + safeByteLabel(vocab.get(best.right)) + ", creating token " + newId + ".");
+      }
+      return true;
+    }
+
+    function stopPlaying() {
+      if (playTimer) window.clearInterval(playTimer);
+      playTimer = null;
+      remainingPlaySteps = 0;
+      if (playButton) playButton.textContent = "Play three steps";
+    }
+
+    function togglePlay() {
+      if (playTimer) {
+        stopPlaying();
+        announce("BPE playback paused.");
+        return;
+      }
+      remainingPlaySteps = 3;
+      playButton.textContent = "Pause";
+      if (!learnNextMerge(false)) {
+        stopPlaying();
+        return;
+      }
+      remainingPlaySteps -= 1;
+      playTimer = window.setInterval(function () {
+        if (remainingPlaySteps <= 0 || !learnNextMerge(false)) {
+          stopPlaying();
+          announce("BPE playback completed.");
+          return;
+        }
+        remainingPlaySteps -= 1;
+      }, 760);
+    }
+
+    function encodeWithRules() {
+      var state = currentState();
+      var rules = state ? state.rules : [];
+      var bytes = Array.from(encoder.encode(encodeInput.value));
+      if (!rules.length) {
+        showError(encodeError, "Learn at least one merge before replaying ranks.", encodeInput);
+        return;
+      }
+      if (!bytes.length) {
+        showError(encodeError, "Enter at least one character to encode.", encodeInput);
+        return;
+      }
+      if (bytes.length > 64) {
+        showError(encodeError, "Keep the encoding example at 64 UTF-8 bytes or fewer.", encodeInput);
+        return;
+      }
+      showError(encodeError, "", encodeInput);
+      var tokens = bytes.slice();
+      var trace = [];
+      while (true) {
+        var applicable = rules.filter(function (rule) {
+          for (var index = 0; index < tokens.length - 1; index += 1) {
+            if (tokens[index] === rule.left && tokens[index + 1] === rule.right) return true;
+          }
+          return false;
+        }).sort(function (a, b) { return a.rank - b.rank; });
+        if (!applicable.length) break;
+        var rule = applicable[0];
+        tokens = replacePair(tokens, rule.left, rule.right, rule.newId);
+        trace.push(rule);
+      }
+      renderTokens(encodedSequenceElement, tokens, rules, null);
+      encodeTrace.replaceChildren();
+      var vocab = vocabulary(rules);
+      trace.forEach(function (rule) {
+        var item = document.createElement("li");
+        item.dataset.rank = "r" + String(rule.rank);
+        var text = document.createElement("span");
+        text.textContent = "apply " + safeByteLabel(vocab.get(rule.left)) + " + " + safeByteLabel(vocab.get(rule.right)) + " → id " + rule.newId;
+        item.appendChild(text);
+        encodeTrace.appendChild(item);
+      });
+      if (!trace.length) {
+        var noRule = document.createElement("li");
+        noRule.dataset.rank = "—";
+        var noRuleText = document.createElement("span");
+        noRuleText.textContent = "No learned pair applies; the input stays as base bytes.";
+        noRule.appendChild(noRuleText);
+        encodeTrace.appendChild(noRule);
+      }
+      encodeSummary.textContent = bytes.length + " bytes → " + tokens.length + (tokens.length === 1 ? " token" : " tokens");
+      announce("Encoding complete: " + bytes.length + " bytes became " + tokens.length + " tokens.");
+    }
+
+    lab.querySelector('[data-action="load-training"]').addEventListener("click", loadTrainingText);
+    lab.querySelector('[data-action="reset"]').addEventListener("click", function () {
+      input.value = "aaabdaaabac";
+      loadTrainingText();
+    });
+    nextButton.addEventListener("click", function () { learnNextMerge(true); });
+    previousButton.addEventListener("click", function () {
+      stopPlaying();
+      if (historyIndex > 0) historyIndex -= 1;
+      showError(trainingError, "", input);
+      renderState();
+      announce("Returned to BPE step " + historyIndex + ".");
+    });
+    playButton.addEventListener("click", togglePlay);
+    encodeButton.addEventListener("click", encodeWithRules);
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") loadTrainingText();
+    });
+    encodeInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") encodeWithRules();
+    });
+
+    var tabs = Array.from(lab.querySelectorAll("[data-lab-tab]"));
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        stopPlaying();
+        var mode = tab.dataset.labTab;
+        tabs.forEach(function (candidate) {
+          var active = candidate === tab;
+          candidate.classList.toggle("is-active", active);
+          candidate.setAttribute("aria-selected", String(active));
+          candidate.setAttribute("tabindex", active ? "0" : "-1");
+        });
+        lab.querySelectorAll("[data-lab-panel]").forEach(function (panel) {
+          panel.hidden = panel.dataset.labPanel !== mode;
+        });
+        if (mode === "encode" && !encodedSequenceElement.children.length) {
+          encodeSummary.textContent = currentState().rules.length ? currentState().rules.length + (currentState().rules.length === 1 ? " learned rule" : " learned rules") : "Learn at least one rule";
+        }
+      });
+      tab.addEventListener("keydown", function (event) {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        var currentIndex = tabs.indexOf(tab);
+        var nextIndex = currentIndex;
+        if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        tabs[nextIndex].focus();
+        tabs[nextIndex].click();
+      });
+    });
+
+    loadTrainingText();
+  }
+
+  document.querySelectorAll("[data-bpe-lab]").forEach(initializeBpeLab);
+}());
+
+  </script>
+</body>
+</html>
