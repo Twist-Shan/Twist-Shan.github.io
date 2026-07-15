@@ -1,6 +1,5 @@
 ---
 ---
-<!-- Generated from outputs/tokenization_notes_en.html. Regenerate the source article before updating this layout. -->
 <!doctype html>
 <html lang="en" data-theme="light">
 <head>
@@ -16,9 +15,51 @@
   <meta property="article:published_time" content="2026-07-11">
   <meta name="twitter:card" content="summary">
   <title>Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer — Liang (Twist) Shan</title>
-  <link rel="canonical" href="{{ page.url | absolute_url }}">
-  <meta property="og:url" content="{{ page.url | absolute_url }}">
   <style>
+/*
+ * Shared visual contract for every long-form note.
+ * Topic-specific styles may add components, but must not redefine this scale.
+ */
+:root {
+  --type-hero: clamp(48px, 5.5vw, 82px);
+  --type-hero-tablet: clamp(47px, 5.8vw, 69px);
+  --type-hero-mobile: clamp(43px, 12.5vw, 61px);
+  --type-hero-phone: 42px;
+  --type-hero-description: clamp(17px, 1.35vw, 21px);
+  --type-article-body: 17px;
+  --type-article-body-mobile: 16px;
+  --type-article-lede: clamp(21px, 2vw, 26px);
+  --type-section-title: clamp(35px, 4vw, 50px);
+  --type-subsection-title: clamp(25px, 2.4vw, 31px);
+
+  --hero-columns: minmax(0, 1.45fr) minmax(300px, 0.68fr);
+  --hero-gap: clamp(52px, 7vw, 132px);
+  --hero-padding: clamp(78px, 9vw, 142px) clamp(78px, 8vw, 126px);
+  --hero-title-width: 990px;
+  --hero-card-height: 440px;
+}
+
+/*
+ * Desktop reading rail contract.
+ *
+ * The topic styles place `.toc-sticky` inside a CSS Grid item. Because the
+ * article grid uses `align-items: start`, that item otherwise collapses to the
+ * TOC's own height and leaves no containing-block travel for `position: sticky`.
+ * Stretching only the desktop rail gives the sticky child the full article
+ * height while the existing max-height keeps long TOCs scrollable in-view.
+ */
+@media (min-width: 931px) {
+  .article-layout > .desktop-toc {
+    align-self: stretch;
+  }
+
+  .article-layout > .desktop-toc > .toc-sticky {
+    top: 30px;
+    max-height: calc(100vh - 60px);
+    max-height: calc(100dvh - 60px);
+  }
+}
+
 :root {
   --paper: #f7f7f2;
   --paper-soft: #f2ede4;
@@ -71,7 +112,6 @@ html {
 
 body {
   margin: 0;
-  overflow-x: hidden;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
@@ -284,10 +324,10 @@ button:active,
 .article-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.68fr);
-  gap: clamp(52px, 7vw, 132px);
+  grid-template-columns: var(--hero-columns);
+  gap: var(--hero-gap);
   align-items: end;
-  padding-block: clamp(78px, 9vw, 142px) clamp(78px, 8vw, 126px);
+  padding-block: var(--hero-padding);
 }
 
 .article-hero::after {
@@ -390,11 +430,11 @@ button:active,
 }
 
 .article-hero h1 {
-  max-width: 990px;
+  max-width: var(--hero-title-width);
   margin: 0;
   color: var(--ink);
   font-family: var(--serif);
-  font-size: clamp(48px, 5.5vw, 82px);
+  font-size: var(--type-hero);
   font-weight: 400;
   letter-spacing: -0.052em;
   line-height: 0.99;
@@ -410,7 +450,7 @@ button:active,
   max-width: 720px;
   margin: 30px 0 0;
   color: var(--muted);
-  font-size: clamp(17px, 1.35vw, 21px);
+  font-size: var(--type-hero-description);
   line-height: 1.6;
 }
 
@@ -498,7 +538,7 @@ button:active,
 
 .token-anatomy {
   align-self: center;
-  min-height: 440px;
+  min-height: var(--hero-card-height);
   padding: 28px;
   border: 1px solid rgba(168, 76, 62, 0.22);
   border-radius: var(--radius-large);
@@ -753,7 +793,7 @@ button:active,
 
 .article-prose {
   color: var(--ink);
-  font-size: 17px;
+  font-size: var(--type-article-body);
   line-height: 1.78;
 }
 
@@ -810,7 +850,7 @@ button:active,
   border: 0;
   color: var(--ink);
   font-family: var(--serif);
-  font-size: clamp(21px, 2vw, 26px);
+  font-size: var(--type-article-lede);
   line-height: 1.52;
 }
 
@@ -877,7 +917,7 @@ button:active,
   margin: 0 0 36px;
   color: var(--ink);
   font-family: var(--serif);
-  font-size: clamp(35px, 4vw, 50px);
+  font-size: var(--type-section-title);
   font-weight: 400;
   letter-spacing: -0.035em;
   line-height: 1.06;
@@ -890,7 +930,7 @@ button:active,
   margin: 58px 0 22px;
   color: var(--ink);
   font-family: var(--serif);
-  font-size: clamp(25px, 2.4vw, 31px);
+  font-size: var(--type-subsection-title);
   font-weight: 400;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -1692,7 +1732,7 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
   }
 
   .article-hero h1 {
-    font-size: clamp(47px, 5.8vw, 69px);
+    font-size: var(--type-hero-tablet);
   }
 
   .article-layout {
@@ -1876,7 +1916,7 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
   }
 
   .article-hero h1 {
-    font-size: clamp(43px, 12.5vw, 61px);
+    font-size: var(--type-hero-mobile);
     letter-spacing: -0.048em;
     line-height: 1.01;
   }
@@ -1937,12 +1977,12 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
   }
 
   .article-prose {
-    font-size: 16px;
+    font-size: var(--type-article-body-mobile);
     line-height: 1.75;
   }
 
   .article-lede {
-    font-size: 21px;
+    font-size: var(--type-article-lede);
   }
 
   .evidence-note {
@@ -2053,7 +2093,7 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
   }
 
   .article-hero h1 {
-    font-size: 42px;
+    font-size: var(--type-hero-phone);
   }
 
   .article-breadcrumbs {
