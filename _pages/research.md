@@ -3,6 +3,11 @@ layout: studio
 title: Research
 permalink: /research/
 slug: research
+# Optional publication metadata. Empty values stay hidden on the page.
+pareto_arxiv:
+pareto_venue:
+cot_arxiv:
+cot_venue:
 ---
 
 <header class="page-hero shell reveal">
@@ -30,10 +35,12 @@ slug: research
 
       <article class="research-entry" id="chatbot-arena-ranking">
         <h4>Pareto AI Identification</h4>
-        <p>We study Pareto-optimal set identification algorithm for evaluating models from human preferences, especially in AI Arena, through binary pairwise feedback bandits with Bradley-Terry model and Borda score successive elimination.</p>
+        <p class="research-description">We study Pareto-optimal set identification algorithm for evaluating models from human preferences, especially in AI Arena, through binary pairwise feedback bandits with Bradley-Terry model and Borda score successive elimination.</p>
         <div class="research-links">
           <a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn">Synthetic repo <span>↗</span></a>
           <a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Rea_Arena">Realistic repo <span>↗</span></a>
+          {% if page.pareto_arxiv %}<a class="research-arxiv" href="{{ page.pareto_arxiv }}">arXiv <span>↗</span></a>{% endif %}
+          {% if page.pareto_venue %}<span class="research-venue">{{ page.pareto_venue }}</span>{% endif %}
           <a class="research-advisor" href="https://zhimeir.github.io/">Advisor · Prof. Zhimei Ren <span>↗</span></a>
         </div>
       </article>
@@ -56,10 +63,12 @@ slug: research
 
       <article class="research-entry" id="cot-counting-mechanism">
         <h4>CoT Mechanism for Counting</h4>
-        <p>We investigate how Chain-of-Thought improves LLMs'counting ability, by tracing the mechanism from controlled synthetic tasks on GPT-2 like Transformers to realistic needle-in-a-haystack settings in open-weight large model.</p>
+        <p class="research-description">We investigate how Chain-of-Thought improves LLMs'counting ability, by tracing the mechanism from controlled synthetic tasks on GPT-2 like Transformers to realistic needle-in-a-haystack settings in open-weight large model.</p>
         <div class="research-links">
           <a href="https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count">Synthetic repo <span>↗</span></a>
           <a href="https://github.com/Twist-Shan/Realistic_CoT_NiaH_Count">Realistic repo <span>↗</span></a>
+          {% if page.cot_arxiv %}<a class="research-arxiv" href="{{ page.cot_arxiv }}">arXiv <span>↗</span></a>{% endif %}
+          {% if page.cot_venue %}<span class="research-venue">{{ page.cot_venue }}</span>{% endif %}
           <a class="research-advisor" href="https://pages.stat.wisc.edu/~zhong35/">Advisor · Prof. Yiqiao Zhong <span>↗</span></a>
         </div>
       </article>
