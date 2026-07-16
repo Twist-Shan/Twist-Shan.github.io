@@ -3,11 +3,18 @@ layout: studio
 title: Research
 permalink: /research/
 slug: research
-# Optional publication metadata. Empty values stay hidden on the page.
-pareto_arxiv:
-pareto_venue:
-cot_arxiv:
-cot_venue:
+# Each resource below is optional. Empty values stay hidden and the remaining
+# items automatically shift left in this order: synthetic, realistic, arXiv, venue.
+pareto_links:
+  synthetic_repo: "https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn"
+  realistic_repo: "https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Rea_Arena"
+  arxiv:
+  venue:
+cot_links:
+  synthetic_repo: "https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count"
+  realistic_repo: "https://github.com/Twist-Shan/Realistic_CoT_NiaH_Count"
+  arxiv:
+  venue:
 ---
 
 <header class="page-hero shell reveal">
@@ -37,10 +44,14 @@ cot_venue:
         <h4>Pareto AI Identification</h4>
         <p class="research-description">We study Pareto-optimal set identification algorithm for evaluating models from human preferences, especially in AI Arena, through binary pairwise feedback bandits with Bradley-Terry model and Borda score successive elimination.</p>
         <div class="research-links">
-          <a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn">Synthetic repo <span>↗</span></a>
-          <a href="https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Rea_Arena">Realistic repo <span>↗</span></a>
-          {% if page.pareto_arxiv %}<a class="research-arxiv" href="{{ page.pareto_arxiv }}">arXiv <span>↗</span></a>{% endif %}
-          {% if page.pareto_venue %}<span class="research-venue">{{ page.pareto_venue }}</span>{% endif %}
+          {% if page.pareto_links.synthetic_repo or page.pareto_links.realistic_repo or page.pareto_links.arxiv or page.pareto_links.venue %}
+          <div class="research-resources">
+            {% if page.pareto_links.synthetic_repo %}<a href="{{ page.pareto_links.synthetic_repo }}">Synthetic repo <span>↗</span></a>{% endif %}
+            {% if page.pareto_links.realistic_repo %}<a href="{{ page.pareto_links.realistic_repo }}">Realistic repo <span>↗</span></a>{% endif %}
+            {% if page.pareto_links.arxiv %}<a class="research-arxiv" href="{{ page.pareto_links.arxiv }}">arXiv <span>↗</span></a>{% endif %}
+            {% if page.pareto_links.venue %}<span class="research-venue">{{ page.pareto_links.venue }}</span>{% endif %}
+          </div>
+          {% endif %}
           <a class="research-advisor" href="https://zhimeir.github.io/">Advisor · Prof. Zhimei Ren <span>↗</span></a>
         </div>
       </article>
@@ -65,10 +76,14 @@ cot_venue:
         <h4>CoT Mechanism for Counting</h4>
         <p class="research-description">We investigate how Chain-of-Thought improves LLMs'counting ability, by tracing the mechanism from controlled synthetic tasks on GPT-2 like Transformers to realistic needle-in-a-haystack settings in open-weight large model.</p>
         <div class="research-links">
-          <a href="https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count">Synthetic repo <span>↗</span></a>
-          <a href="https://github.com/Twist-Shan/Realistic_CoT_NiaH_Count">Realistic repo <span>↗</span></a>
-          {% if page.cot_arxiv %}<a class="research-arxiv" href="{{ page.cot_arxiv }}">arXiv <span>↗</span></a>{% endif %}
-          {% if page.cot_venue %}<span class="research-venue">{{ page.cot_venue }}</span>{% endif %}
+          {% if page.cot_links.synthetic_repo or page.cot_links.realistic_repo or page.cot_links.arxiv or page.cot_links.venue %}
+          <div class="research-resources">
+            {% if page.cot_links.synthetic_repo %}<a href="{{ page.cot_links.synthetic_repo }}">Synthetic repo <span>↗</span></a>{% endif %}
+            {% if page.cot_links.realistic_repo %}<a href="{{ page.cot_links.realistic_repo }}">Realistic repo <span>↗</span></a>{% endif %}
+            {% if page.cot_links.arxiv %}<a class="research-arxiv" href="{{ page.cot_links.arxiv }}">arXiv <span>↗</span></a>{% endif %}
+            {% if page.cot_links.venue %}<span class="research-venue">{{ page.cot_links.venue }}</span>{% endif %}
+          </div>
+          {% endif %}
           <a class="research-advisor" href="https://pages.stat.wisc.edu/~zhong35/">Advisor · Prof. Yiqiao Zhong <span>↗</span></a>
         </div>
       </article>
