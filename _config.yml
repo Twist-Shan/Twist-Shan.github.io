@@ -12,7 +12,7 @@ site_theme              : "default"
 title                   : "Liang (Twist) Shan"
 title_separator           : "-"
 name                      : &name "Liang Shan"
-description               : &description "Undergraduate at Peking University (SMS & NSD). Research interests: Statistical Foundations and Optimization Algorithms for Modern Machine Learning (DL, RL, LLMs)."
+description               : &description "Liang (Twist) Shan is an undergraduate at Peking University pursuing Statistics and Economics, with research interests in statistics, optimization, deep learning, reinforcement learning, and large language models."
 url                       : "https://twist-shan.github.io" 
 baseurl                   : "" 
 repository                : "Twist-Shan/Twist-Shan.github.io"
@@ -29,7 +29,7 @@ author:
   bio              : "Undergraduate student in School of Mathematical Sciences, Peking University"
   location         : "Beijing, China"
   employer         : "Peking University"
-  uri              : 
+  uri              : "https://twist-shan.github.io/"
   email            : "twistshan1218@gmail.com"
 
   # Academic websites
@@ -107,19 +107,24 @@ yandex_site_verification :
 
 # Social Sharing
 twitter:
-  username               : &twitter
+  username               : &twitter "LiangTwistShan"
 facebook:
   username               :
   app_id                 :
   publisher              :
-og_image                 :  # Social media default site image
-og_description           :  # Social media default site image description
+og_image                 : "/images/profile.jpg"
+og_description           : "Liang (Twist) Shan is an undergraduate at Peking University with research interests in statistics, optimization, and modern machine learning."
 # For specifying social profiles
 # - https://developers.google.com/structured-data/customize/social-profiles
 social:
-  type                   : # Person or Organization (defaults to Person)
-  name                   : # If the user or organization name differs from the site's name
-  links: # An array of links to social media profiles
+  type                   : Person
+  name                   : "Liang (Twist) Shan"
+  links:
+    - "https://github.com/Twist-Shan"
+    - "https://www.linkedin.com/in/liang-twist-shan"
+    - "https://huggingface.co/Twist-Shan"
+    - "https://x.com/LiangTwistShan"
+    - "https://www.instagram.com/twist_shan"
 
 
 # Analytics

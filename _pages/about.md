@@ -2,6 +2,8 @@
 layout: studio
 permalink: /
 slug: home
+seo_title: "Liang (Twist) Shan | Academic Homepage"
+description: "Liang (Twist) Shan is an undergraduate at Peking University pursuing Statistics and Economics, with research interests in statistics, optimization, deep learning, reinforcement learning, and large language models."
 redirect_from:
   - /about/
   - /about.html

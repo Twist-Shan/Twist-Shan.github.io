@@ -1,5 +1,6 @@
 ---
 title: "Archive Layout with Content"
+sitemap: false
 layout: archive
 permalink: /archive-layout-with-content/
 ---
