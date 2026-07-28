@@ -40,7 +40,7 @@ cot_links:
     <div class="research-track">
       <header class="research-track-header research-track-header--rl">
         <div class="research-track-title">
-          <p>RL / Theory</p>
+          <p>RL / Theory / Bandits Theory</p>
         </div>
       </header>
 
@@ -73,7 +73,7 @@ cot_links:
     <div class="research-track">
       <header class="research-track-header research-track-header--llm">
         <div class="research-track-title">
-          <p>LLM / Interpretability</p>
+          <p>LLM / Interpretability / Reasoning</p>
         </div>
       </header>
 
