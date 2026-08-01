@@ -2,8 +2,8 @@
 layout: studio
 permalink: /
 slug: home
-seo_title: "Liang (Twist) Shan | Academic Homepage"
-description: "Liang (Twist) Shan is an undergraduate at Peking University pursuing Statistics and Economics, with research interests in statistics, optimization, deep learning, reinforcement learning, and large language models."
+seo_title: "Liang (Twist) Shan | Personal Homepage"
+description: "Liang (Twist) Shan is an undergraduate at Peking University pursuing Statistics and Economics, with research interests in statistics, optimization, deep learning, reinforcement learning, large language models, and diffusion language models."
 redirect_from:
   - /about/
   - /about.html
@@ -19,7 +19,8 @@ redirect_from:
     <div class="about-copy">
       <h2>About</h2>
       <p class="hero-intro">I’m an undergraduate at Peking University pursuing a double major in Statistics in the School of Mathematical Sciences and Economics in the National School of Development.</p>
-      <p>My research interests focus on the applications of statistics and optimization in modern machine learning, especially in Deep Learning (DL), Reinforcement Learning (RL), and Large Language Models (LLMs). I am seeking PhD opportunities beginning in Fall 2028 in Statistics, Computer Science, or Operations Research.</p>
+      <p>My research interests focus on the applications of statistics and optimization in modern machine learning, especially in Deep Learning (DL), Reinforcement Learning (RL), Large Language Models (LLMs), and Diffusion Language Models (DLMs).</p>
+      <p>I am seeking PhD opportunities beginning in Fall 2028 in Statistics, Computer Science, or Operations Research.</p>
     </div>
     <div class="hero-actions">
       <a class="text-link" href="{{ '/research/' | relative_url }}">Explore my research <span>↗</span></a>

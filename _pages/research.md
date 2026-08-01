@@ -40,7 +40,7 @@ cot_links:
     <div class="research-track">
       <header class="research-track-header research-track-header--rl">
         <div class="research-track-title">
-          <p>RL / Theory / Bandits Theory</p>
+          <p>RL / Theory / Bandits</p>
         </div>
       </header>
 
