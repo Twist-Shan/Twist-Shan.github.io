@@ -19,8 +19,7 @@ redirect_from:
     <div class="about-copy">
       <h2>About</h2>
       <p class="hero-intro">I’m an undergraduate at Peking University pursuing a double major in Statistics in the School of Mathematical Sciences and Economics in the National School of Development.</p>
-      <p>My research interests focus on the applications of statistics and optimization in modern machine learning, especially in Deep Learning (DL), Reinforcement Learning (RL), Large Language Models (LLMs), and Diffusion Language Models (DLMs).</p>
-      <p>I am seeking PhD opportunities beginning in Fall 2028 in Statistics, Computer Science, or Operations Research.</p>
+      <p>My research interests span the statistical foundations, optimization, and mechanistic interpretability of <strong>Modern Machine Learning</strong>, with a focus on deep learning, reinforcement learning, and generative AI, including language models and diffusion models.</p>
     </div>
     <div class="hero-actions">
       <a class="text-link" href="{{ '/research/' | relative_url }}">Explore my research <span>↗</span></a>
