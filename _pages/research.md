@@ -3,100 +3,273 @@ layout: studio
 title: Research
 permalink: /research/
 slug: research
-# Each resource below is optional. Empty values stay hidden and the remaining
-# items automatically shift left in this order: synthetic, realistic, arXiv, blog, venue.
-pareto_links:
-  synthetic_repo: "https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn"
-  realistic_repo: "https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Rea_Arena"
-  arxiv:
-  blog:
-  venue_label:
-  venue_url:
-cot_links:
-  synthetic_repo: "https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count"
-  realistic_repo: "https://github.com/Twist-Shan/Realistic_CoT_NiaH_Count"
-  arxiv:
-  blog:
-  venue_label:
-  venue_url:
+
+# ============================================================
+# Research Page
+#
+# All research content is managed below.
+# The Liquid/HTML template at the bottom should normally
+# NOT need to be modified when adding new projects.
+#
+# Resource order:
+# synthetic repo -> realistic repo -> arXiv -> blog -> venue
+#
+# Every resource is optional. Empty values stay hidden.
+# Advisor is also optional.
+# ============================================================
+
+
+# ============================================================
+# HOW TO ADD A NEW PROJECT
+#
+# Copy the block below into "projects:" under any research track.
+#
+#      - id: project-id
+#        draft: false
+#        title: Project Title
+#        description: >-
+#          One-sentence project description.
+#
+#        links:
+#          synthetic_repo:
+#          realistic_repo:
+#          arxiv:
+#          blog:
+#          venue_label:
+#          venue_url:
+#
+#        advisor:
+#          name:
+#          url:
+#
+# Notes:
+# - "id" must be unique across the page.
+# - Use lowercase kebab-case for id, e.g. loop-test-time-training.
+# - Set draft: true if you want to keep the project hidden.
+# - Empty links/advisor fields will not be displayed.
+# ============================================================
+
+
+research_tracks:
+
+  # ==========================================================
+  # Deep Learning
+  # ==========================================================
+  - key: dl
+    title: DL / Architecture
+
+    projects:
+
+      - id: loop-test-time-training
+        draft: false
+        title: Loop & Test-Time Training
+        description: >-
+          We want to study how lightweight test-time parameter updates interact with recurrent-depth computation in looped Transformers, aiming to jointly reduce operator mismatch and finite-iteration error.
+
+        links:
+          code_repo:
+          arxiv:
+          blog:
+          venue_label:
+          venue_url:
+
+        advisor:
+          name:
+          url:
+
+  # ==========================================================
+  # RL / Theory / Bandits
+  # ==========================================================
+  - key: rl
+    title: RL / Theory / Bandits
+
+    projects:
+
+      - id: chatbot-arena-ranking
+        draft: false
+        title: Pareto AI Identification
+        description: >-
+          We study Pareto-optimal set identification algorithms for evaluating models from human preferences, especially in AI Arena, through binary pairwise-feedback bandits with the Bradley-Terry model and Borda-score successive elimination.
+
+        links:
+          synthetic_repo: https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn
+          realistic_repo: https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Rea_Arena
+          arxiv: 
+          blog: 
+          venue_label: 
+          venue_url: 
+
+        advisor:
+          name: Prof. Zhimei Ren
+          url: https://zhimeir.github.io/
+
+
+  # ==========================================================
+  # LLM / Interpretability / Reasoning
+  # ==========================================================
+  - key: llm
+    title: LLM / Interpretability / Reasoning
+
+    projects:
+
+      - id: cot-counting-mechanism
+        draft: false
+        title: CoT Mechanism for Counting
+        description: >-
+          We investigate how Chain-of-Thought improves LLMs' counting ability by tracing the mechanism from controlled synthetic tasks on GPT-2-like Transformers to realistic needle-in-a-haystack settings in open-weight large models.
+
+        links:
+          synthetic_repo: https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count
+          realistic_repo: https://github.com/Twist-Shan/Realistic_CoT_NiaH_Count
+          arxiv:
+          blog:
+          venue_label:
+          venue_url:
+
+        advisor:
+          name: Prof. Yiqiao Zhong
+          url: https://pages.stat.wisc.edu/~zhong35/
+
+    aside:
+      prefix: >-
+        We are also interested in the geometry and compression of hidden-state representations; some toy experiments are available in
+      link_label: Hidden State Evaluation
+      link_url: https://github.com/Twist-Shan/Hidden_State_Evaluation
+      suffix: "."
+
+  # ==========================================================
+  # Diffusion Language Model
+  # ==========================================================
+  - key: dlm
+    title: DLM / Interpretability
+
+    projects:
+
+      - id: diffusion-language-model-sudoku
+        draft: false
+        title: Diffusion Language Models for Sudoku
+        description: >-
+          We want to study how diffusion language models enable efficient planning and reasoning on specific tasks like Sudoku, and how different adaptive decoding order affects them.
+
+        links:
+          code_repo:
+          arxiv:
+          blog:
+          venue_label:
+          venue_url:
+
+        advisor:
+          name:
+          url:
+
 ---
 
-<header class="page-hero shell reveal">
-  <p class="eyebrow">01 — Research</p>
-  <h1>Questions I’m <em>interested in.</em></h1>
-  <p>I’m a slow learner, but I keep learning and moving forward.</p>
-</header>
 
-<main class="research-catalog shell">
-  <!-- Deep Learning is reserved as a future research direction and remains hidden until it has content. -->
+{% for track in page.research_tracks %}
+<div class="research-track">
 
-  <section class="research-domain reveal" id="reinforcement-learning">
-    <header class="research-domain-header">
-      <p class="project-number">R / 01</p>
-      <h2>Reinforcement Learning</h2>
-      <i class="heading-mark heading-mark--rl" aria-hidden="true"></i>
-    </header>
-
-    <div class="research-track">
-      <header class="research-track-header research-track-header--rl">
-        <div class="research-track-title">
-          <p>RL / Theory / Bandits</p>
-        </div>
-      </header>
-
-      <article class="research-entry" id="chatbot-arena-ranking">
-        <h4>Pareto AI Identification</h4>
-        <p class="research-description">We study Pareto-optimal set identification algorithm for evaluating models from human preferences, especially in AI Arena, through binary pairwise feedback bandits with Bradley-Terry model and Borda score successive elimination.</p>
-        <div class="research-links">
-          {% if page.pareto_links.synthetic_repo or page.pareto_links.realistic_repo or page.pareto_links.arxiv or page.pareto_links.blog or page.pareto_links.venue_label or page.pareto_links.venue_url %}
-          <div class="research-resources">
-            {% if page.pareto_links.synthetic_repo %}<a href="{{ page.pareto_links.synthetic_repo }}">Synthetic repo <span>↗</span></a>{% endif %}
-            {% if page.pareto_links.realistic_repo %}<a href="{{ page.pareto_links.realistic_repo }}">Realistic repo <span>↗</span></a>{% endif %}
-            {% if page.pareto_links.arxiv %}<a class="research-arxiv" href="{{ page.pareto_links.arxiv }}">arXiv <span>↗</span></a>{% endif %}
-            {% if page.pareto_links.blog %}<a class="research-blog" href="{{ page.pareto_links.blog }}">Blog <span>↗</span></a>{% endif %}
-            {% if page.pareto_links.venue_url %}<a class="research-venue" href="{{ page.pareto_links.venue_url }}">{% if page.pareto_links.venue_label %}{{ page.pareto_links.venue_label }}{% else %}Venue{% endif %} <span>↗</span></a>{% elsif page.pareto_links.venue_label %}<span class="research-venue">{{ page.pareto_links.venue_label }}</span>{% endif %}
-          </div>
-          {% endif %}
-          <a class="research-advisor" href="https://zhimeir.github.io/">Advisor · Prof. Zhimei Ren <span>↗</span></a>
-        </div>
-      </article>
+  <header class="research-track-header research-track-header--{{ track.key }}">
+    <div class="research-track-title">
+      <p>{{ track.title }}</p>
     </div>
-  </section>
+  </header>
 
-  <section class="research-domain reveal" id="large-language-model">
-    <header class="research-domain-header">
-      <p class="project-number">R / 02</p>
-      <h2>Large Language Model</h2>
-      <i class="heading-mark heading-mark--llm" aria-hidden="true"></i>
-    </header>
 
-    <div class="research-track">
-      <header class="research-track-header research-track-header--llm">
-        <div class="research-track-title">
-          <p>LLM / Interpretability / Reasoning</p>
-        </div>
-      </header>
+  {% for project in track.projects %}
+  {% unless project.draft %}
 
-      <article class="research-entry" id="cot-counting-mechanism">
-        <h4>CoT Mechanism for Counting</h4>
-        <p class="research-description">We investigate how Chain-of-Thought improves LLMs'counting ability, by tracing the mechanism from controlled synthetic tasks on GPT-2 like Transformers to realistic needle-in-a-haystack settings in open-weight large model.</p>
-        <div class="research-links">
-          {% if page.cot_links.synthetic_repo or page.cot_links.realistic_repo or page.cot_links.arxiv or page.cot_links.blog or page.cot_links.venue_label or page.cot_links.venue_url %}
-          <div class="research-resources">
-            {% if page.cot_links.synthetic_repo %}<a href="{{ page.cot_links.synthetic_repo }}">Synthetic repo <span>↗</span></a>{% endif %}
-            {% if page.cot_links.realistic_repo %}<a href="{{ page.cot_links.realistic_repo }}">Realistic repo <span>↗</span></a>{% endif %}
-            {% if page.cot_links.arxiv %}<a class="research-arxiv" href="{{ page.cot_links.arxiv }}">arXiv <span>↗</span></a>{% endif %}
-            {% if page.cot_links.blog %}<a class="research-blog" href="{{ page.cot_links.blog }}">Blog <span>↗</span></a>{% endif %}
-            {% if page.cot_links.venue_url %}<a class="research-venue" href="{{ page.cot_links.venue_url }}">{% if page.cot_links.venue_label %}{{ page.cot_links.venue_label }}{% else %}Venue{% endif %} <span>↗</span></a>{% elsif page.cot_links.venue_label %}<span class="research-venue">{{ page.cot_links.venue_label }}</span>{% endif %}
-          </div>
+  <article class="research-entry" id="{{ project.id }}">
+    <h4>{{ project.title }}</h4>
+
+    {% if project.description %}
+    <p class="research-description">{{ project.description }}</p>
+    {% endif %}
+
+    <div class="research-links">
+
+      {% assign links = project.links %}
+
+      {% if links.synthetic_repo or links.realistic_repo or links.arxiv or links.blog or links.venue_label or links.venue_url %}
+      <div class="research-resources">
+
+        {% if links.synthetic_repo %}
+        <a href="{{ links.synthetic_repo }}">
+          Synthetic repo <span>↗</span>
+        </a>
+        {% endif %}
+
+        {% if links.realistic_repo %}
+        <a href="{{ links.realistic_repo }}">
+          Realistic repo <span>↗</span>
+        </a>
+        {% endif %}
+
+        {% if links.arxiv %}
+        <a class="research-arxiv" href="{{ links.arxiv }}">
+          arXiv <span>↗</span>
+        </a>
+        {% endif %}
+
+        {% if links.blog %}
+        <a class="research-blog" href="{{ links.blog }}">
+          Blog <span>↗</span>
+        </a>
+        {% endif %}
+
+        {% if links.venue_url %}
+        <a class="research-venue" href="{{ links.venue_url }}">
+          {% if links.venue_label %}
+          {{ links.venue_label }}
+          {% else %}
+          Venue
           {% endif %}
-          <a class="research-advisor" href="https://pages.stat.wisc.edu/~zhong35/">Advisor · Prof. Yiqiao Zhong <span>↗</span></a>
-        </div>
-      </article>
+          <span>↗</span>
+        </a>
 
-      <aside class="research-aside">
-        <p>We are also interested in the geometry and compression of hidden-state representations; some toy experiments are available in <a href="https://github.com/Twist-Shan/Hidden_State_Evaluation">Hidden State Evaluation <span>↗</span></a>.</p>
-      </aside>
+        {% elsif links.venue_label %}
+        <span class="research-venue">
+          {{ links.venue_label }}
+        </span>
+        {% endif %}
+
+      </div>
+      {% endif %}
+
+
+      {% if project.advisor.name %}
+
+        {% if project.advisor.url %}
+        <a class="research-advisor" href="{{ project.advisor.url }}">
+          Advisor · {{ project.advisor.name }} <span>↗</span>
+        </a>
+
+        {% else %}
+        <span class="research-advisor">
+          Advisor · {{ project.advisor.name }}
+        </span>
+        {% endif %}
+
+      {% endif %}
+
     </div>
-  </section>
-</main>
+  </article>
+
+  {% endunless %}
+  {% endfor %}
+
+
+  {% if track.aside %}
+  <aside class="research-aside">
+    <p>
+      {{ track.aside.prefix }}
+      {% if track.aside.link_url and track.aside.link_label %}
+      <a href="{{ track.aside.link_url }}">
+        {{ track.aside.link_label }} <span>↗</span>
+      </a>
+      {% endif %}{{ track.aside.suffix }}
+    </p>
+  </aside>
+  {% endif %}
+
+</div>
+{% endfor %}
