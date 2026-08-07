@@ -1,0 +1,37 @@
+{% assign project = include.project %}
+{% unless project.draft %}
+<article class="research-entry" id="{{ project.id }}">
+  <h4>{{ project.title }}</h4>
+
+  {% if project.description %}
+  <p class="research-description">{{ project.description }}</p>
+  {% endif %}
+
+  {% assign resource_count = project.resources | size %}
+  {% if resource_count > 0 or project.advisor.name %}
+  <div class="research-links">
+    {% if resource_count > 0 %}
+    <div class="research-resources">
+      {% for resource in project.resources %}
+        {% if resource.url %}
+        <a{% if resource.kind %} class="research-{{ resource.kind }}"{% endif %} href="{{ resource.url }}">
+          {{ resource.label }} <span>↗</span>
+        </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if project.advisor.name %}
+      {% if project.advisor.url %}
+      <a class="research-advisor" href="{{ project.advisor.url }}">
+        Advisor · {{ project.advisor.name }} <span>↗</span>
+      </a>
+      {% else %}
+      <span class="research-advisor">Advisor · {{ project.advisor.name }}</span>
+      {% endif %}
+    {% endif %}
+  </div>
+  {% endif %}
+</article>
+{% endunless %}
