@@ -114,19 +114,20 @@ html[data-theme="dark"] .moon-icon { opacity: 1; transform: rotate(0) scale(1); 
 .heading-mark--notes { border: 1px solid var(--line); border-radius: 50%; background: color-mix(in srgb, var(--accent) 5%, transparent); box-shadow: inset 0 0 0 7px color-mix(in srgb, var(--mint) 6%, transparent); }
 .heading-mark--notes::before { content: ""; position: absolute; width: 40px; height: 1px; background: currentColor; left: 50%; top: 27px; transform: translateX(-50%); box-shadow: 0 11px 0 currentColor, 0 22px 0 currentColor; }
 .heading-mark--notes::after { content: ""; position: absolute; width: 11px; aspect-ratio: 1; border: 2px solid var(--page); border-radius: 50%; background: var(--mint); right: 6px; top: 6px; box-shadow: -51px 51px 0 -3px var(--accent); }
-.heading-mark--dl { background: radial-gradient(circle at 82% 18%, var(--mint) 0 6px, transparent 7px); }
-.heading-mark--dl::before, .heading-mark--dl::after { content: ""; position: absolute; border: 1px solid currentColor; }
-.heading-mark--dl::before { width: 52px; height: 52px; left: 5px; top: 19px; transform: rotate(45deg); background: color-mix(in srgb, var(--accent) 6%, transparent); }
-.heading-mark--dl::after { width: 34px; height: 34px; left: 25px; top: 8px; border-color: var(--accent); transform: rotate(45deg); box-shadow: 13px 13px 0 -12px var(--mint); }
+.heading-mark--dl { background: radial-gradient(circle at 86% 14%, var(--mint) 0 6px, transparent 7px), linear-gradient(145deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 62%); }
+.heading-mark--dl::before, .heading-mark--dl::after { content: ""; position: absolute; width: 50px; height: 34px; border: 1px solid currentColor; }
+.heading-mark--dl::before { left: 5px; top: 15px; transform: skewY(-8deg); box-shadow: 9px 10px 0 -9px var(--mint); }
+.heading-mark--dl::after { left: 24px; top: 32px; border-color: var(--accent); background: color-mix(in srgb, var(--mint) 11%, transparent); transform: skewY(6deg); }
 .heading-mark--rl { border: 1px solid var(--line); border-radius: 50%; background: var(--motto-bg); }
 .heading-mark--rl::before { content: ""; position: absolute; inset: 15px 23px; border: 1px solid currentColor; border-radius: 50%; transform: rotate(35deg) scaleX(1.5); box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 7%, transparent); }
 .heading-mark--rl::after { content: ""; position: absolute; width: 15px; aspect-ratio: 1; border-radius: 50%; background: var(--accent); left: 50%; top: 50%; transform: translate(-50%,-50%); box-shadow: 30px -30px 0 -4px var(--mint); }
-.heading-mark--llm { background: radial-gradient(circle at 84% 16%, var(--mint) 0 6px, transparent 7px); }
-.heading-mark--llm::before, .heading-mark--llm::after { content: ""; position: absolute; width: 50px; height: 38px; border: 1px solid currentColor; left: 5px; top: 10px; transform: rotate(-3deg); }
-.heading-mark--llm::after { left: 23px; top: 29px; border-color: var(--accent); background: color-mix(in srgb, var(--mint) 18%, transparent); transform: rotate(2deg); }
-.heading-mark--dlm { border: 1px solid var(--line); border-radius: 50%; background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--mint) 20%, transparent) 0 17%, transparent 18%); }
-.heading-mark--dlm::before { content: ""; position: absolute; width: 54px; height: 18px; left: 13px; top: 31px; border: 1px solid currentColor; border-radius: 50%; transform: rotate(-18deg); box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 6%, transparent); }
-.heading-mark--dlm::after { content: ""; position: absolute; width: 10px; aspect-ratio: 1; right: 6px; top: 8px; border-radius: 50%; background: var(--accent); box-shadow: -54px 52px 0 -3px var(--mint); }
+.heading-mark--llm { background: radial-gradient(circle at 84% 14%, var(--mint) 0 6px, transparent 7px), linear-gradient(29deg, transparent 0 47%, color-mix(in srgb, var(--ink) 34%, transparent) 48% 49%, transparent 50%) 12px 15px / 57px 46px no-repeat; }
+.heading-mark--llm::before { content: ""; position: absolute; width: 15px; height: 15px; left: 6px; top: 17px; border: 1px solid currentColor; background: var(--paper); box-shadow: 25px 13px 0 -1px var(--paper), 25px 13px 0 0 var(--accent), 50px 29px 0 -1px var(--paper), 50px 29px 0 0 currentColor; }
+.heading-mark--llm::after { content: ""; position: absolute; width: 5px; aspect-ratio: 1; left: 11px; top: 22px; border-radius: 50%; background: var(--accent); box-shadow: 25px 13px 0 var(--mint), 50px 29px 0 var(--accent); }
+.heading-mark--dlm { overflow: hidden; border-bottom: 1px solid var(--line); background: radial-gradient(circle at 78% 14%, var(--accent) 0 5px, transparent 6px), linear-gradient(180deg, transparent 0 63%, color-mix(in srgb, var(--mint) 9%, transparent) 64% 100%); }
+.heading-mark--dlm::before, .heading-mark--dlm::after { content: ""; position: absolute; border: 2px solid transparent; border-top-color: var(--accent); border-radius: 50%; }
+.heading-mark--dlm::before { width: 64px; height: 34px; left: -13px; top: 35px; transform: rotate(8deg); }
+.heading-mark--dlm::after { width: 70px; height: 38px; left: 28px; top: 40px; border-top-color: var(--mint); transform: rotate(-9deg); }
 .heading-mark--things { border-radius: 54% 46% 38% 62%; background: var(--fresh); transform: rotate(-5deg); }
 .heading-mark--things::before { content: ""; position: absolute; width: 46px; aspect-ratio: 1; border: 1px solid currentColor; left: 9px; top: 12px; transform: rotate(17deg); }
 .heading-mark--things::after { content: ""; position: absolute; width: 14px; aspect-ratio: 1; border-radius: 50%; background: var(--mint); right: 1px; top: 2px; box-shadow: -37px 41px 0 -4px var(--accent); }

@@ -25,7 +25,7 @@ domains:
         projects:
           - id: loop-test-time-training
             draft: false
-            title: "Loop & Test-Time Training"
+            title: "Looped Transformer & Test-Time Training"
             description: >-
               We want to study how lightweight test-time parameter updates interact with recurrent-depth computation in looped Transformers, aiming to jointly reduce operator mismatch and finite-iteration error.
             resources: []
@@ -63,7 +63,7 @@ domains:
         projects:
           - id: cot-counting-mechanism
             draft: false
-            title: "CoT Mechanism for Counting"
+            title: "CoT Reasoning Mechanism for Counting"
             description: >-
               We investigate how Chain-of-Thought improves LLMs' counting ability by tracing the mechanism from controlled synthetic tasks on GPT-2-like Transformers to realistic needle-in-a-haystack settings in open-weight large models.
             resources:
@@ -90,7 +90,7 @@ domains:
         projects:
           - id: diffusion-language-model-sudoku
             draft: false
-            title: "Diffusion Language Models for Sudoku"
+            title: "DLM Reasoning Mechanism for Sudoku"
             description: >-
               We want to study how diffusion language models enable efficient planning and reasoning on tasks such as Sudoku, and how different adaptive decoding orders affect their reasoning behavior.
             resources: []
