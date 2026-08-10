@@ -21,7 +21,7 @@ domains:
     title: "Deep Learning"
     mark: dl
     tracks:
-      - label: "DL / Architecture"
+      - label: "DL / Architecture / Recurrent Model"
         projects:
           - id: loop-test-time-training
             draft: false
@@ -40,7 +40,7 @@ domains:
     title: "Reinforcement Learning"
     mark: rl
     tracks:
-      - label: "RL / Theory / Bandits"
+      - label: "RL / Theory / Bandits Theory"
         projects:
           - id: chatbot-arena-ranking
             draft: false
@@ -61,7 +61,7 @@ domains:
     title: "Large Language Model"
     mark: llm
     tracks:
-      - label: "LLM / Interpretability / Reasoning"
+      - label: "LLM / Interpretability / Chain-of-Thought Reasoning"
         projects:
           - id: cot-counting-mechanism
             draft: false
@@ -88,7 +88,7 @@ domains:
     title: "Diffusion Language Model"
     mark: dlm
     tracks:
-      - label: "DLM / Interpretability"
+      - label: "DLM / Interpretability / Latent Reasoning"
         projects:
           - id: diffusion-language-model-sudoku
             draft: false
@@ -98,6 +98,6 @@ domains:
             resources: 
               - label: "Code repo"
                 url: "https://github.com/Twist-Shan/DLM_Reasoning_Interp"    
-            advisor:
-              name:
-              url:
+            advisor: 
+              name: 
+              url: 
