@@ -44,7 +44,7 @@ domains:
         projects:
           - id: chatbot-arena-ranking
             draft: false
-            title: "Pareto Frontier AI Identification"
+            title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
             description: >-
               We study Pareto frontier identification algorithms for evaluating models from human preferences, especially in AI Arena, through binary pairwise-feedback bandits with the Bradley-Terry model and Borda-score successive elimination.
             resources:
