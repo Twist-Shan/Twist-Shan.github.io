@@ -269,6 +269,9 @@ defaults:
 # Sass/SCSS
 sass:
   sass_dir: _sass
+  # Keep a relative load path so legacy Ruby Sass can build through an ASCII junction on Windows.
+  load_paths:
+    - _sass
   style: compressed # https://sass-lang.com/documentation/file.SASS_REFERENCE.html#output_style
 
 

@@ -500,22 +500,7 @@ Once large-scale LM training begins, the tokenizer becomes similar to an ABI: re
 
 ---
 
-## 12. Exercises: from Karpathy to CS336 and then to research questions
-
-1. **Basic BPE:** reproduce `aaabdaaabac → [258,100,258,97,99]` and assert the merge tree, not only the final IDs.
-2. **Regex BPE:** add a GPT-style pre-tokenizer and verify that no merge crosses a category boundary.
-3. **Special tokens:** implement `allowed_special` and write special-token injection tests.
-4. **Exact parity:** load `tiktoken` merges and compare IDs on mixed English, digits, Korean, and emoji. Exact parity requires the same normalization, regex, merge ranks, special-token policy, library behavior, and version.
-5. **Efficient training:** replace full rescans with occurrence lists and local pair-count updates.
-6. **English–Chinese fairness:** train 1K, 4K, and 16K vocabularies on balanced and imbalanced bilingual corpora; compare bytes/token, tokens/grapheme, and p95 sequence length.
-7. **Digit policy:** compare `\p{N}{1}`, `{1,2}`, and `{1,3}` on sequence compression and a tiny LM trained on elementary arithmetic.
-8. **Multiple segmentations:** implement BPE-dropout and compare typo robustness against deterministic BPE.
-9. **Comparable metrics:** train compute-matched tiny LMs under several tokenizers and compare carefully accounted BPB rather than per-token perplexity.
-10. **Frontier reproduction:** implement a simple entropy patcher and inspect whether high-entropy boundaries appear near word starts, code symbols, typos, or language switches.
-
----
-
-## 13. An annotated reading path
+## 12. An annotated reading path
 
 ### Stage 1: learn by implementing
 

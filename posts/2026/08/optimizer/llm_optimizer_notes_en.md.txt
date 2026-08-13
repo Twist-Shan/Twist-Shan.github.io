@@ -1,0 +1,1071 @@
+---
+title: "LLM Optimizers: From SGD and AdamW to SOAP, Muon, and Scalable Training"
+date: 2026-08-13
+description: "Implementation-first notes on how LLM optimizers work, why AdamW remains the baseline, how memory and distributed systems change the choice, and where matrix-aware optimization may go next."
+---
+
+# LLM Optimizers: From SGD and AdamW to SOAP, Muon, and Scalable Training
+
+> An implementation-first guide to optimizer mathematics, code, and systems trade-offs. Read Sections 1–7 for the core path from gradients to AdamW, Sections 8–11 for memory- and matrix-aware alternatives, and Sections 12–14 for evidence, open problems, and further study. The guide follows [Stanford CS336](https://cs336.stanford.edu/), [CS231n](https://cs231n.github.io/neural-networks-3/), [Dive into Deep Learning](https://d2l.ai/chapter_optimization/index.html), and Andrej Karpathy's compact [nanoGPT](https://github.com/karpathy/nanoGPT/blob/master/model.py) and [nanochat](https://github.com/karpathy/nanochat) training code. The research survey is current through **August 13, 2026**.
+
+> **A note on evidence:** the article distinguishes peer-reviewed papers, technical reports, and preprints. Reported scale, speedups, and downstream results are the authors' findings; they have not necessarily been independently reproduced across hardware, model families, data regimes, and training recipes. “Recent” marks the research frontier—it does not mean every conclusion is settled.
+
+## Four ideas to remember
+
+1. **An optimizer is more than an update equation.** In an LLM run, the effective training algorithm also includes the gradient estimator, parameter groups, learning-rate schedule, weight decay, clipping, precision, state dtype, and distributed implementation. Changing any one of these can change the training trajectory.
+2. **Most optimizer differences can be read as geometry.** SGD applies one global scale; Adam rescales each coordinate; Shampoo, SOAP, and Muon use matrix structure. The recurring question is: given the same noisy gradient, which direction should the model take, and how large should each part of the step be?
+3. **AdamW remains the baseline because it is robust and operationally mature, not because it is universally optimal.** It has known tuning behavior, fused kernels, checkpoint support, and well-tested sharding. New methods must beat that whole system, not an under-tuned equation.
+4. **The frontier is matrix-aware, memory-aware, and hardware-aware.** The most credible challengers capture interactions within weight matrices. The most deployable ones must also control state memory, communication, numerical precision, and the cost of inverse roots or orthogonalization.
+
+---
+
+## 1. What problem is an LLM optimizer solving?
+
+Let (θ) denote all trainable parameters, (x) a sampled training item or token block from distribution (𝒟), and (ℓ(θ;x)) its loss. Training seeks parameters with low expected loss:
+
+<div class="formula-note" role="img" aria-label="L of theta equals the expectation over x from D of ell of theta semicolon x">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><mi>L</mi><mo>(</mo><mi>θ</mi><mo>)</mo><mo>=</mo><msub><mi mathvariant="double-struck">E</mi><mrow><mi>x</mi><mo>∼</mo><mi>𝒟</mi></mrow></msub><mo>[</mo><mi>ℓ</mi><mo>(</mo><mi>θ</mi><mo>;</mo><mi>x</mi><mo>)</mo><mo>]</mo><mo>.</mo></mrow>
+  </math>
+</div>
+
+The full expectation is too expensive to compute. At optimizer step (t), a minibatch (B_t) therefore gives the gradient estimate used for the next update:
+
+<div class="formula-note" role="img" aria-label="g t equals one over batch size times the sum of gradients of the example losses">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow>
+      <msub><mi>g</mi><mi>t</mi></msub><mo>=</mo>
+      <mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>B</mi><mi>t</mi></msub><mo>|</mo></mrow></mfrac>
+      <munder><mo>∑</mo><mrow><mi>x</mi><mo>∈</mo><msub><mi>B</mi><mi>t</mi></msub></mrow></munder>
+      <msub><mo>∇</mo><mi>θ</mi></msub><mi>ℓ</mi><mo>(</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>;</mo><mi>x</mi><mo>)</mo><mo>.</mo>
+    </mrow>
+  </math>
+</div>
+
+For an autoregressive language model, the elementary losses are usually next-token predictions. The formula looks simple, but the implemented average depends on loss reduction, sequence packing, padding masks, token weights, data-parallel reduction, and gradient accumulation. A useful sanity check is to ask what receives equal weight. If microbatches contain different numbers of valid tokens, averaging their mean losses equally does **not** equal averaging all valid tokens equally.
+
+A useful generic update is:
+
+<div class="formula-note" role="img" aria-label="theta t equals theta t minus one minus eta t times P t times g t">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>P</mi><mi>t</mi></msub><msub><mi>g</mi><mi>t</mi></msub><mo>.</mo></mrow>
+  </math>
+</div>
+
+Here (η_t) is the global learning rate: it sets the overall step scale. The operator (P_t) changes the gradient's geometry: it sets relative scales and may also rotate the direction. SGD uses (P_t=I); Adam uses a diagonal function of recent squared gradients; a matrix-aware method may act from the left, the right, or both sides of a weight matrix. This “global scale plus geometric transform” view is the thread connecting the optimizers in this article.
+
+This equation is a map, not a complete implementation. A real step also includes momentum or other history, regularization, clipping, finite-precision rules, and possibly a skipped update after overflow. Before comparing two optimizers, separate the following components so that an improvement in one is not mistakenly attributed to another:
+
+| Component | Question it answers | Typical choices |
+|---|---|---|
+| Gradient estimator | Which noisy direction did this effective batch produce? | minibatch mean, token-weighted mean, accumulated gradients |
+| State and direction | Which past gradients should influence this step? | none, momentum, dual EMA, Hessian estimate |
+| Preconditioner | How should directions or coordinates be rescaled? | identity, diagonal RMS, factored or matrix preconditioner |
+| Global schedule | How far should the run move now? | warmup + cosine, WSD, inverse square root, schedule-free |
+| Regularization | How should parameters be shrunk or constrained? | AdamW decay, no-decay groups, norm constraints |
+| Safety | How are extreme or nonfinite updates handled? | global-norm clipping, coordinate clipping, loss-scale skip |
+| Systems | Where do state and computation live? | fused kernels, ZeRO/FSDP, quantized state, CPU offload |
+
+### Optimization is not the same as learning
+
+[Deep Learning, Chapter 8](https://www.deeplearningbook.org/contents/optimization.html) emphasizes that minimizing the training objective is only a surrogate for the real goal: performance on unseen data. Modern pretraining also stops at a fixed token or compute budget, usually long before a numerical optimizer would declare convergence. Therefore, “better” means producing a more useful checkpoint under a stated budget—not merely approaching a training-loss minimum asymptotically.
+
+At least four objectives may disagree:
+
+- **token efficiency:** lower validation loss after the same number of training tokens;
+- **compute efficiency:** lower validation loss after the same FLOPs;
+- **time efficiency:** reaching a target loss sooner on a particular system;
+- **resource efficiency:** fitting or training a useful model within a memory, power, or communication budget.
+
+These objectives can rank methods differently. An optimizer can need fewer updates yet take longer because every update performs matrix inverse roots or extra communication. A memory-saving method may improve throughput only because it enables a larger batch. A late-decay schedule may look worse at intermediate checkpoints and better at the final budget. Every comparison should therefore name both the target metric and the resource held fixed.
+
+---
+
+## 2. Geometry first: curvature, conditioning, and preconditioning
+
+The cleanest way to see optimizer geometry is a two-dimensional quadratic, where the Hessian is constant and every direction can be analyzed exactly:
+
+<div class="formula-note" role="img" aria-label="f of theta equals one half theta transpose H theta and its gradient equals H theta">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><mi>f</mi><mo>(</mo><mi>θ</mi><mo>)</mo><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><msup><mi>θ</mi><mi>T</mi></msup><mi>H</mi><mi>θ</mi><mo>,</mo><mspace width="1em"/><mo>∇</mo><mi>f</mi><mo>(</mo><mi>θ</mi><mo>)</mo><mo>=</mo><mi>H</mi><mi>θ</mi><mo>.</mo></mrow>
+  </math>
+</div>
+
+Assume (H) is positive definite. Its eigenvectors are the valley's principal axes, and its eigenvalues measure curvature along those axes. When the eigenvalues differ greatly, the loss is a narrow valley with condition number (κ=λ_{max}/λ_{min}). One learning rate must then satisfy two conflicting demands: a large rate moves along the flat direction but can oscillate along the steep one, while a safe rate for the steep direction crawls along the flat one.
+
+### 2.1 Conditioning gives a quantitative prediction
+
+For the centered quadratic above, gradient descent is a linear dynamical system:
+
+<div class="formula-note" role="img" aria-label="theta t plus one equals I minus eta H times theta t">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mi>θ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mo>(</mo><mi>I</mi><mo>−</mo><mi>η</mi><mi>H</mi><mo>)</mo><msub><mi>θ</mi><mi>t</mi></msub><mo>.</mo></mrow>
+  </math>
+</div>
+
+Diagonalizing (H) turns one coupled update into independent scalar updates. Along the eigenvector with eigenvalue (λ_i), the error is multiplied by (1−ηλ_i) at every step. Stability therefore requires (0&lt;η&lt;2/λ_{max}). For a positive-definite quadratic, the best constant rate and its worst-direction contraction factor are:
+
+<div class="formula-note" role="img" aria-label="optimal learning rate is two divided by lambda max plus lambda min, with contraction kappa minus one over kappa plus one">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.55em">
+      <mtr><mtd><mrow><msup><mi>η</mi><mo>*</mo></msup><mo>=</mo><mfrac><mn>2</mn><mrow><msub><mi>λ</mi><mi mathvariant="normal">max</mi></msub><mo>+</mo><msub><mi>λ</mi><mi mathvariant="normal">min</mi></msub></mrow></mfrac><mo>,</mo></mrow></mtd></mtr>
+      <mtr><mtd><mrow><msup><mi>ρ</mi><mo>*</mo></msup><mo>=</mo><mfrac><mrow><mi>κ</mi><mo>−</mo><mn>1</mn></mrow><mrow><mi>κ</mi><mo>+</mo><mn>1</mn></mrow></mfrac><mo>.</mo></mrow></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+The closer (ρ*) is to zero, the faster the worst direction contracts. When (κ) is large, (ρ*) is close to one, so even the best constant learning rate makes slow progress. A symmetric positive-definite preconditioner (P) attempts to reduce this transformed condition number:
+
+<div class="formula-note" role="img" aria-label="z t plus one equals I minus eta P one half H P one half times z t">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.55em">
+      <mtr><mtd><mrow>
+        <msub><mi>θ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mo>(</mo><mi>I</mi><mo>−</mo><mi>η</mi><mi>P</mi><mi>H</mi><mo>)</mo><msub><mi>θ</mi><mi>t</mi></msub><mo>,</mo><mspace width="1em"/>
+        <msub><mi>z</mi><mi>t</mi></msub><mo>=</mo><msup><mi>P</mi><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><msub><mi>θ</mi><mi>t</mi></msub><mo>,</mo>
+      </mrow></mtd></mtr>
+      <mtr><mtd><mrow>
+        <msub><mi>z</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mo>[</mo><mi>I</mi><mo>−</mo><mi>η</mi><msup><mi>P</mi><mfrac><mn>1</mn><mn>2</mn></mfrac></msup><mi>H</mi><msup><mi>P</mi><mfrac><mn>1</mn><mn>2</mn></mfrac></msup><mo>]</mo><msub><mi>z</mi><mi>t</mi></msub><mo>.</mo>
+      </mrow></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+The relevant condition number is now (κ(P^{1/2}HP^{1/2})). The ideal choice (P=H^{-1}) turns the valley into a spherical bowl and solves this centered quadratic in one step when (η=1). Deep-network training cannot materialize or invert a full Hessian over billions of parameters, so practical optimizer design searches for cheaper, noisier approximations to that coordinate change:
+
+- **SGD:** no preconditioning;
+- **AdaGrad, RMSProp, Adam:** coordinate-wise diagonal scaling;
+- **Adafactor and Adam-mini:** compressed diagonal statistics;
+- **Shampoo and SOAP:** Kronecker-factored or rotated matrix statistics;
+- **Muon:** a shape-aware matrix update based on the polar factor of momentum;
+- **Sophia:** a periodically refreshed diagonal curvature estimate plus coordinate clipping.
+
+Keep two boundaries around this analogy. First, Adam's second raw moment is a history of squared gradients, not the Hessian; it reflects curvature only indirectly and also contains gradient noise and signal. Second, fast convergence on a quadratic does not prove better language-model training. The toy problem teaches what scale and geometry mean, but it does not model changing representations, nonstationarity, or generalization.
+
+### Why Transformers often favor adaptivity
+
+Transformer parameter blocks are heterogeneous: embedding tables, normalization scales, attention projections, MLP matrices, biases, and the output head can have very different gradient scales and curvature. A single SGD learning rate must accommodate all of them, whereas Adam supplies coordinate-wise normalization. The empirical study [Why Transformers Need Adam: A Hessian Perspective](https://arxiv.org/abs/2402.16788) examines block heterogeneity as one explanation for Adam's advantage over SGD; [Toward Understanding Why Adam Converges Faster Than SGD for Transformers](https://arxiv.org/abs/2306.00204) offers a complementary directional-sharpness view.
+
+These are explanatory lenses, not settled causal laws. A later controlled study, [Deconstructing What Makes a Good Optimizer for Autoregressive Language Models](https://openreview.net/forum?id=zfeso8ceqr), found that several adaptive methods became broadly comparable after tuning, while adaptivity remained especially important for LayerNorm and the output layer. That observation motivates hybrid routing: richer optimization for matrices or fragile blocks, simpler treatment elsewhere.
+
+---
+
+## 3. SGD, momentum, and the role of minibatch noise
+
+Minibatch stochastic gradient descent is the reference update:
+
+<div class="formula-note" role="img" aria-label="theta t equals theta t minus one minus eta t times g t">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>g</mi><mi>t</mi></msub><mo>.</mo></mrow>
+  </math>
+</div>
+
+“Stochastic” describes the gradient estimate, not a batch size of one. Modern SGD normally averages a minibatch, producing a noisy estimate of the dataset or population gradient. Plain SGD stores no persistent optimizer tensor, which makes it simple and memory-light, but its single global learning rate must serve every parameter block and direction.
+
+### 3.1 What the noise is doing
+
+Changing batch size changes two things at once: the noise in each gradient estimate and the number of parameter updates obtained from a fixed token budget. Larger batches usually improve hardware utilization and reduce estimator variance, but beyond a critical regime they produce increasingly redundant information. [An Empirical Model of Large-Batch Training](https://arxiv.org/abs/1812.06162) uses the gradient noise scale to describe when additional batch size buys little further reduction in the number of updates needed.
+
+This does not justify “the largest batch that fits.” Batch size, learning rate, warmup, optimizer, and training horizon interact. When the effective batch changes meaningfully, re-sweep the learning rate. Do not assume a universal linear or square-root scaling rule for AdamW.
+
+### 3.2 Heavy-ball momentum
+
+One clear exponential-moving-average convention is:
+
+<div class="formula-note" role="img" aria-label="m t equals beta m t minus one plus one minus beta times g t; theta t equals theta t minus one minus eta t times m t">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.55em">
+      <mtr><mtd><mrow><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo>)</mo><msub><mi>g</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
+      <mtr><mtd><mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>m</mi><mi>t</mi></msub><mo>.</mo></mrow></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+Momentum is a low-pass filter over update steps. Components that repeatedly point in the same direction survive the average, while rapidly alternating components cancel. The factor (β) controls the trade-off between responsiveness and smoothing: an EMA has an approximate memory length of (1/(1-β)), so (β=0.9) remembers roughly ten updates and (β=0.99) roughly one hundred.
+
+Some libraries define the buffer without the factor (1-β), so the same numerical learning rate is not transferable between formulas. Nesterov momentum adds a look-ahead correction, but library conventions differ. When reproducing an optimizer, copy the exact recurrence and learning-rate convention—not merely its name.
+
+The interactive lab below optimizes an anisotropic quadratic with identical starting coordinates. Vary the condition number and learning rate, then compare SGD, momentum, RMSProp, and Adam.
+
+---
+
+## 4. From AdaGrad and RMSProp to coordinate-wise adaptivity
+
+### 4.1 AdaGrad: accumulate squared gradients forever
+
+[AdaGrad](https://jmlr.org/papers/v12/duchi11a.html) maintains a coordinate-wise accumulator:
+
+<div class="formula-note" role="img" aria-label="s t equals s t minus one plus g t squared; theta update divides the gradient by the square root of s t plus epsilon">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.55em">
+      <mtr><mtd><mrow><msub><mi>s</mi><mi>t</mi></msub><mo>=</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>g</mi><mi>t</mi></msub><mo>⊙</mo><msub><mi>g</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
+      <mtr><mtd><mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><mi>η</mi><mfrac><msub><mi>g</mi><mi>t</mi></msub><mrow><msqrt><msub><mi>s</mi><mi>t</mi></msub></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>.</mo></mrow></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+Read the denominator as a per-coordinate history meter. A coordinate that has accumulated many large gradients receives a smaller future effective rate; a rarely active coordinate retains a comparatively large one. This is attractive for sparse features, but in long dense pretraining (s_t) only grows, so the effective rates may eventually become too small.
+
+### 4.2 RMSProp: remember recent scale
+
+RMSProp fixes AdaGrad's one-way accumulation by replacing the lifetime sum with an exponentially weighted recent history:
+
+<div class="formula-note" role="img" aria-label="v t equals rho v t minus one plus one minus rho times g t squared; theta update divides by the square root of v t plus epsilon">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.55em">
+      <mtr><mtd><mrow><msub><mi>v</mi><mi>t</mi></msub><mo>=</mo><mi>ρ</mi><msub><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>−</mo><mi>ρ</mi><mo>)</mo><msup><msub><mi>g</mi><mi>t</mi></msub><mn>2</mn></msup><mo>,</mo></mrow></mtd></mtr>
+      <mtr><mtd><mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><mi>η</mi><mfrac><msub><mi>g</mi><mi>t</mi></msub><mrow><msqrt><msub><mi>v</mi><mi>t</mi></msub></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>.</mo></mrow></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+RMSProp was introduced in Geoffrey Hinton's 2012 [Neural Networks for Machine Learning lecture materials](https://www.cs.toronto.edu/~hinton/coursera_lectures.html), rather than a standalone peer-reviewed paper. It can track nonstationary gradient scales because old observations decay.
+
+The vector (v_t) is an EMA of the **uncentered second raw moment**. Calling it “the variance” is only correct when the gradient mean is zero. Dividing by (√v_t) roughly makes a coordinate's update relative to its recent gradient scale; it does not compute an inverse Hessian.
+
+### 4.3 What epsilon really does
+
+Epsilon prevents division by zero, but it also sets the crossover between adaptive and nearly linear behavior. When (√v_t) is much larger than (ε), the denominator is dominated by recent gradient scale. When (√v_t) is much smaller, the update is approximately (g_t/ε). Its placement therefore matters; these are different algorithms:
+
+<div class="formula-note" role="img" aria-label="the square root of v plus epsilon is not equal to the square root of v plus epsilon inside the square root">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow>
+      <mfrac><mi>g</mi><mrow><msqrt><mi>v</mi></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>≠</mo>
+      <mfrac><mi>g</mi><msqrt><mrow><mi>v</mi><mo>+</mo><mi>ε</mi></mrow></msqrt></mfrac><mo>.</mo>
+    </mrow>
+  </math>
+</div>
+
+Adam and current [PyTorch AdamW](https://docs.pytorch.org/docs/main/generated/torch.optim.AdamW.html) place epsilon outside the square root. Algebraic rewrites that absorb bias correction into a scalar step must rescale epsilon consistently or they silently change the early update.
+
+---
+
+## 5. Adam, line by line
+
+[Adam](https://arxiv.org/abs/1412.6980) combines the two ideas just developed: momentum supplies a smoothed direction, while RMSProp-style statistics supply a recent scale for each coordinate. Starting from zero state, it updates:
+
+<div class="formula-note" role="img" aria-label="Adam first moment and second raw moment recurrences">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.55em">
+      <mtr><mtd><mrow><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo><msub><mi>g</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
+      <mtr><mtd><mrow><msub><mi>v</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo>)</mo><msup><msub><mi>g</mi><mi>t</mi></msub><mn>2</mn></msup><mo>.</mo></mrow></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+Because both moving averages start at zero, their early values contain less than a full unit of averaging weight and are biased toward zero. Bias correction divides by the accumulated EMA mass:
+
+<div class="formula-note" role="img" aria-label="m hat t equals m t divided by one minus beta one to the t; v hat t equals v t divided by one minus beta two to the t">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow>
+      <msub><mover accent="true"><mi>m</mi><mo>ˆ</mo></mover><mi>t</mi></msub>
+      <mo>=</mo>
+      <mfrac><msub><mi>m</mi><mi>t</mi></msub><mrow><mn>1</mn><mo>−</mo><msup><msub><mi>β</mi><mn>1</mn></msub><mi>t</mi></msup></mrow></mfrac>
+      <mo>,</mo><mspace width="1em"/>
+      <msub><mover accent="true"><mi>v</mi><mo>ˆ</mo></mover><mi>t</mi></msub>
+      <mo>=</mo>
+      <mfrac><msub><mi>v</mi><mi>t</mi></msub><mrow><mn>1</mn><mo>−</mo><msup><msub><mi>β</mi><mn>2</mn></msub><mi>t</mi></msup></mrow></mfrac>
+      <mo>.</mo>
+    </mrow>
+  </math>
+</div>
+
+The correction follows directly from a geometric series. If the gradient has a stationary mean (μ) and (m_0=0), then the expected first moment is:
+
+<div class="formula-note" role="img" aria-label="expected m t equals one minus beta one to t times mu">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.55em">
+      <mtr><mtd><mrow>
+        <mi mathvariant="double-struck">E</mi><mo>[</mo><msub><mi>m</mi><mi>t</mi></msub><mo>]</mo><mo>=</mo>
+        <mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo>
+        <munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>t</mi></munderover>
+        <msup><msub><mi>β</mi><mn>1</mn></msub><mrow><mi>t</mi><mo>−</mo><mi>k</mi></mrow></msup><mi>μ</mi>
+      </mrow></mtd></mtr>
+      <mtr><mtd><mrow>
+        <mo>=</mo><mo>(</mo><mn>1</mn><mo>−</mo><msup><msub><mi>β</mi><mn>1</mn></msub><mi>t</mi></msup><mo>)</mo><mi>μ</mi><mo>.</mo>
+      </mrow></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+Dividing by (1−β_1^t) restores the missing mass, giving (μ) under this stationary assumption. In a real nonstationary run, bias correction removes the artifact of zero initialization; it cannot make a moving average unbiased for a target whose value is itself changing.
+
+The final update is:
+
+<div class="formula-note" role="img" aria-label="theta t equals theta t minus one minus eta t times m hat t divided by square root v hat t plus epsilon">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow>
+      <msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub>
+      <mfrac>
+        <msub><mover accent="true"><mi>m</mi><mo>ˆ</mo></mover><mi>t</mi></msub>
+        <mrow><msqrt><msub><mover accent="true"><mi>v</mi><mo>ˆ</mo></mover><mi>t</mi></msub></msqrt><mo>+</mo><mi>ε</mi></mrow>
+      </mfrac><mo>.</mo>
+    </mrow>
+  </math>
+</div>
+
+The update is easier to remember by assigning one job to each term:
+
+- (m_t) smooths the direction;
+- (v_t) measures recent coordinate-wise gradient magnitude;
+- bias correction repairs zero initialization, especially during warmup;
+- epsilon sets a numerical and behavioral floor;
+- (η_t) still controls the global distance moved.
+
+Coordinate (i) has the instantaneous scale
+
+<div class="formula-note" role="img" aria-label="alpha t i equals eta t divided by square root v hat t i plus epsilon">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow>
+      <msub><mi>α</mi><mrow><mi>t</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>=</mo>
+      <mfrac><msub><mi>η</mi><mi>t</mi></msub><mrow><msqrt><msub><mover accent="true"><mi>v</mi><mo>ˆ</mo></mover><mrow><mi>t</mi><mo>,</mo><mi>i</mi></mrow></msub></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac>
+      <mo>,</mo><mspace width="1em"/><mi>Δ</mi><msub><mi>θ</mi><mrow><mi>t</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>=</mo><mo>−</mo>
+      <msub><mi>α</mi><mrow><mi>t</mi><mo>,</mo><mi>i</mi></mrow></msub><msub><mover accent="true"><mi>m</mi><mo>ˆ</mo></mover><mrow><mi>t</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>.</mo>
+    </mrow>
+  </math>
+</div>
+
+Thus Adam does not have one effective learning rate: it has a global schedule multiplied by a state-dependent scale for every coordinate. A constant nonzero gradient gives a useful limiting case. After bias correction, (m̂_t=g) and (v̂_t=g²), so the coordinate update is (−η_t g/(|g|+ε)); it approaches a sign step only when (|g|≫ε). Real dynamics differ because gradients change, the two EMAs use different time constants, and clipping and scheduling alter the inputs and global scale.
+
+### 5.1 A compact reference implementation
+
+The core recurrence fits in a few lines. Read the code in the same order as the equations: update the two moments, correct their initialization bias, then divide direction by scale. This teaching function assumes dense tensors and stores state in the parameter dtype; production code needs an explicit state-dtype policy.
+
+```python
+@torch.no_grad()
+def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
+    m, v = state["m"], state["v"]
+    m.mul_(beta1).add_(grad, alpha=1 - beta1)
+    v.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
+
+    m_hat = m / (1 - beta1**step)
+    v_hat = v / (1 - beta2**step)
+    param.addcdiv_(m_hat, v_hat.sqrt().add_(eps), value=-lr)
+```
+
+The complete companion file, [llm_optimizers_from_scratch.py](./llm_optimizers_from_scratch.py), wraps this logic in a `torch.optim.Optimizer`, tests it against PyTorch in float64, and includes a teaching implementation of Muon's Newton–Schulz orthogonalization.
+
+### 5.2 The convergence caveat
+
+[On the Convergence of Adam and Beyond](https://openreview.net/forum?id=ryQu7f-RZ) constructs simple convex sequences on which the original Adam update does not converge to the optimum. AMSGrad responds by preventing the second-moment denominator from decreasing:
+
+<div class="formula-note" role="img" aria-label="v max t equals the coordinate wise maximum of v max t minus one and v t">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msubsup><mi>v</mi><mi>t</mi><mi mathvariant="normal">max</mi></msubsup><mo>=</mo><mi mathvariant="normal">max</mi><mo>(</mo><msubsup><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow><mi mathvariant="normal">max</mi></msubsup><mo>,</mo><msub><mi>v</mi><mi>t</mi></msub><mo>)</mo><mo>.</mo></mrow>
+  </math>
+</div>
+
+The counterexample establishes that Adam's success is not covered by a universal convergence guarantee; it does **not** predict that a normal Transformer run will fail. PyTorch therefore exposes AMSGrad but keeps `amsgrad=False` by default. When an LLM run becomes unstable, first inspect the learning rate, warmup, loss normalization, data, precision, clipping, model normalization, and implementation before blaming this theoretical edge case.
+
+---
+
+## 6. AdamW: weight decay is not L2 regularization under Adam
+
+The AdamW distinction is easiest to see by following where shrinkage enters the computation. If an L2 penalty (λ‖θ‖²/2) is added to the loss, its gradient (λθ) enters Adam's moments and is divided by the adaptive denominator together with the data gradient:
+
+<div class="formula-note" role="img" aria-label="the gradient is replaced by the gradient plus lambda theta before Adam preconditioning">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mi>g</mi><mi>t</mi></msub><mo>←</mo><msub><mi>g</mi><mi>t</mi></msub><mo>+</mo><mi>λ</mi><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>.</mo></mrow>
+  </math>
+</div>
+
+[AdamW](https://iclr.cc/virtual/2019/poster/935) takes a different route: first shrink the parameter directly, then apply the adaptively preconditioned data-gradient update. In one combined expression:
+
+<div class="formula-note" role="img" aria-label="theta t equals one minus eta lambda times theta t minus one minus eta times the Adam direction">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub>
+      <mfrac><msub><mover accent="true"><mi>m</mi><mo>ˆ</mo></mover><mi>t</mi></msub><mrow><msqrt><msub><mover accent="true"><mi>v</mi><mo>ˆ</mo></mover><mi>t</mi></msub></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>.</mo></mrow>
+  </math>
+</div>
+
+For plain SGD, L2 regularization and multiplicative weight decay can be equivalent after matching conventions. Under Adam's diagonal preconditioner they are not: placing (λθ) inside the gradient divides the penalty by a different denominator in every coordinate and also mixes it into the moments. AdamW keeps shrinkage separate from gradient normalization, so (λ) has a clearer parameter-space meaning.
+
+“Decoupled” means separate from the gradient preconditioner, not independent of the learning rate or training duration. To see the remaining coupling, set the loss-gradient update to zero. Repeated AdamW decay gives:
+
+<div class="formula-note" role="img" aria-label="theta T equals theta zero times the product over t of one minus eta t lambda">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mi>θ</mi><mi>T</mi></msub><mo>=</mo><msub><mi>θ</mi><mn>0</mn></msub><munderover><mo>∏</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo><mo>.</mo></mrow>
+  </math>
+</div>
+
+When every (η_tλ) is small, taking logarithms gives:
+
+<div class="formula-note" role="img" aria-label="theta T is approximately exponential of minus lambda times cumulative learning rate times theta zero">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.55em">
+      <mtr><mtd><mrow><mi mathvariant="normal">log</mi><mo>(</mo><mfrac><mrow><mo>‖</mo><msub><mi>θ</mi><mi>T</mi></msub><mo>‖</mo></mrow><mrow><mo>‖</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>‖</mo></mrow></mfrac><mo>)</mo><mo>≈</mo><mo>−</mo><mi>λ</mi><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><msub><mi>η</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
+      <mtr><mtd><mrow><msub><mi>θ</mi><mi>T</mi></msub><mo>≈</mo><mi mathvariant="normal">exp</mi><mo>(</mo><mo>−</mo><mi>λ</mi><msub><mi>A</mi><mi>T</mi></msub><mo>)</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><mspace width="1em"/><msub><mi>A</mi><mi>T</mi></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><msub><mi>η</mi><mi>t</mi></msub><mo>.</mo></mrow></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+The relevant control is therefore (λA_T): weight decay multiplied by the cumulative area under the learning-rate schedule. Two runs with the same nominal (λ) but different schedules or numbers of optimizer steps can apply substantially different total shrinkage.
+
+### 6.1 A pedagogical PyTorch optimizer
+
+```python
+class AdamWFromScratch(torch.optim.Optimizer):
+    def __init__(self, params, lr=1e-3, betas=(0.9, 0.999),
+                 eps=1e-8, weight_decay=0.0):
+        defaults = dict(lr=lr, betas=betas, eps=eps,
+                        weight_decay=weight_decay)
+        super().__init__(params, defaults)
+
+    @torch.no_grad()
+    def step(self, closure=None):
+        loss = closure() if closure is not None else None
+        for group in self.param_groups:
+            beta1, beta2 = group["betas"]
+            for p in group["params"]:
+                if p.grad is None:
+                    continue
+                if p.grad.is_sparse:
+                    raise RuntimeError("dense gradients required")
+
+                state = self.state[p]
+                if not state:
+                    state["step"] = 0
+                    state["m"] = torch.zeros_like(p)
+                    state["v"] = torch.zeros_like(p)
+
+                state["step"] += 1
+                t = state["step"]
+                m, v = state["m"], state["v"]
+                m.mul_(beta1).add_(p.grad, alpha=1 - beta1)
+                v.mul_(beta2).addcmul_(p.grad, p.grad,
+                                      value=1 - beta2)
+
+                m_hat = m / (1 - beta1**t)
+                v_hat = v / (1 - beta2**t)
+                p.mul_(1 - group["lr"] * group["weight_decay"])
+                p.addcdiv_(m_hat, v_hat.sqrt().add_(group["eps"]),
+                           value=-group["lr"])
+        return loss
+```
+
+This implementation is deliberately readable, not production-equivalent. Its purpose is to expose the recurrence and update ordering. It omits foreach and fused kernels, CUDA graph capture, differentiable steps, complex tensors, tensor learning rates, sparse-gradient variants, and an explicit FP32-state policy for low-precision parameters.
+
+### 6.2 `grad is None` is different from a zero gradient
+
+In PyTorch-style semantics, `p.grad is None` means “this parameter did not participate in this update,” so its step counter, moments, parameter value, and weight decay are usually left untouched. An allocated all-zero gradient means “the update was computed and happened to be zero”; state can still advance and decay can still apply. Consequently, `optimizer.zero_grad(set_to_none=True)` changes both memory use and the semantics of unused parameters.
+
+### 6.3 Parameter groups are part of the recipe
+
+Karpathy's [nanoGPT configuration](https://github.com/karpathy/nanoGPT/blob/master/model.py) demonstrates a common convention: decay matrix-like weights while leaving biases and normalization parameters undecayed. Many LLM codebases use a similar split, but the split is neither part of AdamW's definition nor a theorem. Embeddings, output heads, expert weights, norms, and biases may need architecture-specific treatment.
+
+When reproducing a run, serialize and report the actual name-to-group mapping and each group's hyperparameters. “AdamW, learning rate (3×10^{-4}), weight decay 0.1” is incomplete if many parameters use another rate or no decay—and a changed naming rule can silently change the experiment after a refactor.
+
+### 6.4 Verification before speed
+
+A from-scratch implementation should first match a trusted reference in float64, where numerical discrepancies are easier to interpret. Test cases should isolate one semantic choice at a time:
+
+- the first step, where bias correction is largest;
+- several steps with changing gradients;
+- two groups with different learning rates and decay;
+- a zero gradient and `grad=None`;
+- checkpoint save and load;
+- invalid hyperparameters and sparse gradients;
+- CPU and accelerator behavior if both are supported.
+
+Only after step-by-step numerical agreement should you add fusion, sharding, or lower-precision state. Those optimizations combine operations and introduce rounding or communication effects, making a wrong recurrence much harder to localize.
+
+---
+
+## 7. The schedule, clipping, and precision are part of the training algorithm
+
+### 7.1 Warmup
+
+An optimizer begins with empty moments and a model begins with unadapted representations, so the earliest updates are unusually sensitive. Linear warmup limits their size by increasing the rate gradually to (η_{max}):
+
+<div class="formula-note" role="img" aria-label="eta t equals eta max times t divided by T warmup">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mi>η</mi><mi>t</mi></msub><mo>=</mo><msub><mi>η</mi><mi mathvariant="normal">max</mi></msub><mfrac><mi>t</mi><msub><mi>T</mi><mi mathvariant="normal">warmup</mi></msub></mfrac><mo>.</mo></mrow>
+  </math>
+</div>
+
+Warmup gives the moments, activation statistics, and representations time to move away from initialization before the peak rate is used. [On Layer Normalization in the Transformer Architecture](https://www.microsoft.com/en-us/research/publication/on-layer-normalization-in-the-transformer-architecture/) connects warmup sensitivity to Transformer normalization placement in a particular theoretical and experimental setting. Treat warmup as a practical stabilizer—not a universal law, and not a substitute for sound initialization, normalization, or loss scaling.
+
+### 7.2 Inverse square root, cosine, and WSD
+
+The original Transformer used a model-dimension-scaled warmup followed by inverse-square-root decay:
+
+<div class="formula-note" role="img" aria-label="eta t equals d model to the minus one half times the minimum of t to the minus one half and t times T warmup to the minus three halves">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mi>η</mi><mi>t</mi></msub><mo>=</mo><msup><msub><mi>d</mi><mi mathvariant="normal">model</mi></msub><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mi mathvariant="normal">min</mi><mo>(</mo><msup><mi>t</mi><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mo>,</mo><mi>t</mi><msup><msub><mi>T</mi><mi>w</mi></msub><mrow><mo>−</mo><mfrac><mn>3</mn><mn>2</mn></mfrac></mrow></msup><mo>)</mo><mo>.</mo></mrow>
+  </math>
+</div>
+
+Warmup plus cosine decay is common in decoder-only pretraining:
+
+<div class="formula-note" role="img" aria-label="cosine learning rate decay from eta max to eta min after warmup">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mi>η</mi><mi>t</mi></msub><mo>=</mo><msub><mi>η</mi><mi mathvariant="normal">min</mi></msub><mo>+</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>(</mo><msub><mi>η</mi><mi mathvariant="normal">max</mi></msub><mo>−</mo><msub><mi>η</mi><mi mathvariant="normal">min</mi></msub><mo>)</mo><mo>[</mo><mn>1</mn><mo>+</mo><mi mathvariant="normal">cos</mi><mo>(</mo><mi>π</mi><mfrac><mrow><mi>t</mi><mo>−</mo><msub><mi>T</mi><mi>w</mi></msub></mrow><mrow><mi>T</mi><mo>−</mo><msub><mi>T</mi><mi>w</mi></msub></mrow></mfrac><mo>)</mo><mo>]</mo><mo>.</mo></mrow>
+  </math>
+</div>
+
+Cosine decay ties every learning rate to a planned final step. Warmup–Stable–Decay (WSD) instead separates continued training from finalization: hold a stable rate along a long branch, then run a shorter cooldown when a final checkpoint is needed. [Understanding Warmup-Stable-Decay Learning Rates](https://arxiv.org/abs/2410.05192) motivates this flexibility and a “river valley” view of the final loss drop. The 2025 follow-up [Training Dynamics of the Cooldown Stage](https://arxiv.org/abs/2508.01483) reports that cooldown shape and AdamW hyperparameters interact materially.
+
+| Schedule | Strength | Main caveat |
+|---|---|---|
+| Warmup + inverse square root | Simple historical Transformer recipe | Couples rate to a particular scaling convention |
+| Warmup + cosine | Strong mature baseline with a smooth cooldown | Commits to the total step budget in advance |
+| WSD | Continue the stable branch, then decay selected checkpoints | Final quality depends strongly on cooldown length and shape |
+| Schedule-free | Combines optimization and iterate averaging without a prescribed endpoint | Train/eval iterate semantics and tuning still matter |
+
+[The Road Less Scheduled](https://proceedings.neurips.cc/paper_files/paper/2024/hash/136b9a13861308c8948cd308ccd02658-Abstract-Conference.html) won the 2024 AlgoPerf self-tuning track with Schedule-Free AdamW. It is a serious alternative, not proof that warmup, regularization, or learning-rate selection disappear.
+
+### 7.3 Gradient accumulation and the optimizer clock
+
+Gradient accumulation should reproduce the gradient of the intended effective batch. For (K) equally weighted microbatches, divide each loss by (K), backpropagate through all of them, and call `step()` once. If valid-token counts differ, normalize by the total number of valid tokens rather than by the number of microbatches.
+
+This creates two clocks: microsteps consume data and accumulate gradients; optimizer steps change parameters and moments. The scheduler normally advances once per **successful optimizer update**, not per microstep. If mixed-precision overflow skips an update, the optimizer state and scheduler should normally stay on the same clock.
+
+### 7.4 Global-norm clipping
+
+Global clipping rescales all gradients together when their norm exceeds (c):
+
+<div class="formula-note" role="img" aria-label="the clipped gradient equals the gradient times the minimum of one and c divided by the gradient norm">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><mi>g</mi><mo>←</mo><mi>g</mi><mi mathvariant="normal">min</mi><mo>(</mo><mn>1</mn><mo>,</mo><mfrac><mi>c</mi><msub><mrow><mo>‖</mo><mi>g</mi><mo>‖</mo></mrow><mn>2</mn></msub></mfrac><mo>)</mo><mo>.</mo></mrow>
+  </math>
+</div>
+
+Global-norm clipping preserves the gradient's direction because every coordinate receives the same multiplier. This differs from Sophia's coordinate-wise update clipping and from clipping attention logits. Under FP16 loss scaling, unscale before measuring or clipping the norm. If clipping fires almost every step, it may be masking an excessive learning rate or bad data; log the pre-clip norm and the fraction of clipped steps.
+
+### 7.5 Mixed precision ordering
+
+Mixed precision makes operation order part of correctness. A robust training step is:
+
+1. forward under autocast;
+2. compute a correctly normalized loss;
+3. backward through all accumulation microbatches;
+4. unscale gradients if a loss scaler is active;
+5. compute diagnostics and clip the global norm;
+6. skip optimizer and scheduler on a nonfinite overflow;
+7. run the optimizer step;
+8. advance the schedule once;
+9. clear gradients, often with `set_to_none=True`.
+
+BF16 usually has enough exponent range that dynamic loss scaling is unnecessary, but verify this for the framework and workload rather than treating it as a law. Also separate parameter precision, gradient precision, accumulation precision, and state precision: low-precision parameters do not imply that low-precision moments are safe.
+
+---
+
+## 8. Memory-first optimizers: Adafactor, quantized state, Adam-mini, and GaLore
+
+AdamW stores a first and second moment for every parameter. At billions of parameters, those two simple recurrences become a major memory allocation and checkpoint burden. The methods in this section retain some form of adaptivity while answering different compression questions: fewer statistics, fewer bits, fewer distinct rates, or a smaller subspace.
+
+### 8.1 Adafactor
+
+For a matrix gradient (G_t ∈ ℝ^{r×c}), [Adafactor](https://proceedings.mlr.press/v80/shazeer18a.html) approximates a full second-moment matrix using row and column statistics. Let (S_t=G_t⊙G_t). Exponentially averaged row and column sums are:
+
+<div class="formula-note" role="img" aria-label="Adafactor row and column second moment accumulators">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em">
+      <mtr><mtd><msub><mi>S</mi><mi>t</mi></msub><mo>=</mo><msub><mi>G</mi><mi>t</mi></msub><mo>⊙</mo><msub><mi>G</mi><mi>t</mi></msub><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mi>a</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><msub><mi>a</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo>)</mo></mrow><msub><mi>S</mi><mi>t</mi></msub><msub><mn>1</mn><mi>c</mi></msub><mo>∈</mo><msup><mi>ℝ</mi><mi>r</mi></msup><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mi>b</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><msub><mi>b</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo>)</mo></mrow><msubsup><mn>1</mn><mi>r</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>S</mi><mi>t</mi></msub><mo>∈</mo><msup><mi>ℝ</mi><mi>c</mi></msup><mo>.</mo></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+It reconstructs a rank-one nonnegative approximation:
+
+<div class="formula-note" role="img" aria-label="Adafactor approximate second moment is an outer product divided by the row total">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msub><mover accent="true"><mi>V</mi><mo>ˆ</mo></mover><mi>t</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>a</mi><mi>t</mi></msub><msubsup><mi>b</mi><mi>t</mi><mi mathvariant="normal">T</mi></msubsup></mrow><mrow><msubsup><mn>1</mn><mi>r</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>a</mi><mi>t</mi></msub></mrow></mfrac><mo>∈</mo><msup><mi>ℝ</mi><mrow><mi>r</mi><mo>×</mo><mi>c</mi></mrow></msup><mo>.</mo></mrow>
+  </math>
+</div>
+
+The reconstruction matches the stored row and column marginals while reducing second-moment storage from (O(rc)) to (O(r+c)). What is lost is arbitrary within-matrix coordinate structure: a rank-one outer product cannot represent every second-moment pattern. Adafactor is also more than “factorized Adam”; the paper adds update clipping, time-varying second-moment decay, parameter-relative steps, and a memory-minimal mode without first-moment momentum. Its WMT 2014 English–German result belongs to that experimental setting and should not be generalized automatically to every decoder-only LM.
+
+### 8.2 Eight-bit optimizer states
+
+[8-bit Optimizers via Block-wise Quantization](https://openreview.net/forum?id=shpkpVXzo3h) stores Adam statistics in quantized blocks while performing arithmetic in higher precision. Independent block scales limit the influence of outliers; dynamic quantization represents small and large magnitudes more accurately than a single linear scale.
+
+The key distinction is **storage precision versus arithmetic precision**. A fused kernel can load and dequantize state into registers, update it at higher precision, and requantize it without allocating another full tensor. The actual memory is slightly above two bytes per parameter because each block needs scale metadata and small tensors may use higher-precision fallbacks.
+
+Recent 2026 work on low-precision states highlights a subtle failure mode: an EMA update can round back to exactly the stored value repeatedly, creating stale state. Low-bit optimization is therefore about dynamics and error feedback, not only compression ratio.
+
+### 8.3 Adam-mini
+
+[Adam-mini (ICLR 2025)](https://proceedings.iclr.cc/paper_files/paper/2025/file/45ae878717399e6f62d57c65f052cd46-Paper-Conference.pdf) keeps the first moment but assigns one second-moment-derived learning rate to carefully selected parameter blocks instead of one to every coordinate. The authors report roughly half AdamW's optimizer-state memory, comparable results through 13B parameters, and higher throughput in a specific two-A800 7B setup.
+
+The broader idea survives even if a headline number does not transfer: Adam's second moment encodes the assumption that every coordinate deserves its own adaptive scale. Block methods test a cheaper hypothesis—many coordinates may be well served by one shared scale if the partition reflects model structure.
+
+### 8.4 GaLore is a strategy around an optimizer
+
+[GaLore (ICML 2024)](https://proceedings.mlr.press/v235/zhao24s.html) projects matrix gradients into a periodically refreshed low-rank subspace, runs an optimizer in that smaller space, and maps the update back. It preserves full-parameter learning while reducing optimizer-state dimension.
+
+The authors report up to 65.5% optimizer-state savings, or 82.5% with 8-bit GaLore, and demonstrate 7B pretraining on a 24 GB consumer GPU. This establishes memory feasibility. It does not imply that the resulting run is the fastest way to pretrain 7B: subspace refresh, layer-wise updates, and host/device movement can add cost.
+
+### 8.5 These methods solve different bottlenecks
+
+| Method | What is compressed? | Persistent state idea | Main tradeoff |
+|---|---|---|---|
+| Adafactor | second moments of matrices | row + column factors | approximation and extra recipe choices |
+| 8-bit AdamW | numerical representation | quantized blockwise moments | quantization dynamics and fallbacks |
+| Adam-mini | number of adaptive rates | one rate per chosen block | partition quality and generality |
+| GaLore | gradient/optimizer subspace | low-rank projected state | projection refresh and scheduling |
+| ZeRO/FSDP | placement, not mathematics | shard replicated state | communication and orchestration |
+
+---
+
+## 9. The memory ledger and distributed state
+
+A memory claim is incomplete until it names the dtype, replication, and sharding of every tensor. One common **unsharded** mixed-precision ledger is:
+
+| Component | Illustrative dtype | Bytes per parameter |
+|---|---:|---:|
+| model parameter | BF16 | 2 |
+| gradient | BF16 | 2 |
+| optional master parameter | FP32 | 4 |
+| Adam first moment | FP32 | 4 |
+| Adam second raw moment | FP32 | 4 |
+
+This example totals **12 bytes per parameter without** an FP32 master copy and **16 bytes per parameter with one**. These are persistent training-state estimates, not peak-memory estimates: activations, temporary buffers, allocator fragmentation, communication buckets, and checkpoint staging are still missing. Some systems update BF16 parameters directly; others keep an FP32 master, and gradients may be BF16 or FP32. Inspect the actual framework configuration rather than applying one ledger universally.
+
+### 9.1 ZeRO and FSDP change placement, not the recurrence
+
+[ZeRO](https://doi.org/10.1109/sc41405.2020.00024) progressively shards data-parallel state:
+
+- **stage 1:** optimizer state;
+- **stage 2:** optimizer state and gradients;
+- **stage 3:** optimizer state, gradients, and parameters.
+
+Fully Sharded Data Parallel implements related ideas in PyTorch. Dividing shardable state by the data-parallel world size gives a useful lower-bound estimate for per-device persistence, not a peak guarantee. Real systems also need all-gathers, reduce-scatters, prefetch buffers, metadata, and sometimes temporary full parameters; checkpoint conversion can create an additional transient peak.
+
+### 9.2 Optimizer state becomes communication
+
+At scale, an optimizer's shape determines collective communication. AdamW's elementwise moments shard naturally. Shampoo must distribute preconditioner blocks or search directions. Muon may orthogonalize matrices on selected ranks and then gather or reduce results. Adam-mini reduces both memory and the state that a sharded optimizer must communicate.
+
+This is why the symbolic update and distributed implementation form one algorithm in practice. A mathematically richer direction can reduce total time if its token savings exceed its per-step overhead. Conversely, a lean recurrence can lose if it creates many small kernels, awkward collectives, or expensive state movement.
+
+Use the calculator below as a persistent-state estimate, then leave headroom for runtime peaks.
+
+---
+
+## 10. Beyond diagonal Adam: Lion, LAMB, Sophia, and Shampoo
+
+### 10.1 Lion: one state and a sign update
+
+[Lion](https://arxiv.org/abs/2302.06675) was found by symbolic program search. It removes Adam's second-moment tensor and turns a momentum–gradient interpolation into a coordinate-wise sign direction. In one common presentation:
+
+<div class="formula-note" role="img" aria-label="Lion updates parameters with the sign of an interpolation between momentum and gradient, then updates the stored momentum with beta two">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em">
+      <mtr><mtd><msub><mi>u</mi><mi>t</mi></msub><mo>=</mo><mi mathvariant="normal">sign</mi><mo>(</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo></mrow><msub><mi>g</mi><mi>t</mi></msub><mo>)</mo><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>u</mi><mi>t</mi></msub><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo>)</mo></mrow><msub><mi>g</mi><mi>t</mi></msub><mo>.</mo></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+Lion stores one momentum tensor rather than Adam's two moments. Before weight decay, every nonzero coordinate update has magnitude (η_t), regardless of the raw gradient magnitude. This changes the meaning of the learning rate, so Lion usually needs a substantially smaller value than AdamW. The original paper reports similar or better results for several language tasks and larger benefits at large batch size; controlled LLM studies find a more conditional advantage.
+
+### 10.2 LAMB: match update norm to parameter norm
+
+[LAMB](https://openreview.net/forum?id=Syx4wnEtvH) starts with an Adam-like direction, then asks a block-level question: how large is the proposed update relative to the parameter itself? It rescales each layer or parameter block by a trust ratio:
+
+<div class="formula-note" role="img" aria-label="the LAMB block update is scaled by the norm of the parameter divided by the norm of the Adam-like direction">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em">
+      <mtr><mtd><msubsup><mi>r</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>=</mo><mfrac><msubsup><mover accent="true"><mi>m</mi><mo>ˆ</mo></mover><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mrow><msqrt><msubsup><mover accent="true"><mi>v</mi><mo>ˆ</mo></mover><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>+</mo><mi>λ</mi><msubsup><mi>θ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msubsup><mi>τ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>=</mo><mfrac><mrow><mi>φ</mi><mo>(</mo><msub><mrow><mo>‖</mo><msubsup><mi>θ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>‖</mo></mrow><mn>2</mn></msub><mo>)</mo></mrow><msub><mrow><mo>‖</mo><msubsup><mi>r</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>‖</mo></mrow><mn>2</mn></msub></mfrac><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msubsup><mi>θ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>=</mo><msubsup><mi>θ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msubsup><mi>τ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><msubsup><mi>r</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>.</mo></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+Ignoring edge-case guards and clipping, the trust ratio makes the block update norm track a function of the parameter norm. This was designed to keep relative step sizes sensible in very large-batch training. The paper's “BERT in 76 minutes” result belongs to its TPU Pod, batch size, and full recipe; it does not imply that LAMB is universally faster than AdamW.
+
+### 10.3 Sophia: diagonal curvature with clipping
+
+[Sophia (ICLR 2024)](https://proceedings.iclr.cc/paper_files/paper/2024/hash/06960915ba8674c7a898ec0b472b80ff-Abstract-Conference.html) replaces Adam's gradient-scale denominator with a more direct diagonal curvature estimate. It periodically estimates a Hessian or Gauss–Newton diagonal, divides momentum by that estimate with a floor, and clips each coordinate's update. Refreshing curvature only every several steps controls overhead but makes the estimate stale between refreshes.
+
+The authors report roughly 2× fewer steps, compute, and wall time than Adam on GPT models from 125M to 1.5B. Later equal-tuning comparisons do not find a universal 2× gain. Sophia remains conceptually important: it demonstrates that lightweight curvature information plus aggressive clipping can be practical for language-model pretraining.
+
+### 10.4 Shampoo: use the tensor's own axes
+
+For a matrix gradient (G_t ∈ ℝ^{m×n}), original [Shampoo](https://proceedings.mlr.press/v80/gupta18a.html) accumulates left and right statistics:
+
+<div class="formula-note" role="img" aria-label="L t accumulates G G transpose, R t accumulates G transpose G, and Shampoo preconditions G with inverse fourth roots">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em">
+      <mtr><mtd><msub><mi>L</mi><mi>t</mi></msub><mo>=</mo><mi>ε</mi><mi>I</mi><mo>+</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>≤</mo><mi>t</mi></mrow></munder><msub><mi>G</mi><mi>s</mi></msub><msubsup><mi>G</mi><mi>s</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mi>R</mi><mi>t</mi></msub><mo>=</mo><mi>ε</mi><mi>I</mi><mo>+</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>≤</mo><mi>t</mi></mrow></munder><msubsup><mi>G</mi><mi>s</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>G</mi><mi>s</mi></msub><mo>,</mo></mtd></mtr>
+      <mtr><mtd><mi>Δ</mi><msub><mi>W</mi><mi>t</mi></msub><mo>∝</mo><msup><msub><mi>L</mi><mi>t</mi></msub><mrow><mo>−</mo><mfrac><mn>1</mn><mn>4</mn></mfrac></mrow></msup><msub><mi>G</mi><mi>t</mi></msub><msup><msub><mi>R</mi><mi>t</mi></msub><mrow><mo>−</mo><mfrac><mn>1</mn><mn>4</mn></mfrac></mrow></msup><mo>.</mo></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+The two statistics summarize different interactions: (L_t) couples rows, while (R_t) couples columns. Shampoo therefore captures structure that a diagonal scale cannot, while storing (O(m²+n²)) matrix state instead of an impossible (O(m²n²)) full preconditioner over all entries. Practical implementations block large tensors, refresh inverse roots less often, graft the update magnitude to a familiar first-order method, and distribute the preconditioner work.
+
+The benefit is richer geometry; the price is matrix state and matrix algebra. Inverse roots can require high precision, infrequent refreshes make preconditioners stale, and block layouts must map efficiently to accelerators and collectives. [Practical Scalable Shampoo](https://arxiv.org/abs/2002.09018) and [Distributed Shampoo](https://arxiv.org/abs/2309.06497) are therefore as important operationally as the original equation.
+
+---
+
+## 11. SOAP and Muon: two matrix-aware paths
+
+### 11.1 SOAP: Adam in Shampoo's eigenbasis
+
+SOAP is easiest to understand as a two-stage procedure: use Shampoo-style statistics to discover a coordinate system, then run Adam inside that rotated system. For a matrix parameter (W_t∈ℝ^{m×n}) with gradient (G_t), [SOAP (ICLR 2025)](https://proceedings.iclr.cc/paper_files/paper/2025/hash/e988664070e9591f93fdcf605f7dc623-Abstract-Conference.html) first maintains row and column statistics:
+
+<div class="formula-note" role="img" aria-label="SOAP left and right preconditioner recurrences">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em">
+      <mtr><mtd><msub><mi>L</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mi>s</mi></msub><msub><mi>L</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mi>s</mi></msub><mo>)</mo></mrow><msub><mi>G</mi><mi>t</mi></msub><msubsup><mi>G</mi><mi>t</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mi>R</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mi>s</mi></msub><msub><mi>R</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mi>s</mi></msub><mo>)</mo></mrow><msubsup><mi>G</mi><mi>t</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>G</mi><mi>t</mi></msub><mo>.</mo></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+Every (f) steps it refreshes approximate eigenbases (Q_L,Q_R). The columns of (Q_L) define directions among rows, and the columns of (Q_R) define directions among columns. Between refreshes, SOAP rotates the gradient into this basis and stores its first moment there:
+
+<div class="formula-note" role="img" aria-label="SOAP rotates the gradient and stores its first moment in the active eigenbasis, transporting that moment exactly when the basis changes">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em">
+      <mtr><mtd><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><msubsup><mi>Q</mi><mi>L</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>G</mi><mi>t</mi></msub><msub><mi>Q</mi><mi>R</mi></msub><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo></mrow><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mtext>new</mtext></msub><mo>=</mo><msubsup><mi>Q</mi><mrow><mi>L</mi><mo>,</mo><mtext>new</mtext></mrow><mi mathvariant="normal">T</mi></msubsup><msub><mi>Q</mi><mrow><mi>L</mi><mo>,</mo><mtext>old</mtext></mrow></msub><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mtext>old</mtext></msub><msubsup><mi>Q</mi><mrow><mi>R</mi><mo>,</mo><mtext>old</mtext></mrow><mi mathvariant="normal">T</mi></msubsup><msub><mi>Q</mi><mrow><mi>R</mi><mo>,</mo><mtext>new</mtext></mrow></msub><mo>.</mo></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+When the basis changes, the stored first moment must change coordinates even though the underlying matrix-valued moment has not changed. Because this transformation is linear, SOAP can map the first moment back through the original coordinates and into the new basis exactly. The elementwise second raw moment is harder: rotating and then squaring is not the same as squaring and then rotating. SOAP therefore continues to estimate it in the active basis:
+
+<div class="formula-note" role="img" aria-label="SOAP second moment and update in the rotated basis">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em">
+      <mtr><mtd><msub><mover accent="true"><mi>V</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mover accent="true"><mi>V</mi><mo>¯</mo></mover><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo>)</mo></mrow><mrow><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>⊙</mo><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub></mrow><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mover accent="true"><mi>D</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><mfrac><msub><mover accent="true"><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mo>ˆ</mo></mover><mi>t</mi></msub><mrow><msqrt><msub><mover accent="true"><mover accent="true"><mi>V</mi><mo>¯</mo></mover><mo>ˆ</mo></mover><mi>t</mi></msub></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mi>D</mi><mi>t</mi></msub><mo>=</mo><msub><mi>Q</mi><mi>L</mi></msub><msub><mover accent="true"><mi>D</mi><mo>¯</mo></mover><mi>t</mi></msub><msubsup><mi>Q</mi><mi>R</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr>
+      <mtr><mtd><msub><mi>W</mi><mi>t</mi></msub><mo>=</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow><msub><mi>W</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>D</mi><mi>t</mi></msub><mo>.</mo></mtd></mtr>
+    </mtable>
+  </math>
+</div>
+
+This is the precise meaning of **Adam in Shampoo's eigenbasis**. The row and column statistics choose the axes; Adam's moments choose the direction and scale along each pair of rotated axes; the result is rotated back to parameter space. SOAP uses more structure than diagonal Adam but still does not form or invert a full Hessian.
+
+### 11.2 What the Shampoo connection does—and does not—say
+
+Original matrix Shampoo applies the inverse-fourth-root direction:
+
+<div class="formula-note" role="img" aria-label="original Shampoo update uses inverse fourth roots on both sides of the gradient">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msubsup><mi>D</mi><mi>t</mi><mtext>Shampoo</mtext></msubsup><mo>=</mo><msup><msub><mi>L</mi><mi>t</mi></msub><mrow><mo>−</mo><mfrac><mn>1</mn><mn>4</mn></mfrac></mrow></msup><msub><mi>G</mi><mi>t</mi></msub><msup><msub><mi>R</mi><mi>t</mi></msub><mrow><mo>−</mo><mfrac><mn>1</mn><mn>4</mn></mfrac></mrow></msup><mo>.</mo></mrow></math>
+</div>
+
+SOAP's formal connection is narrower than the slogan “SOAP equals Shampoo.” The paper analyzes an idealized Shampoo variant with inverse-half powers, a layerwise scalar correction, dataset-average statistics, and fresh eigenvectors. Under those assumptions, the direction can be written in the shared eigenbasis as:
+
+<div class="formula-note" role="img" aria-label="idealized inverse half power Shampoo written in its eigenbasis">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><mi>L</mi><mo>=</mo><msub><mi>Q</mi><mi>L</mi></msub><msub><mi>Λ</mi><mi>L</mi></msub><msubsup><mi>Q</mi><mi>L</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo><mspace width="1em"/><mi>R</mi><mo>=</mo><msub><mi>Q</mi><mi>R</mi></msub><msub><mi>Λ</mi><mi>R</mi></msub><msubsup><mi>Q</mi><mi>R</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr><mtr><mtd><msup><mi>L</mi><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mi>G</mi><msup><mi>R</mi><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mo>=</mo><msub><mi>Q</mi><mi>L</mi></msub><mo>[</mo><msup><msub><mi>Λ</mi><mi>L</mi></msub><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mover accent="true"><mi>G</mi><mo>¯</mo></mover><msup><msub><mi>Λ</mi><mi>R</mi></msub><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mo>]</mo><msubsup><mi>Q</mi><mi>R</mi><mi mathvariant="normal">T</mi></msubsup><mo>.</mo></mtd></mtr></mtable>
+  </math>
+</div>
+
+Under those assumptions, factorized Adafactor in the rotated space recovers the same scaling up to a layerwise scalar. This result explains the design; it is not an identity between production implementations. EMA statistics, damping, stale bases, grafting, and finite refresh frequency all break exact equivalence.
+
+The refresh exposes the key approximation. A first moment transforms linearly between old and new bases, but an elementwise second moment does not: in general, (Q^T(M⊙M)Q)≠(Q^TMQ)⊙(Q^TMQ). SOAP relies on the bases changing slowly while (V̄_t) is updated every step in the current basis. The paper's implementation refreshes eigenvectors with power iteration plus QR, routes one-dimensional tensors to AdamW, and may use an identity basis on very large axes. If both bases are identity, that layer reduces to AdamW.
+
+Full two-sided SOAP is state-heavy. Besides Adam-shaped (M,V̄), it stores (L,R) and their bases: roughly (2mn+2m²+2n²) state values before blocking or one-sided variants. The refresh interval (f) trades fresh geometry for eigensolver cost, so state layout and refresh frequency are central systems hyperparameters. In the paper's 360M/660M large-batch experiments, SOAP reports over 40% fewer iterations and over 35% lower wall-clock time than AdamW; those figures remain specific to that setup.
+
+### 11.3 Muon: the polar factor as a steepest-descent direction
+
+Muon—**MomentUm Orthogonalized by Newton–Schulz**—takes a different matrix-aware path: it does not accumulate row and column preconditioners. Instead, it forms a momentum matrix and normalizes its singular directions at every update. Keller Jordan's [write-up and reference implementation](https://kellerjordan.github.io/posts/muon/) introduced the method. For a two-dimensional hidden weight, form momentum (B_t) and, commonly, a Nesterov-like matrix (N_t):
+
+<div class="formula-note" role="img" aria-label="Muon momentum and Nesterov recurrences">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>B</mi><mi>t</mi></msub><mo>=</mo><mi>μ</mi><msub><mi>B</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>G</mi><mi>t</mi></msub><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>N</mi><mi>t</mi></msub><mo>=</mo><msub><mi>G</mi><mi>t</mi></msub><mo>+</mo><mi>μ</mi><msub><mi>B</mi><mi>t</mi></msub><mspace width="0.8em"/><mtext>(Nesterov).</mtext></mtd></mtr></mtable>
+  </math>
+</div>
+
+If the compact SVD is (N_t=UΣV^T), Muon's exact target is the polar factor (UV^T): keep the left and right singular directions while replacing every nonzero singular value by one. The object being processed is the **momentum update**, not the weight matrix; Muon does not force the learned weights themselves to be orthogonal.
+
+Why is (UV^T) a sensible direction? Linearize the loss and ask for the step that decreases it most while constraining the step's spectral norm:
+
+<div class="formula-note" role="img" aria-label="the polar factor solves steepest descent under a spectral norm constraint">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>N</mi><mi>t</mi></msub><mo>=</mo><mi>U</mi><mi>Σ</mi><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>,</mo></mtd></mtr><mtr><mtd><msup><mi>Δ</mi><mo>*</mo></msup><mo>=</mo><munder><mrow><mi mathvariant="normal">arg</mi><mspace width="0.35em"/><mi mathvariant="normal">min</mi></mrow><mrow><msub><mrow><mo>‖</mo><mi>Δ</mi><mo>‖</mo></mrow><mn>2</mn></msub><mo>≤</mo><mi>η</mi></mrow></munder><msub><mrow><mo>⟨</mo><msub><mi>N</mi><mi>t</mi></msub><mo>,</mo><mi>Δ</mi><mo>⟩</mo></mrow><mi>F</mi></msub><mo>=</mo><mo>−</mo><mi>η</mi><mi>U</mi><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>,</mo></mtd></mtr><mtr><mtd><mi mathvariant="normal">min</mi><mo>=</mo><mo>−</mo><mi>η</mi><msub><mrow><mo>‖</mo><msub><mi>N</mi><mi>t</mi></msub><mo>‖</mo></mrow><mo>*</mo></msub><mo>.</mo></mtd></mtr></mtable>
+  </math>
+</div>
+
+Spectral–nuclear norm duality gives the solution above. Intuitively, the polar direction uses the full allowed spectral magnitude along every nonzero singular direction instead of letting the largest singular value dominate. Jeremy Bernstein's [Deriving Muon](https://jeremybernste.in/writing/deriving-muon) refines the layerwise view with an RMS-to-RMS operator norm, which supplies a fan-in/fan-out scale. This is a matrix analogue of normalizing a vector before steepest descent; it does **not** say that the loss is locally isotropic or that all singular directions contain equally reliable signal.
+
+There is also a clean instantaneous-Shampoo identity. On the nonzero singular subspace:
+
+<div class="formula-note" role="img" aria-label="instantaneous Shampoo inverse fourth root direction equals the polar factor">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mrow><msup><mrow><mo>[</mo><msup><mrow><mi>N</mi><msup><mi>N</mi><mi mathvariant="normal">T</mi></msup></mrow><mo>†</mo></msup><mo>]</mo></mrow><mfrac><mn>1</mn><mn>4</mn></mfrac></msup><mi>N</mi><msup><mrow><mo>[</mo><msup><mrow><msup><mi>N</mi><mi mathvariant="normal">T</mi></msup><mi>N</mi></mrow><mo>†</mo></msup><mo>]</mo></mrow><mfrac><mn>1</mn><mn>4</mn></mfrac></msup><mo>=</mo><mi>U</mi><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>.</mo></mrow>
+  </math>
+</div>
+
+This identity offers a useful bridge: Muon resembles an accumulation-free Shampoo direction applied to the current momentum matrix. It is not equivalent to practical Shampoo, which accumulates statistics over time and may use blocking, damping, grafting, and infrequent inverse-root refreshes.
+
+### 11.4 Newton–Schulz: SVD behavior without an SVD
+
+An exact SVD for every eligible matrix at every step would be expensive. Newton–Schulz replaces that decomposition with matrix multiplications, which accelerators handle well. Muon transposes tall matrices so the smaller Gram matrix is formed, normalizes the input, and runs about five quintic iterations in BF16:
+
+<div class="formula-note" role="img" aria-label="Muon Newton Schulz quintic matrix iteration">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>X</mi><mn>0</mn></msub><mo>=</mo><mfrac><msub><mover accent="true"><mi>N</mi><mo>˜</mo></mover><mi>t</mi></msub><mrow><msub><mrow><mo>‖</mo><msub><mover accent="true"><mi>N</mi><mo>˜</mo></mover><mi>t</mi></msub><mo>‖</mo></mrow><mi>F</mi></msub><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>A</mi><mi>k</mi></msub><mo>=</mo><msub><mi>X</mi><mi>k</mi></msub><msubsup><mi>X</mi><mi>k</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>X</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mi>a</mi><msub><mi>X</mi><mi>k</mi></msub><mo>+</mo><mrow><mo>(</mo><mi>b</mi><msub><mi>A</mi><mi>k</mi></msub><mo>+</mo><mi>c</mi><msubsup><mi>A</mi><mi>k</mi><mn>2</mn></msubsup><mo>)</mo></mrow><msub><mi>X</mi><mi>k</mi></msub><mo>,</mo></mtd></mtr><mtr><mtd><mrow><mo>(</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo>,</mo><mi>c</mi><mo>)</mo></mrow><mo>=</mo><mrow><mo>(</mo><mn>3.4445</mn><mo>,</mo><mo>−</mo><mn>4.7750</mn><mo>,</mo><mn>2.0315</mn><mo>)</mo></mrow><mo>.</mo></mtd></mtr></mtable>
+  </math>
+</div>
+
+Because the iteration is a polynomial in (X_kX_k^T) multiplied by (X_k), it preserves the singular vectors. If (X_k=UΣ_kV^T), only the singular values change:
+
+<div class="formula-note" role="img" aria-label="Newton Schulz maps each singular value through a quintic polynomial">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><mi>φ</mi><mo>⁡</mo><mo>(</mo><mi>σ</mi><mo>)</mo><mo>=</mo><mi>a</mi><mi>σ</mi><mo>+</mo><mi>b</mi><msup><mi>σ</mi><mn>3</mn></msup><mo>+</mo><mi>c</mi><msup><mi>σ</mi><mn>5</mn></msup><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>X</mi><mi>K</mi></msub><mo>=</mo><mi>U</mi><msup><mi>φ</mi><mrow><mo>∘</mo><mi>K</mi></mrow></msup><mo>⁡</mo><mo>(</mo><msub><mi>Σ</mi><mn>0</mn></msub><mo>)</mo><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>.</mo></mtd></mtr></mtable>
+  </math>
+</div>
+
+The tuned coefficients move a broad range of singular values toward one quickly, trading exact convergence for a small, fixed number of matrix multiplications. After five steps, the result is typically (UΣ′V^T), not exactly (UV^T). “Orthogonalized” should therefore be read as an **approximate polar direction**, not a guarantee that the output is exactly semi-orthogonal.
+
+```python
+@torch.no_grad()
+def approximate_polar(x, steps=5, eps=1e-7):
+    a, b, c = 3.4445, -4.7750, 2.0315
+    tall = x.shape[-2] > x.shape[-1]
+    x = x.mT if tall else x
+    x = x.to(torch.bfloat16)
+    x = x / (x.norm() + eps)
+
+    for _ in range(steps):
+        gram = x @ x.mT
+        x = a * x + (b * gram + c * (gram @ gram)) @ x
+
+    return x.mT if tall else x
+```
+
+### 11.5 Shape scaling and routing are part of Muon
+
+For an exact polar factor (O=UV^T) of rank (r), (‖O‖_F²=r). Its entrywise RMS is therefore:
+
+<div class="formula-note" role="img" aria-label="polar update RMS equals square root rank over matrix size and one over square root maximum dimension at full rank">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><mi>O</mi><mo>=</mo><mi>U</mi><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>,</mo><mspace width="0.8em"/><msubsup><mrow><mo>‖</mo><mi>O</mi><mo>‖</mo></mrow><mi>F</mi><mn>2</mn></msubsup><mo>=</mo><mi>r</mi><mo>,</mo></mtd></mtr><mtr><mtd><mi mathvariant="normal">RMS</mi><mo>⁡</mo><mo>(</mo><mi>O</mi><mo>)</mo><mo>=</mo><msqrt><mfrac><mi>r</mi><mrow><mi>m</mi><mi>n</mi></mrow></mfrac></msqrt><mo>=</mo><mfrac><mn>1</mn><msqrt><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo></mrow></msqrt></mfrac><mspace width="0.8em"/><mtext>when </mtext><mi>r</mi><mo>=</mo><mi mathvariant="normal">min</mi><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo><mo>.</mo></mtd></mtr></mtable>
+  </math>
+</div>
+
+The formula shows why shape scaling is necessary: without it, the entrywise RMS of a full-rank polar update shrinks as the larger matrix dimension grows. [Muon is Scalable for LLM Training](https://arxiv.org/abs/2502.16982) proposes multiplying by (0.2√max(m,n)), giving the matrix update an RMS near 0.2 and making the global learning-rate scale more comparable to AdamW:
+
+<div class="formula-note" role="img" aria-label="Moonlight Muon update with shape aware RMS scaling and weight decay">
+  <math class="formula-math" xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+    <mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>s</mi><mtext>original</mtext></msub><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo><mo>=</mo><msqrt><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo><mo>(</mo><mn>1</mn><mo>,</mo><mfrac><mi>m</mi><mi>n</mi></mfrac><mo>)</mo></mrow></msqrt><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>s</mi><mtext>match</mtext></msub><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo><mo>=</mo><mn>0.2</mn><msqrt><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo></mrow></msqrt><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>W</mi><mi>t</mi></msub><mo>=</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow><msub><mi>W</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>s</mi><mtext>match</mtext></msub><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo><mover accent="true"><mi mathvariant="normal">Polar</mi><mo>˜</mo></mover><mo>⁡</mo><mo>(</mo><msub><mi>N</mi><mi>t</mi></msub><mo>)</mo><mo>.</mo></mtd></mtr></mtable>
+  </math>
+</div>
+
+Keller Jordan's original dimension factor and the newer “match AdamW RMS” factor assign different numerical meanings to the same learning rate. Current [PyTorch Muon](https://docs.pytorch.org/docs/stable/generated/torch.optim.Muon.html) exposes `original`, `match_rms_adamw`, and `spectral_unclamped` conventions. Naming only “Muon” is therefore insufficient; every experiment log must include the scaling convention.
+
+Muon is intended for hidden weight matrices, not for every tensor that happens to have two dimensions. The original recipe routes embeddings and the final LM head—along with biases, normalization gains, and scalars—to AdamW. A production router must also handle tied embedding/head weights, fused QKV tensors, experts, stacked parameters, and tensor-parallel shards. The rule `p.ndim == 2` is useful in teaching code but insufficient as a production policy.
+
+### 11.6 Scale, distribution, and stability
+
+<span class="evidence-tier evidence-tier--emerging">strong emerging evidence</span>
+
+The Moonlight report adds decoupled weight decay and shape-aware scaling. Its fitted compute-optimal experiments report needing about 52% of AdamW's training FLOPs to reach comparable loss, and it trains a 16B-total/3B-active MoE model on 5.7T tokens. In those experiments, five Newton–Schulz steps were more useful than ten: a more accurate polar approximation did not improve training enough to repay its extra matrix multiplications.
+
+Distribution can change the mathematical update, not merely its speed. Orthogonalizing tensor-parallel or data-parallel shards separately is generally different from orthogonalizing the full matrix. Moonlight gathers the matrix needed for Newton–Schulz, computes a full direction, retains local slices, and communicates updated parameters. Because the overall recipe still uses AdamW for routed tensors, “one momentum tensor” describes eligible Muon matrices—not the complete optimizer-state budget.
+
+[SOAP, Muon, and Beyond](https://arxiv.org/abs/2607.20548), an NVIDIA preprint released on July 13, 2026, adds a distinct large-scale data point. The authors compare AdamW, Muon, and SOAP on an 8B dense model and MoE models up to 72B total parameters using 1T- and 3T-token training subsets. They report that Muon and SOAP outperform AdamW in the tested regimes and remain stable at global batches up to 100M tokens, where AdamW quality degrades. Their layer-wise distributed implementation preserves full matrix operations and is released through [Emerging-Optimizers](https://github.com/NVIDIA-NeMo/Emerging-Optimizers). These are substantial paper-reported results, but the extreme-batch regime, model recipes, and NVIDIA software stack still limit how broadly the ranking can be generalized.
+
+[Kimi K2](https://arxiv.org/abs/2507.20534) demonstrates feasibility at enormous scale: a 1T-total/32B-active MoE trained on 15.5T tokens. Its MuonClip variant monitors attention logits and applies QK-specific clipping to address instability. This does not isolate Muon as the cause of K2's capabilities or establish a universal 2× law. It shows that matrix optimization, normalization, clipping, routing, and architecture become one coupled training design at scale.
+
+---
+
+## 12. What the current evidence actually says
+
+Optimizer comparisons are unusually sensitive to tuning budget, schedule, model scale, data regime, hardware, and the checkpoint chosen for evaluation. A strong abstract may be accurate for its experiment and still fail to transfer. The following three tiers separate an operational default from promising replicated directions and paper-specific frontier claims.
+
+### 12.1 Practice
+
+<span class="evidence-tier evidence-tier--practice">practice</span>
+
+- AdamW is a well-supported baseline for Transformer pretraining.
+- Warmup plus a controlled decay remains a strong recipe.
+- ZeRO/FSDP state sharding is standard systems engineering.
+- Eight-bit optimizer state is mature enough for many memory-constrained workloads.
+- Gradient clipping, loss reduction, and parameter grouping must be logged as part of the configuration.
+
+### 12.2 Strong emerging evidence
+
+<span class="evidence-tier evidence-tier--emerging">strong emerging evidence</span>
+
+- Matrix-aware updates can improve token efficiency over diagonal AdamW in some regimes.
+- SOAP and Muon are credible challengers, not merely toy optimizers.
+- Muon-style training has reached trillion-parameter MoE scale.
+- The best method can depend on model size and the data-to-model training ratio.
+- Optimizer state and communication can be reduced without abandoning full-parameter learning.
+
+### 12.3 Paper-reported frontier
+
+<span class="evidence-tier evidence-tier--frontier">paper-reported frontier</span>
+
+Exact 1.4–2× claims, hybrid methods such as COSMOS, state-allocation schemes such as APOLLO, and new 2026 Muon variants remain conditional on their experimental regimes. Use these results to choose experiments and priors—not as constants to insert into a training budget without local validation.
+
+### 12.4 The ICLR 2026 reality check
+
+[Fantastic Pretraining Optimizers and Where to Find Them](https://openreview.net/forum?id=2J51qUZ0iG) compares ten optimizers across 0.1B–1.2B models and data budgets from 1–8× Chinchilla-optimal tokens. Its main lesson is methodological: optimizer rank is a function of scale, tuning, schedule phase, and data ratio. Concretely:
+
+1. Every optimizer needs a fair hyperparameter budget; transferring AdamW settings can make a good method look bad.
+2. Rankings can flip during learning-rate decay, so intermediate checkpoints are not a reliable final comparison.
+3. Matrix-preconditioned methods such as Muon and SOAP are usually among the fastest.
+4. The advantage over well-tuned AdamW shrinks with model scale—from about 1.4× at 0.1B to about 1.1× at 1.2B in the reported study.
+5. The preferred optimizer can change with data-to-model ratio: Muon can lead nearer compute-optimal training, while SOAP/Kron-style methods can become stronger in more heavily overtrained regimes.
+
+The result is encouraging because matrix geometry remains competitive after controlled tuning, and sobering because the advantage narrows as the baseline and model become stronger. The correct conclusion is conditional—matrix-aware methods deserve serious tests at the target scale—not a universal replacement rule.
+
+| Method | Primary evidence | Authors report | What remains uncertain |
+|---|---|---|---|
+| Lion | NeurIPS 2023 | one-state memory and competitive results across several tasks | universal LM advantage after equal tuning |
+| Sophia | ICLR 2024 | about 2× efficiency on 125M–1.5B GPT experiments | transfer across architectures, schedules, and stronger baselines |
+| SOAP | ICLR 2025 | >35% wall-time reduction on 360M/660M large-batch LMs | overhead and gains at multi-billion scale |
+| Muon | 2024 write-up; 2025 technical report | strong nanoGPT results; roughly 2× compute efficiency in Moonlight experiments | exact causal gain at frontier scale and across data regimes |
+| NVIDIA emerging optimizers | July 2026 preprint | Muon and SOAP beat AdamW in tested 8B dense and up-to-72B MoE regimes; stability at batches up to 100M tokens | independent reproduction, ordinary-batch gains, and transfer beyond the reported stack |
+| MuonClip | Kimi K2 report | stable 15.5T-token training of a 1T-total MoE | controlled optimizer-only attribution |
+| Adam-mini | ICLR 2025 | about half optimizer memory and scale to 13B | partition transfer and broad framework maturity |
+| Cautious optimizers | ICLR 2026 | gains from masking update/gradient disagreement | effect size across well-tuned large-scale baselines |
+
+### 12.5 Why AdamW has not disappeared
+
+AdamW has a large operational moat:
+
+- stable and fused implementations across frameworks;
+- known optimizer-state layouts and checkpoint semantics;
+- mature ZeRO/FSDP sharding and offload;
+- years of hyperparameter experience;
+- simple parameter-wise computation;
+- predictable interaction with tensor parallelism and compiler fusion.
+
+This operational maturity sets the real break-even point. A replacement must save enough tokens or memory to pay for extra compute, communication, tuning, checkpoint complexity, and engineering risk. Even a 10% data-efficiency gain can be enormously valuable at frontier scale, but only if it persists at the intended scale and does not depend on instability-prone routing or a fragile custom kernel.
+
+---
+
+## 13. Current problems and future directions
+
+### 13.1 Hyperparameter transfer across scale
+
+The learning rate, weight decay, momentum time constants, update scaling, and clipping threshold should ideally retain meaning across width, depth, batch size, and duration. [μTransfer](https://arxiv.org/abs/2203.03466) attacks this problem through parameterization; 2026 work is extending scaling rules across AdamW, LAMB, Sophia, Shampoo, and Muon. The practical goal is not zero tuning, but a scale-aware parameterization that turns small-model sweeps into informative priors rather than restarting the search at every size.
+
+### 13.2 Optimizer-aware scaling laws
+
+Most language-model scaling laws hold the optimizer fixed, so they cannot tell us whether an optimizer advantage grows, shrinks, or changes regime with scale. [Towards Robust Scaling Laws for Optimizers](https://arxiv.org/abs/2602.07712) asks how optimizer-specific rescaling enters the loss law. A method that looks superior at 100M may approach AdamW at 10B—or become more valuable when training data greatly exceed compute-optimal ratios.
+
+The research goal is not merely “fit a separate curve per optimizer.” We need experiments that disentangle irreducible loss, model-size error, data error, and optimization error while sharing statistically stable exponents.
+
+### 13.3 Allocate geometry where it is worth the cost
+
+SOAP, Muon, Adam-mini, GaLore, and COSMOS all make different bets about where richer state belongs:
+
+- every coordinate;
+- every row and column;
+- a leading eigensubspace;
+- a whole hidden matrix;
+- only selected parameter blocks.
+
+A likely future is **heterogeneous optimization**: choose the cheapest geometry justified by each tensor's role, shape, observed spectrum, and communication placement. Hidden matrices may receive matrix-aware updates, embeddings sparse or factored adaptation, and norms and biases a simpler rule. The research challenge is to make this routing principled, reproducible, and checkpoint-compatible rather than a growing list of hand-written exceptions.
+
+### 13.4 Low-precision state without stale dynamics
+
+The next step beyond eight-bit state is not achieved by changing one integer in a quantizer. EMA increments can be much smaller than the stored state, so deterministic rounding may erase the same update repeatedly and freeze the dynamics. Promising tools include stochastic rounding, error feedback, periodically refreshed higher-precision anchors, transformed nonnegative statistics, and state resets triggered by detected staleness.
+
+The July 2026 preprint [Full-Stack FP4](https://arxiv.org/abs/2607.04422) is a frontier watch item, not an established recipe. It illustrates the direction: optimizer state, projections, attention, and even Newton–Schulz must be designed together for very low precision.
+
+### 13.5 Hardware-aware matrix operations
+
+Matrix preconditioners improve end-to-end training only when inverse roots, eigendecompositions, or polar iterations map well to the hardware. Small blocks can improve numerical control but create many low-utilization kernels; large blocks improve arithmetic intensity but increase cubic work and state. Distributed placement adds gather, scatter, and synchronization costs.
+
+Recent systems such as DASH batch Shampoo blocks into hardware-friendly tensors and improve inverse-root solvers. NVIDIA's [Emerging-Optimizers](https://github.com/NVIDIA-NeMo/Emerging-Optimizers) takes a complementary layer-wise distribution approach for Muon and SOAP, preserving whole-matrix operations while balancing memory and hiding communication in Megatron-style training. Always translate an “optimizer step is 5× faster” claim into end-to-end training time: the optimizer may be only a fraction of the step.
+
+### 13.6 Stability is architecture-coupled
+
+MuonClip's QK clipping is a concrete example of optimizer–architecture coupling. Changing update geometry changes weight norms, which can change attention logits, residual-stream scales, and the probability of loss spikes. Better optimizers will likely expose observables such as per-block update RMS, spectral norm, attention-logit maxima, moment staleness, and trust ratios—and use them to adapt safely.
+
+[Muon Meets Mamba](https://arxiv.org/abs/2608.03941), an August 2026 preprint, offers a useful routing warning outside Transformers. In controlled Mamba-2 130M experiments, the reported token-efficiency benefit is localized: applying Muon to the output projection helps more than applying it to the input projection or to both, even though conditioning improves for whichever projection Muon trains. This small-model result does not establish a universal Mamba recipe, but it weakens the assumption that “better conditioning everywhere” or “route every eligible matrix” is automatically beneficial.
+
+This also complicates fine-tuning. The 2026 preprint [Can Muon Fine-tune Adam-Pretrained Models?](https://arxiv.org/abs/2605.10468) reports an optimizer-mismatch effect when switching an Adam-pretrained checkpoint to Muon. Pretraining, supervised fine-tuning, and reinforcement learning are different optimization regimes; one winner need not serve all three.
+
+### 13.7 Better optimizer benchmarks
+
+The field needs a protocol that makes both the mathematical method and its systems cost comparable across model scales, data ratios, and hardware. At minimum it should include:
+
+- separate but equal tuning budgets;
+- full-schedule endpoints;
+- validation loss versus tokens, FLOPs, and wall-clock;
+- peak total memory and optimizer-only state;
+- optimizer-step time and total throughput;
+- communication volume and sharding configuration;
+- loss spikes, nonfinite updates, and failed runs;
+- downstream evaluation and checkpoint quality;
+- multiple seeds where affordable.
+
+Without this protocol, optimizer research is vulnerable to baseline neglect: a new method receives extensive tuning while AdamW inherits an old learning rate, an unfavorable decay endpoint, or inappropriate beta values. The resulting comparison measures experimental attention as much as optimizer quality.
+
+### 13.8 Learned and self-tuning optimizers
+
+Lion demonstrates that search can discover a compact symbolic update that humans can still inspect. Learned optimizers go further by mapping gradient history and tensor metadata directly to an update. Their recurring obstacles are scale transfer, meta-training cost, interpretability, and failure outside the meta-training distribution.
+
+An attractive middle ground is a constrained controller that selects among validated geometric primitives, schedules, or block allocations while respecting explicit memory and stability limits. The future optimizer may be partly learned, but its invariances, resource budget, fallback behavior, and checkpoint state should remain inspectable.
+
+---
+
+## 14. An annotated reading path
+
+### Stage 1: foundations and intuition
+
+- [Stanford CS231n optimization notes](https://cs231n.github.io/neural-networks-3/): visual intuition for SGD, conditioning, momentum, AdaGrad, RMSProp, and Adam.
+- [Deep Learning, Chapter 8](https://www.deeplearningbook.org/contents/optimization.html): the conceptual distinction between learning and pure optimization, plus classic methods.
+- [Dive into Deep Learning: Optimization Algorithms](https://d2l.ai/chapter_optimization/index.html): executable treatments of the main recurrences and schedules.
+- [AdaGrad (JMLR 2011)](https://jmlr.org/papers/v12/duchi11a.html): the foundational adaptive-geometry paper.
+- [Adam](https://arxiv.org/abs/1412.6980): moments, bias correction, and the original algorithm.
+- [On the Convergence of Adam and Beyond](https://openreview.net/forum?id=ryQu7f-RZ): why a successful practical method can still need theoretical repair.
+- [AdamW](https://arxiv.org/abs/1711.05101): the precise reason decoupled weight decay differs from an L2 penalty.
+
+### Stage 2: implementation and LLM practice
+
+- [Stanford CS336](https://cs336.stanford.edu/) and [Assignment 1](https://github.com/stanford-cs336/assignment1-basics): implement AdamW and a complete Transformer training loop from scratch.
+- [CS336 2026 training overview](https://github.com/stanford-cs336/lectures/blob/main/lecture_01.py): places AdamW, SOAP, Muon, initialization, schedules, and scale in one LLM pipeline.
+- [PyTorch AdamW documentation](https://docs.pytorch.org/docs/main/generated/torch.optim.AdamW.html): current exact recurrence and implementation modes.
+- [PyTorch AMP examples](https://docs.pytorch.org/docs/stable/notes/amp_examples.html): correct unscale, clipping, accumulation, and skipped-step ordering.
+- [Karpathy nanoGPT](https://github.com/karpathy/nanoGPT/blob/master/model.py): concise parameter grouping and fused AdamW selection.
+- [Karpathy nanochat](https://github.com/karpathy/nanochat): a current compact training system using AdamW plus Muon routing.
+- [Attention Is All You Need](https://papers.neurips.cc/paper/7181-attention-is-all-you-need.pdf): the historical inverse-square-root schedule with warmup.
+- [Understanding WSD](https://arxiv.org/abs/2410.05192): why a stable branch plus cooldown can decouple continued training from finalization.
+
+### Stage 3: memory and distributed systems
+
+- [Adafactor](https://proceedings.mlr.press/v80/shazeer18a.html): sublinear second-moment memory for matrices.
+- [LAMB](https://openreview.net/forum?id=Syx4wnEtvH): block trust ratios for large-batch training.
+- [ZeRO](https://doi.org/10.1109/sc41405.2020.00024): optimizer, gradient, and parameter sharding as a systems design.
+- [8-bit Optimizers](https://openreview.net/forum?id=shpkpVXzo3h): block-wise quantization of persistent state.
+- [GaLore](https://proceedings.mlr.press/v235/zhao24s.html): low-rank gradient projection for full-parameter learning.
+- [Adam-mini](https://proceedings.iclr.cc/paper_files/paper/2025/file/45ae878717399e6f62d57c65f052cd46-Paper-Conference.pdf): fewer adaptive learning rates and reduced state communication.
+- [Shampoo](https://proceedings.mlr.press/v80/gupta18a.html): tensor-aware preconditioning from row and column statistics.
+- [Distributed Shampoo](https://arxiv.org/abs/2309.06497): the implementation and placement problem at scale.
+
+### Stage 4: frontier methods and evaluation
+
+- [Lion](https://arxiv.org/abs/2302.06675): symbolic optimizer discovery and one-state sign momentum.
+- [Sophia](https://proceedings.iclr.cc/paper_files/paper/2024/hash/06960915ba8674c7a898ec0b472b80ff-Abstract-Conference.html): lightweight diagonal curvature plus clipping.
+- [SOAP](https://proceedings.iclr.cc/paper_files/paper/2025/hash/e988664070e9591f93fdcf605f7dc623-Abstract-Conference.html): Adam in Shampoo's eigenbasis.
+- [Muon: original write-up](https://kellerjordan.github.io/posts/muon/): the most direct explanation and compact implementation.
+- [Muon is Scalable for LLM Training](https://arxiv.org/abs/2502.16982): update scaling, weight decay, distributed Muon, and Moonlight.
+- [PyTorch Muon documentation](https://docs.pytorch.org/docs/stable/generated/torch.optim.Muon.html): current framework semantics and scaling variants.
+- [Kimi K2 / MuonClip](https://arxiv.org/abs/2507.20534): frontier-scale feasibility and architecture-aware stability.
+- [SOAP, Muon, and Beyond](https://arxiv.org/abs/2607.20548): large-batch multi-billion-parameter evidence and a layer-wise distributed implementation.
+- [Muon Meets Mamba](https://arxiv.org/abs/2608.03941): architecture-specific evidence that optimizer routing can matter more than blanket matrix eligibility.
+- [The Road Less Scheduled](https://proceedings.neurips.cc/paper_files/paper/2024/hash/136b9a13861308c8948cd308ccd02658-Abstract-Conference.html): schedule-free optimization and iterate averaging.
+- [Cautious Optimizers (ICLR 2026)](https://openreview.net/forum?id=zBPZeRjfgu): a low-cost momentum–gradient alignment modifier.
+- [Fantastic Pretraining Optimizers (ICLR 2026)](https://openreview.net/forum?id=2J51qUZ0iG): the essential fair-comparison study and the best antidote to headline-only reading.
+- [Towards Robust Scaling Laws for Optimizers](https://arxiv.org/abs/2602.07712): how optimizer effects may scale with model and data.
+- [Can Muon Fine-tune Adam-Pretrained Models?](https://arxiv.org/abs/2605.10468): recent evidence that optimizer choice can create training-stage mismatch.
+
+---
+
+## Conclusion
+
+An optimizer is a policy for converting noisy gradient information into parameter changes under limits on time, memory, precision, and communication. SGD stores almost nothing and trusts one global scale. AdamW spends two state values per parameter to obtain robust coordinate-wise normalization. Shampoo and SOAP spend matrix state and computation to learn a better basis. Muon spends matrix multiplications to normalize the singular structure of hidden-weight momentum.
+
+The practical conclusion in 2026 is not “replace AdamW everywhere.” It is more precise:
+
+> **Use AdamW as the measured baseline; treat schedules, grouping, precision, and sharding as part of it; then test whether matrix-aware geometry buys enough token efficiency to pay for its systems cost at your actual scale.**
+
+That decision rule is also the most promising research direction. Future optimizers will probably be heterogeneous rather than monolithic, low precision without stale state, transferable across scale rather than retuned from scratch, and co-designed with the distributed system that executes them.

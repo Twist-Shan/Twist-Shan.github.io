@@ -2881,21 +2881,7 @@ for _ in range(num_merges):
 </ul>
 <p>Once large-scale LM training begins, the tokenizer becomes similar to an ABI: replacing it is not an ordinary preprocessing change because token IDs already address rows in the embedding table and output head.</p>
 
-</section><section aria-labelledby="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions" class="article-section" data-chapter="practice" data-section-number="12" id="section-12-exercises-from-karpathy-to-cs336-and-then-to-research-questions"><p aria-hidden="true" class="section-label">12</p><h2 id="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions">12. Exercises: from Karpathy to CS336 and then to research questions</h2>
-<ol>
-<li><strong>Basic BPE:</strong> reproduce <code>aaabdaaabac → [258,100,258,97,99]</code> and assert the merge tree, not only the final IDs.</li>
-<li><strong>Regex BPE:</strong> add a GPT-style pre-tokenizer and verify that no merge crosses a category boundary.</li>
-<li><strong>Special tokens:</strong> implement <code>allowed_special</code> and write special-token injection tests.</li>
-<li><strong>Exact parity:</strong> load <code>tiktoken</code> merges and compare IDs on mixed English, digits, Korean, and emoji. Exact parity requires the same normalization, regex, merge ranks, special-token policy, library behavior, and version.</li>
-<li><strong>Efficient training:</strong> replace full rescans with occurrence lists and local pair-count updates.</li>
-<li><strong>English–Chinese fairness:</strong> train 1K, 4K, and 16K vocabularies on balanced and imbalanced bilingual corpora; compare bytes/token, tokens/grapheme, and p95 sequence length.</li>
-<li><strong>Digit policy:</strong> compare <code>\p{N}{1}</code>, <code>{1,2}</code>, and <code>{1,3}</code> on sequence compression and a tiny LM trained on elementary arithmetic.</li>
-<li><strong>Multiple segmentations:</strong> implement BPE-dropout and compare typo robustness against deterministic BPE.</li>
-<li><strong>Comparable metrics:</strong> train compute-matched tiny LMs under several tokenizers and compare carefully accounted BPB rather than per-token perplexity.</li>
-<li><strong>Frontier reproduction:</strong> implement a simple entropy patcher and inspect whether high-entropy boundaries appear near word starts, code symbols, typos, or language switches.</li>
-</ol>
-
-</section><section aria-labelledby="13-an-annotated-reading-path" class="article-section" data-chapter="practice" data-section-number="13" id="section-13-an-annotated-reading-path"><p aria-hidden="true" class="section-label">13</p><h2 id="13-an-annotated-reading-path">13. An annotated reading path</h2>
+</section><section aria-labelledby="12-an-annotated-reading-path" class="article-section" data-chapter="practice" data-section-number="12" id="section-12-an-annotated-reading-path"><p aria-hidden="true" class="section-label">12</p><h2 id="12-an-annotated-reading-path">12. An annotated reading path</h2>
 <div class="reading-filter" data-reading-filter="">
 <div class="reading-filter-head">
 <div>
@@ -2993,6 +2979,18 @@ for _ in range(num_merges):
   <script>
 (function () {
   "use strict";
+
+  document.querySelectorAll('[data-toc-section="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions"]').forEach(function (item) {
+    item.remove();
+  });
+  document.querySelectorAll('[data-toc-section="13-an-annotated-reading-path"]').forEach(function (item) {
+    item.dataset.tocSection = "12-an-annotated-reading-path";
+    var link = item.querySelector('a[href="#13-an-annotated-reading-path"]');
+    if (link) link.setAttribute("href", "#12-an-annotated-reading-path");
+  });
+  document.querySelectorAll('a[href="#13-an-annotated-reading-path"]').forEach(function (link) {
+    link.setAttribute("href", "#12-an-annotated-reading-path");
+  });
 
   var root = document.documentElement;
   var liveStatus = document.querySelector("[data-live-status]");

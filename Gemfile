@@ -11,3 +11,9 @@ end
 
 gem 'github-pages'
 gem 'connection_pool', '2.5.0'
+
+# Windows does not provide the IANA zoneinfo database used by Jekyll.
+platforms :mingw, :x64_mingw, :mswin, :jruby do
+  gem 'tzinfo', '>= 1', '< 3'
+  gem 'tzinfo-data'
+end
