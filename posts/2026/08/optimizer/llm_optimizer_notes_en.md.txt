@@ -877,8 +877,6 @@ Optimizer comparisons are unusually sensitive to tuning budget, schedule, model 
 
 ### 12.1 Practice
 
-<span class="evidence-tier evidence-tier--practice">practice</span>
-
 - AdamW is a well-supported baseline for Transformer pretraining.
 - Warmup plus a controlled decay remains a strong recipe.
 - ZeRO/FSDP state sharding is standard systems engineering.
@@ -887,8 +885,6 @@ Optimizer comparisons are unusually sensitive to tuning budget, schedule, model 
 
 ### 12.2 Strong emerging evidence
 
-<span class="evidence-tier evidence-tier--emerging">strong emerging evidence</span>
-
 - Matrix-aware updates can improve token efficiency over diagonal AdamW in some regimes.
 - SOAP and Muon are credible challengers, not merely toy optimizers.
 - Muon-style training has reached trillion-parameter MoE scale.
@@ -896,8 +892,6 @@ Optimizer comparisons are unusually sensitive to tuning budget, schedule, model 
 - Optimizer state and communication can be reduced without abandoning full-parameter learning.
 
 ### 12.3 Paper-reported frontier
-
-<span class="evidence-tier evidence-tier--frontier">paper-reported frontier</span>
 
 Exact 1.4–2× claims, hybrid methods such as COSMOS, state-allocation schemes such as APOLLO, and new 2026 Muon variants remain conditional on their experimental regimes. Use these results to choose experiments and priors—not as constants to insert into a training budget without local validation.
 

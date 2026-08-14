@@ -1,5 +1,3 @@
----
----
 <!doctype html>
 <html lang="en" data-theme="light">
 <head>
@@ -2825,6 +2823,27 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 .evidence-tier--emerging { --tier: var(--apricot); }
 .evidence-tier--frontier { --tier: var(--peach); }
 
+.inline-math {
+  display: inline-block;
+  margin-inline: 0.06em;
+  color: inherit;
+  font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", var(--serif);
+  font-size: 1.02em;
+  font-style: italic;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.inline-math sub,
+.inline-math sup {
+  font-size: 0.7em;
+  line-height: 0;
+}
+
+.inline-math__operator {
+  font-style: normal;
+}
+
 .formula-note {
   display: block;
   margin: 32px 0;
@@ -3022,7 +3041,7 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
           <div><dt>Reading</dt><dd>45 min</dd></div>
           <div><dt>Chapters</dt><dd>14</dd></div>
           <div><dt>Sources</dt><dd>51</dd></div>
-          <div><dt>Words</dt><dd>10,050</dd></div>
+          <div><dt>Words</dt><dd>10,100</dd></div>
         </dl>
       </div>
 
@@ -3067,6 +3086,7 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
           <p class="toc-title">On this page</p>
           <nav aria-label="Table of contents"><ol class="toc-list"><li data-toc-section="four-ideas-to-remember"><a href="#four-ideas-to-remember">Four ideas to remember</a></li><li data-toc-section="1-what-problem-is-an-llm-optimizer-solving"><a href="#1-what-problem-is-an-llm-optimizer-solving">What problem is an LLM optimizer solving?</a><ol class="toc-sublist"><li><a href="#optimization-is-not-the-same-as-learning">Optimization is not the same as learning</a></li></ol></li><li data-toc-section="2-geometry-first-curvature-conditioning-and-preconditioning"><a href="#2-geometry-first-curvature-conditioning-and-preconditioning">Geometry first: curvature, conditioning, and preconditioning</a><ol class="toc-sublist"><li><a href="#21-conditioning-gives-a-quantitative-prediction">Conditioning gives a quantitative prediction</a></li><li><a href="#why-transformers-often-favor-adaptivity">Why Transformers often favor adaptivity</a></li></ol></li><li data-toc-section="3-sgd-momentum-and-the-role-of-minibatch-noise"><a href="#3-sgd-momentum-and-the-role-of-minibatch-noise">SGD, momentum, and the role of minibatch noise</a><ol class="toc-sublist"><li><a href="#31-what-the-noise-is-doing">What the noise is doing</a></li><li><a href="#32-heavy-ball-momentum">Heavy-ball momentum</a></li></ol></li><li data-toc-section="4-from-adagrad-and-rmsprop-to-coordinate-wise-adaptivity"><a href="#4-from-adagrad-and-rmsprop-to-coordinate-wise-adaptivity">From AdaGrad and RMSProp to coordinate-wise adaptivity</a><ol class="toc-sublist"><li><a href="#41-adagrad-accumulate-squared-gradients-forever">AdaGrad: accumulate squared gradients forever</a></li><li><a href="#42-rmsprop-remember-recent-scale">RMSProp: remember recent scale</a></li><li><a href="#43-what-epsilon-really-does">What epsilon really does</a></li></ol></li><li data-toc-section="5-adam-line-by-line"><a href="#5-adam-line-by-line">Adam, line by line</a><ol class="toc-sublist"><li><a href="#51-a-compact-reference-implementation">A compact reference implementation</a></li><li><a href="#52-the-convergence-caveat">The convergence caveat</a></li></ol></li><li data-toc-section="6-adamw-weight-decay-is-not-l2-regularization-under-adam"><a href="#6-adamw-weight-decay-is-not-l2-regularization-under-adam">AdamW: weight decay is not L2 regularization under Adam</a><ol class="toc-sublist"><li><a href="#61-a-pedagogical-pytorch-optimizer">A pedagogical PyTorch optimizer</a></li><li><a href="#62-grad-is-none-is-different-from-a-zero-gradient">grad is None is different from a zero gradient</a></li><li><a href="#63-parameter-groups-are-part-of-the-recipe">Parameter groups are part of the recipe</a></li><li><a href="#64-verification-before-speed">Verification before speed</a></li></ol></li><li data-toc-section="7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm"><a href="#7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm">The schedule, clipping, and precision are part of the training algorithm</a><ol class="toc-sublist"><li><a href="#71-warmup">Warmup</a></li><li><a href="#72-inverse-square-root-cosine-and-wsd">Inverse square root, cosine, and WSD</a></li><li><a href="#73-gradient-accumulation-and-the-optimizer-clock">Gradient accumulation and the optimizer clock</a></li><li><a href="#74-global-norm-clipping">Global-norm clipping</a></li><li><a href="#75-mixed-precision-ordering">Mixed precision ordering</a></li></ol></li><li data-toc-section="8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore"><a href="#8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore">Memory-first optimizers: Adafactor, quantized state, Adam-mini, and GaLore</a><ol class="toc-sublist"><li><a href="#81-adafactor">Adafactor</a></li><li><a href="#82-eight-bit-optimizer-states">Eight-bit optimizer states</a></li><li><a href="#83-adam-mini">Adam-mini</a></li><li><a href="#84-galore-is-a-strategy-around-an-optimizer">GaLore is a strategy around an optimizer</a></li><li><a href="#85-these-methods-solve-different-bottlenecks">These methods solve different bottlenecks</a></li></ol></li><li data-toc-section="9-the-memory-ledger-and-distributed-state"><a href="#9-the-memory-ledger-and-distributed-state">The memory ledger and distributed state</a><ol class="toc-sublist"><li><a href="#91-zero-and-fsdp-change-placement-not-the-recurrence">ZeRO and FSDP change placement, not the recurrence</a></li><li><a href="#92-optimizer-state-becomes-communication">Optimizer state becomes communication</a></li></ol></li><li data-toc-section="10-beyond-diagonal-adam-lion-lamb-sophia-and-shampoo"><a href="#10-beyond-diagonal-adam-lion-lamb-sophia-and-shampoo">Beyond diagonal Adam: Lion, LAMB, Sophia, and Shampoo</a><ol class="toc-sublist"><li><a href="#101-lion-one-state-and-a-sign-update">Lion: one state and a sign update</a></li><li><a href="#102-lamb-match-update-norm-to-parameter-norm">LAMB: match update norm to parameter norm</a></li><li><a href="#103-sophia-diagonal-curvature-with-clipping">Sophia: diagonal curvature with clipping</a></li><li><a href="#104-shampoo-use-the-tensors-own-axes">Shampoo: use the tensor's own axes</a></li></ol></li><li data-toc-section="11-soap-and-muon-two-matrix-aware-paths"><a href="#11-soap-and-muon-two-matrix-aware-paths">SOAP and Muon: two matrix-aware paths</a><ol class="toc-sublist"><li><a href="#111-soap-adam-in-shampoos-eigenbasis">SOAP: Adam in Shampoo's eigenbasis</a></li><li><a href="#112-what-the-shampoo-connection-doesand-does-notsay">What the Shampoo connection does—and does not—say</a></li><li><a href="#113-muon-the-polar-factor-as-a-steepest-descent-direction">Muon: the polar factor as a steepest-descent direction</a></li><li><a href="#114-newtonschulz-svd-behavior-without-an-svd">Newton–Schulz: SVD behavior without an SVD</a></li><li><a href="#115-shape-scaling-and-routing-are-part-of-muon">Shape scaling and routing are part of Muon</a></li><li><a href="#116-scale-distribution-and-stability">Scale, distribution, and stability</a></li></ol></li><li data-toc-section="12-what-the-current-evidence-actually-says"><a href="#12-what-the-current-evidence-actually-says">What the current evidence actually says</a><ol class="toc-sublist"><li><a href="#121-practice">Practice</a></li><li><a href="#122-strong-emerging-evidence">Strong emerging evidence</a></li><li><a href="#123-paper-reported-frontier">Paper-reported frontier</a></li><li><a href="#124-the-iclr-2026-reality-check">The ICLR 2026 reality check</a></li><li><a href="#125-why-adamw-has-not-disappeared">Why AdamW has not disappeared</a></li></ol></li><li data-toc-section="13-current-problems-and-future-directions"><a href="#13-current-problems-and-future-directions">Current problems and future directions</a><ol class="toc-sublist"><li><a href="#131-hyperparameter-transfer-across-scale">Hyperparameter transfer across scale</a></li><li><a href="#132-optimizer-aware-scaling-laws">Optimizer-aware scaling laws</a></li><li><a href="#133-allocate-geometry-where-it-is-worth-the-cost">Allocate geometry where it is worth the cost</a></li><li><a href="#134-low-precision-state-without-stale-dynamics">Low-precision state without stale dynamics</a></li><li><a href="#135-hardware-aware-matrix-operations">Hardware-aware matrix operations</a></li><li><a href="#136-stability-is-architecture-coupled">Stability is architecture-coupled</a></li><li><a href="#137-better-optimizer-benchmarks">Better optimizer benchmarks</a></li><li><a href="#138-learned-and-self-tuning-optimizers">Learned and self-tuning optimizers</a></li></ol></li><li data-toc-section="14-an-annotated-reading-path"><a href="#14-an-annotated-reading-path">An annotated reading path</a><ol class="toc-sublist"><li><a href="#stage-1-foundations-and-intuition">Stage 1: foundations and intuition</a></li><li><a href="#stage-2-implementation-and-llm-practice">Stage 2: implementation and LLM practice</a></li><li><a href="#stage-3-memory-and-distributed-systems">Stage 3: memory and distributed systems</a></li><li><a href="#stage-4-frontier-methods-and-evaluation">Stage 4: frontier methods and evaluation</a></li></ol></li><li data-toc-section="conclusion"><a href="#conclusion">Conclusion</a></li></ol></nav>
           <div class="toc-footer">
+            <a href="./llm_optimizer_notes_en.md.txt">Markdown source <span aria-hidden="true">↗</span></a>
             <a href="#14-an-annotated-reading-path">Reading path <span aria-hidden="true">↗</span></a>
           </div>
         </div>
@@ -3086,20 +3106,20 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 </ol>
 
 </section><section aria-labelledby="1-what-problem-is-an-llm-optimizer-solving" class="article-section" data-chapter="foundations" data-section-number="01" id="section-1-what-problem-is-an-llm-optimizer-solving"><p aria-hidden="true" class="section-label">01</p><h2 id="1-what-problem-is-an-llm-optimizer-solving">1. What problem is an LLM optimizer solving?</h2>
-<p>Let (θ) denote all trainable parameters, (x) a sampled training item or token block from distribution (𝒟), and (ℓ(θ;x)) its loss. Training seeks parameters with low expected loss:</p>
+<p>Let <span aria-label="θ" class="inline-math" role="math">θ</span> denote all trainable parameters, <span aria-label="x" class="inline-math" role="math">x</span> a sampled training item or token block from distribution <span aria-label="𝒟" class="inline-math" role="math">𝒟</span>, and <span aria-label="ℓ(θ;x)" class="inline-math" role="math">ℓ(θ;x)</span> its loss. Training seeks parameters with low expected loss:</p>
 <div aria-label="L of theta equals the expectation over x from D of ell of theta semicolon x" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mrow><mi>L</mi><mo>(</mo><mi>θ</mi><mo>)</mo><mo>=</mo><msub><mi mathvariant="double-struck">E</mi><mrow><mi>x</mi><mo>∼</mo><mi>𝒟</mi></mrow></msub><mo>[</mo><mi>ℓ</mi><mo>(</mo><mi>θ</mi><mo>;</mo><mi>x</mi><mo>)</mo><mo>]</mo><mo>.</mo></mrow>
+<mrow><mi>L</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow><mo>=</mo><msub><mi mathvariant="double-struck">E</mi><mrow><mi>x</mi><mo>∼</mo><mi>𝒟</mi></mrow></msub><mo>[</mo><mi>ℓ</mi><mrow><mo>(</mo><mi>θ</mi><mo>;</mo><mi>x</mi><mo>)</mo></mrow><mo>]</mo><mo>.</mo></mrow>
 </math>
 </div>
-<p>The full expectation is too expensive to compute. At optimizer step (t), a minibatch (B_t) therefore gives the gradient estimate used for the next update:</p>
+<p>The full expectation is too expensive to compute. At optimizer step <span aria-label="t" class="inline-math" role="math">t</span>, a minibatch <span aria-label="B_t" class="inline-math" role="math">B<sub>t</sub></span> therefore gives the gradient estimate used for the next update:</p>
 <div aria-label="g t equals one over batch size times the sum of gradients of the example losses" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mrow>
 <msub><mi>g</mi><mi>t</mi></msub><mo>=</mo>
 <mfrac><mn>1</mn><mrow><mo>|</mo><msub><mi>B</mi><mi>t</mi></msub><mo>|</mo></mrow></mfrac>
 <munder><mo>∑</mo><mrow><mi>x</mi><mo>∈</mo><msub><mi>B</mi><mi>t</mi></msub></mrow></munder>
-<msub><mo>∇</mo><mi>θ</mi></msub><mi>ℓ</mi><mo>(</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>;</mo><mi>x</mi><mo>)</mo><mo>.</mo>
+<msub><mo>∇</mo><mi>θ</mi></msub><mi>ℓ</mi><mrow><mo>(</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>;</mo><mi>x</mi><mo>)</mo></mrow><mo>.</mo>
 </mrow>
 </math>
 </div>
@@ -3110,7 +3130,7 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>P</mi><mi>t</mi></msub><msub><mi>g</mi><mi>t</mi></msub><mo>.</mo></mrow>
 </math>
 </div>
-<p>Here (η_t) is the global learning rate: it sets the overall step scale. The operator (P_t) changes the gradient's geometry: it sets relative scales and may also rotate the direction. SGD uses (P_t=I); Adam uses a diagonal function of recent squared gradients; a matrix-aware method may act from the left, the right, or both sides of a weight matrix. This “global scale plus geometric transform” view is the thread connecting the optimizers in this article.</p>
+<p>Here <span aria-label="η_t" class="inline-math" role="math">η<sub>t</sub></span> is the global learning rate: it sets the overall step scale. The operator <span aria-label="P_t" class="inline-math" role="math">P<sub>t</sub></span> changes the gradient's geometry: it sets relative scales and may also rotate the direction. SGD uses <span aria-label="P_t=I" class="inline-math" role="math">P<sub>t</sub>=I</span>; Adam uses a diagonal function of recent squared gradients; a matrix-aware method may act from the left, the right, or both sides of a weight matrix. This “global scale plus geometric transform” view is the thread connecting the optimizers in this article.</p>
 <p>This equation is a map, not a complete implementation. A real step also includes momentum or other history, regularization, clipping, finite-precision rules, and possibly a skipped update after overflow. Before comparing two optimizers, separate the following components so that an improvement in one is not mistakenly attributed to another:</p>
 <div aria-label="The parts of an LLM training algorithm" class="table-scroll" role="region" tabindex="0"><table><caption class="sr-only">The parts of an LLM training algorithm</caption>
 <thead>
@@ -3173,18 +3193,18 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <p>The cleanest way to see optimizer geometry is a two-dimensional quadratic, where the Hessian is constant and every direction can be analyzed exactly:</p>
 <div aria-label="f of theta equals one half theta transpose H theta and its gradient equals H theta" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mrow><mi>f</mi><mo>(</mo><mi>θ</mi><mo>)</mo><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><msup><mi>θ</mi><mi>T</mi></msup><mi>H</mi><mi>θ</mi><mo>,</mo><mspace width="1em"></mspace><mo>∇</mo><mi>f</mi><mo>(</mo><mi>θ</mi><mo>)</mo><mo>=</mo><mi>H</mi><mi>θ</mi><mo>.</mo></mrow>
+<mrow><mi>f</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><msup><mi>θ</mi><mi>T</mi></msup><mi>H</mi><mi>θ</mi><mo>,</mo><mspace width="1em"></mspace><mo>∇</mo><mi>f</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow><mo>=</mo><mi>H</mi><mi>θ</mi><mo>.</mo></mrow>
 </math>
 </div>
-<p>Assume (H) is positive definite. Its eigenvectors are the valley's principal axes, and its eigenvalues measure curvature along those axes. When the eigenvalues differ greatly, the loss is a narrow valley with condition number (κ=λ_{max}/λ_{min}). One learning rate must then satisfy two conflicting demands: a large rate moves along the flat direction but can oscillate along the steep one, while a safe rate for the steep direction crawls along the flat one.</p>
+<p>Assume <span aria-label="H" class="inline-math" role="math">H</span> is positive definite. Its eigenvectors are the valley's principal axes, and its eigenvalues measure curvature along those axes. When the eigenvalues differ greatly, the loss is a narrow valley with condition number <span aria-label="κ=λ_{max}/λ_{min}" class="inline-math" role="math">κ=λ<sub>max</sub>/λ<sub>min</sub></span>. One learning rate must then satisfy two conflicting demands: a large rate moves along the flat direction but can oscillate along the steep one, while a safe rate for the steep direction crawls along the flat one.</p>
 <h3 id="21-conditioning-gives-a-quantitative-prediction">2.1 Conditioning gives a quantitative prediction</h3>
 <p>For the centered quadratic above, gradient descent is a linear dynamical system:</p>
 <div aria-label="theta t plus one equals I minus eta H times theta t" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mrow><msub><mi>θ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mo>(</mo><mi>I</mi><mo>−</mo><mi>η</mi><mi>H</mi><mo>)</mo><msub><mi>θ</mi><mi>t</mi></msub><mo>.</mo></mrow>
+<mrow><msub><mi>θ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mrow><mo>(</mo><mi>I</mi><mo>−</mo><mi>η</mi><mi>H</mi><mo>)</mo></mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>.</mo></mrow>
 </math>
 </div>
-<p>Diagonalizing (H) turns one coupled update into independent scalar updates. Along the eigenvector with eigenvalue (λ_i), the error is multiplied by (1−ηλ_i) at every step. Stability therefore requires (0&lt;η&lt;2/λ_{max}). For a positive-definite quadratic, the best constant rate and its worst-direction contraction factor are:</p>
+<p>Diagonalizing <span aria-label="H" class="inline-math" role="math">H</span> turns one coupled update into independent scalar updates. Along the eigenvector with eigenvalue <span aria-label="λ_i" class="inline-math" role="math">λ<sub>i</sub></span>, the error is multiplied by <span aria-label="1−ηλ_i" class="inline-math" role="math">1−ηλ<sub>i</sub></span> at every step. Stability therefore requires <span aria-label="0&lt;η&lt;2/λ_{max}" class="inline-math" role="math">0&lt;η&lt;2/λ<sub>max</sub></span>. For a positive-definite quadratic, the best constant rate and its worst-direction contraction factor are:</p>
 <div aria-label="optimal learning rate is two divided by lambda max plus lambda min, with contraction kappa minus one over kappa plus one" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.55em">
@@ -3193,12 +3213,12 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 </mtable>
 </math>
 </div>
-<p>The closer (ρ<em>) is to zero, the faster the worst direction contracts. When (κ) is large, (ρ</em>) is close to one, so even the best constant learning rate makes slow progress. A symmetric positive-definite preconditioner (P) attempts to reduce this transformed condition number:</p>
+<p>The closer (ρ<em>) is to zero, the faster the worst direction contracts. When <span aria-label="κ" class="inline-math" role="math">κ</span> is large, (ρ</em>) is close to one, so even the best constant learning rate makes slow progress. A symmetric positive-definite preconditioner <span aria-label="P" class="inline-math" role="math">P</span> attempts to reduce this transformed condition number:</p>
 <div aria-label="z t plus one equals I minus eta P one half H P one half times z t" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.55em">
 <mtr><mtd><mrow>
-<msub><mi>θ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mo>(</mo><mi>I</mi><mo>−</mo><mi>η</mi><mi>P</mi><mi>H</mi><mo>)</mo><msub><mi>θ</mi><mi>t</mi></msub><mo>,</mo><mspace width="1em"></mspace>
+<msub><mi>θ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mrow><mo>(</mo><mi>I</mi><mo>−</mo><mi>η</mi><mi>P</mi><mi>H</mi><mo>)</mo></mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>,</mo><mspace width="1em"></mspace>
 <msub><mi>z</mi><mi>t</mi></msub><mo>=</mo><msup><mi>P</mi><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><msub><mi>θ</mi><mi>t</mi></msub><mo>,</mo>
 </mrow></mtd></mtr>
 <mtr><mtd><mrow>
@@ -3207,7 +3227,7 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 </mtable>
 </math>
 </div>
-<p>The relevant condition number is now (κ(P^{1/2}HP^{1/2})). The ideal choice (P=H^{-1}) turns the valley into a spherical bowl and solves this centered quadratic in one step when (η=1). Deep-network training cannot materialize or invert a full Hessian over billions of parameters, so practical optimizer design searches for cheaper, noisier approximations to that coordinate change:</p>
+<p>The relevant condition number is now <span aria-label="κ(P^{1/2}HP^{1/2})" class="inline-math" role="math">κ(P<sup>1/2</sup>HP<sup>1/2</sup>)</span>. The ideal choice <span aria-label="P=H^{-1}" class="inline-math" role="math">P=H<sup>-1</sup></span> turns the valley into a spherical bowl and solves this centered quadratic in one step when <span aria-label="η=1" class="inline-math" role="math">η=1</span>. Deep-network training cannot materialize or invert a full Hessian over billions of parameters, so practical optimizer design searches for cheaper, noisier approximations to that coordinate change:</p>
 <ul>
 <li><strong>SGD:</strong> no preconditioning;</li>
 <li><strong>AdaGrad, RMSProp, Adam:</strong> coordinate-wise diagonal scaling;</li>
@@ -3237,13 +3257,13 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <div aria-label="m t equals beta m t minus one plus one minus beta times g t; theta t equals theta t minus one minus eta t times m t" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.55em">
-<mtr><mtd><mrow><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo>)</mo><msub><mi>g</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
+<mtr><mtd><mrow><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo>)</mo></mrow><msub><mi>g</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
 <mtr><mtd><mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>m</mi><mi>t</mi></msub><mo>.</mo></mrow></mtd></mtr>
 </mtable>
 </math>
 </div>
-<p>Momentum is a low-pass filter over update steps. Components that repeatedly point in the same direction survive the average, while rapidly alternating components cancel. The factor (β) controls the trade-off between responsiveness and smoothing: an EMA has an approximate memory length of (1/(1-β)), so (β=0.9) remembers roughly ten updates and (β=0.99) roughly one hundred.</p>
-<p>Some libraries define the buffer without the factor (1-β), so the same numerical learning rate is not transferable between formulas. Nesterov momentum adds a look-ahead correction, but library conventions differ. When reproducing an optimizer, copy the exact recurrence and learning-rate convention—not merely its name.</p>
+<p>Momentum is a low-pass filter over update steps. Components that repeatedly point in the same direction survive the average, while rapidly alternating components cancel. The factor <span aria-label="β" class="inline-math" role="math">β</span> controls the trade-off between responsiveness and smoothing: an EMA has an approximate memory length of <span aria-label="1/(1-β)" class="inline-math" role="math">1/(1-β)</span>, so <span aria-label="β=0.9" class="inline-math" role="math">β=0.9</span> remembers roughly ten updates and <span aria-label="β=0.99" class="inline-math" role="math">β=0.99</span> roughly one hundred.</p>
+<p>Some libraries define the buffer without the factor <span aria-label="1-β" class="inline-math" role="math">1-β</span>, so the same numerical learning rate is not transferable between formulas. Nesterov momentum adds a look-ahead correction, but library conventions differ. When reproducing an optimizer, copy the exact recurrence and learning-rate convention—not merely its name.</p>
 <p>The interactive lab below optimizes an anisotropic quadratic with identical starting coordinates. Vary the condition number and learning rate, then compare SGD, momentum, RMSProp, and Adam.</p>
 
 
@@ -3322,21 +3342,21 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 </mtable>
 </math>
 </div>
-<p>Read the denominator as a per-coordinate history meter. A coordinate that has accumulated many large gradients receives a smaller future effective rate; a rarely active coordinate retains a comparatively large one. This is attractive for sparse features, but in long dense pretraining (s_t) only grows, so the effective rates may eventually become too small.</p>
+<p>Read the denominator as a per-coordinate history meter. A coordinate that has accumulated many large gradients receives a smaller future effective rate; a rarely active coordinate retains a comparatively large one. This is attractive for sparse features, but in long dense pretraining <span aria-label="s_t" class="inline-math" role="math">s<sub>t</sub></span> only grows, so the effective rates may eventually become too small.</p>
 <h3 id="42-rmsprop-remember-recent-scale">4.2 RMSProp: remember recent scale</h3>
 <p>RMSProp fixes AdaGrad's one-way accumulation by replacing the lifetime sum with an exponentially weighted recent history:</p>
 <div aria-label="v t equals rho v t minus one plus one minus rho times g t squared; theta update divides by the square root of v t plus epsilon" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.55em">
-<mtr><mtd><mrow><msub><mi>v</mi><mi>t</mi></msub><mo>=</mo><mi>ρ</mi><msub><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>−</mo><mi>ρ</mi><mo>)</mo><msup><msub><mi>g</mi><mi>t</mi></msub><mn>2</mn></msup><mo>,</mo></mrow></mtd></mtr>
+<mtr><mtd><mrow><msub><mi>v</mi><mi>t</mi></msub><mo>=</mo><mi>ρ</mi><msub><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><mi>ρ</mi><mo>)</mo></mrow><msup><msub><mi>g</mi><mi>t</mi></msub><mn>2</mn></msup><mo>,</mo></mrow></mtd></mtr>
 <mtr><mtd><mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><mi>η</mi><mfrac><msub><mi>g</mi><mi>t</mi></msub><mrow><msqrt><msub><mi>v</mi><mi>t</mi></msub></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>.</mo></mrow></mtd></mtr>
 </mtable>
 </math>
 </div>
 <p>RMSProp was introduced in Geoffrey Hinton's 2012 <a class="external-link" href="https://www.cs.toronto.edu/~hinton/coursera_lectures.html" rel="noopener noreferrer" target="_blank">Neural Networks for Machine Learning lecture materials</a>, rather than a standalone peer-reviewed paper. It can track nonstationary gradient scales because old observations decay.</p>
-<p>The vector (v_t) is an EMA of the <strong>uncentered second raw moment</strong>. Calling it “the variance” is only correct when the gradient mean is zero. Dividing by (√v_t) roughly makes a coordinate's update relative to its recent gradient scale; it does not compute an inverse Hessian.</p>
+<p>The vector <span aria-label="v_t" class="inline-math" role="math">v<sub>t</sub></span> is an EMA of the <strong>uncentered second raw moment</strong>. Calling it “the variance” is only correct when the gradient mean is zero. Dividing by <span aria-label="√v_t" class="inline-math" role="math">√v<sub>t</sub></span> roughly makes a coordinate's update relative to its recent gradient scale; it does not compute an inverse Hessian.</p>
 <h3 id="43-what-epsilon-really-does">4.3 What epsilon really does</h3>
-<p>Epsilon prevents division by zero, but it also sets the crossover between adaptive and nearly linear behavior. When (√v_t) is much larger than (ε), the denominator is dominated by recent gradient scale. When (√v_t) is much smaller, the update is approximately (g_t/ε). Its placement therefore matters; these are different algorithms:</p>
+<p>Epsilon prevents division by zero, but it also sets the crossover between adaptive and nearly linear behavior. When <span aria-label="√v_t" class="inline-math" role="math">√v<sub>t</sub></span> is much larger than <span aria-label="ε" class="inline-math" role="math">ε</span>, the denominator is dominated by recent gradient scale. When <span aria-label="√v_t" class="inline-math" role="math">√v<sub>t</sub></span> is much smaller, the update is approximately <span aria-label="g_t/ε" class="inline-math" role="math">g<sub>t</sub>/ε</span>. Its placement therefore matters; these are different algorithms:</p>
 <div aria-label="the square root of v plus epsilon is not equal to the square root of v plus epsilon inside the square root" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mrow>
@@ -3352,8 +3372,8 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <div aria-label="Adam first moment and second raw moment recurrences" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.55em">
-<mtr><mtd><mrow><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo><msub><mi>g</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
-<mtr><mtd><mrow><msub><mi>v</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo>)</mo><msup><msub><mi>g</mi><mi>t</mi></msub><mn>2</mn></msup><mo>.</mo></mrow></mtd></mtr>
+<mtr><mtd><mrow><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo></mrow><msub><mi>g</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
+<mtr><mtd><mrow><msub><mi>v</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo>)</mo></mrow><msup><msub><mi>g</mi><mi>t</mi></msub><mn>2</mn></msup><mo>.</mo></mrow></mtd></mtr>
 </mtable>
 </math>
 </div>
@@ -3372,23 +3392,23 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 </mrow>
 </math>
 </div>
-<p>The correction follows directly from a geometric series. If the gradient has a stationary mean (μ) and (m_0=0), then the expected first moment is:</p>
+<p>The correction follows directly from a geometric series. If the gradient has a stationary mean <span aria-label="μ" class="inline-math" role="math">μ</span> and <span aria-label="m_0=0" class="inline-math" role="math">m<sub>0</sub>=0</span>, then the expected first moment is:</p>
 <div aria-label="expected m t equals one minus beta one to t times mu" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.55em">
 <mtr><mtd><mrow>
 <mi mathvariant="double-struck">E</mi><mo>[</mo><msub><mi>m</mi><mi>t</mi></msub><mo>]</mo><mo>=</mo>
-<mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo>
+<mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo></mrow>
 <munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>t</mi></munderover>
 <msup><msub><mi>β</mi><mn>1</mn></msub><mrow><mi>t</mi><mo>−</mo><mi>k</mi></mrow></msup><mi>μ</mi>
 </mrow></mtd></mtr>
 <mtr><mtd><mrow>
-<mo>=</mo><mo>(</mo><mn>1</mn><mo>−</mo><msup><msub><mi>β</mi><mn>1</mn></msub><mi>t</mi></msup><mo>)</mo><mi>μ</mi><mo>.</mo>
+<mo>=</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msup><msub><mi>β</mi><mn>1</mn></msub><mi>t</mi></msup><mo>)</mo></mrow><mi>μ</mi><mo>.</mo>
 </mrow></mtd></mtr>
 </mtable>
 </math>
 </div>
-<p>Dividing by (1−β_1^t) restores the missing mass, giving (μ) under this stationary assumption. In a real nonstationary run, bias correction removes the artifact of zero initialization; it cannot make a moving average unbiased for a target whose value is itself changing.</p>
+<p>Dividing by <span aria-label="1−β_1^t" class="inline-math" role="math">1−β<sub>1</sub><sup>t</sup></span> restores the missing mass, giving <span aria-label="μ" class="inline-math" role="math">μ</span> under this stationary assumption. In a real nonstationary run, bias correction removes the artifact of zero initialization; it cannot make a moving average unbiased for a target whose value is itself changing.</p>
 <p>The final update is:</p>
 <div aria-label="theta t equals theta t minus one minus eta t times m hat t divided by square root v hat t plus epsilon" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
@@ -3403,13 +3423,13 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 </div>
 <p>The update is easier to remember by assigning one job to each term:</p>
 <ul>
-<li>(m_t) smooths the direction;</li>
-<li>(v_t) measures recent coordinate-wise gradient magnitude;</li>
+<li><span aria-label="m_t" class="inline-math" role="math">m<sub>t</sub></span> smooths the direction;</li>
+<li><span aria-label="v_t" class="inline-math" role="math">v<sub>t</sub></span> measures recent coordinate-wise gradient magnitude;</li>
 <li>bias correction repairs zero initialization, especially during warmup;</li>
 <li>epsilon sets a numerical and behavioral floor;</li>
-<li>(η_t) still controls the global distance moved.</li>
+<li><span aria-label="η_t" class="inline-math" role="math">η<sub>t</sub></span> still controls the global distance moved.</li>
 </ul>
-<p>Coordinate (i) has the instantaneous scale</p>
+<p>Coordinate <span aria-label="i" class="inline-math" role="math">i</span> has the instantaneous scale</p>
 <div aria-label="alpha t i equals eta t divided by square root v hat t i plus epsilon" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mrow>
@@ -3420,7 +3440,7 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 </mrow>
 </math>
 </div>
-<p>Thus Adam does not have one effective learning rate: it has a global schedule multiplied by a state-dependent scale for every coordinate. A constant nonzero gradient gives a useful limiting case. After bias correction, (m̂_t=g) and (v̂_t=g²), so the coordinate update is (−η_t g/(|g|+ε)); it approaches a sign step only when (|g|≫ε). Real dynamics differ because gradients change, the two EMAs use different time constants, and clipping and scheduling alter the inputs and global scale.</p>
+<p>Thus Adam does not have one effective learning rate: it has a global schedule multiplied by a state-dependent scale for every coordinate. A constant nonzero gradient gives a useful limiting case. After bias correction, <span aria-label="m̂_t=g" class="inline-math" role="math">m̂<sub>t</sub>=g</span> and <span aria-label="v̂_t=g²" class="inline-math" role="math">v̂<sub>t</sub>=g<sup>2</sup></span>, so the coordinate update is <span aria-label="−η_t g/(|g|+ε)" class="inline-math" role="math">−η<sub>t</sub> g/(|g|+ε)</span>; it approaches a sign step only when <span aria-label="|g|≫ε" class="inline-math" role="math">|g|≫ε</span>. Real dynamics differ because gradients change, the two EMAs use different time constants, and clipping and scheduling alter the inputs and global scale.</p>
 <h3 id="51-a-compact-reference-implementation">5.1 A compact reference implementation</h3>
 <p>The core recurrence fits in a few lines. Read the code in the same order as the equations: update the two moments, correct their initialization bias, then divide direction by scale. This teaching function assumes dense tensors and stores state in the parameter dtype; production code needs an explicit state-dtype policy.</p>
 <figure class="code-block"><figcaption><span class="code-language">Python</span><button aria-label="Copy Python code" class="copy-code" data-copy-target="code-0" type="button">Copy</button></figcaption><pre><code class="language-python" id="code-0">@torch.no_grad()
@@ -3438,13 +3458,13 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <p><a class="external-link" href="https://openreview.net/forum?id=ryQu7f-RZ" rel="noopener noreferrer" target="_blank">On the Convergence of Adam and Beyond</a> constructs simple convex sequences on which the original Adam update does not converge to the optimum. AMSGrad responds by preventing the second-moment denominator from decreasing:</p>
 <div aria-label="v max t equals the coordinate wise maximum of v max t minus one and v t" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mrow><msubsup><mi>v</mi><mi>t</mi><mi mathvariant="normal">max</mi></msubsup><mo>=</mo><mi mathvariant="normal">max</mi><mo>(</mo><msubsup><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow><mi mathvariant="normal">max</mi></msubsup><mo>,</mo><msub><mi>v</mi><mi>t</mi></msub><mo>)</mo><mo>.</mo></mrow>
+<mrow><msubsup><mi>v</mi><mi>t</mi><mi mathvariant="normal">max</mi></msubsup><mo>=</mo><mi mathvariant="normal">max</mi><mrow><mo>(</mo><msubsup><mi>v</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow><mi mathvariant="normal">max</mi></msubsup><mo>,</mo><msub><mi>v</mi><mi>t</mi></msub><mo>)</mo></mrow><mo>.</mo></mrow>
 </math>
 </div>
 <p>The counterexample establishes that Adam's success is not covered by a universal convergence guarantee; it does <strong>not</strong> predict that a normal Transformer run will fail. PyTorch therefore exposes AMSGrad but keeps <code>amsgrad=False</code> by default. When an LLM run becomes unstable, first inspect the learning rate, warmup, loss normalization, data, precision, clipping, model normalization, and implementation before blaming this theoretical edge case.</p>
 
 </section><section aria-labelledby="6-adamw-weight-decay-is-not-l2-regularization-under-adam" class="article-section" data-chapter="implementation" data-section-number="06" id="section-6-adamw-weight-decay-is-not-l2-regularization-under-adam"><p aria-hidden="true" class="section-label">06</p><h2 id="6-adamw-weight-decay-is-not-l2-regularization-under-adam">6. AdamW: weight decay is not L2 regularization under Adam</h2>
-<p>The AdamW distinction is easiest to see by following where shrinkage enters the computation. If an L2 penalty (λ‖θ‖²/2) is added to the loss, its gradient (λθ) enters Adam's moments and is divided by the adaptive denominator together with the data gradient:</p>
+<p>The AdamW distinction is easiest to see by following where shrinkage enters the computation. If an L2 penalty <span aria-label="λ‖θ‖²/2" class="inline-math" role="math">λ‖θ‖<sup>2</sup>/2</span> is added to the loss, its gradient <span aria-label="λθ" class="inline-math" role="math">λθ</span> enters Adam's moments and is divided by the adaptive denominator together with the data gradient:</p>
 <div aria-label="the gradient is replaced by the gradient plus lambda theta before Adam preconditioning" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mrow><msub><mi>g</mi><mi>t</mi></msub><mo>←</mo><msub><mi>g</mi><mi>t</mi></msub><mo>+</mo><mi>λ</mi><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>.</mo></mrow>
@@ -3453,27 +3473,27 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <p><a class="external-link" href="https://iclr.cc/virtual/2019/poster/935" rel="noopener noreferrer" target="_blank">AdamW</a> takes a different route: first shrink the parameter directly, then apply the adaptively preconditioned data-gradient update. In one combined expression:</p>
 <div aria-label="theta t equals one minus eta lambda times theta t minus one minus eta times the Adam direction" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub>
+<mrow><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub>
 <mfrac><msub><mover accent="true"><mi>m</mi><mo>ˆ</mo></mover><mi>t</mi></msub><mrow><msqrt><msub><mover accent="true"><mi>v</mi><mo>ˆ</mo></mover><mi>t</mi></msub></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>.</mo></mrow>
 </math>
 </div>
-<p>For plain SGD, L2 regularization and multiplicative weight decay can be equivalent after matching conventions. Under Adam's diagonal preconditioner they are not: placing (λθ) inside the gradient divides the penalty by a different denominator in every coordinate and also mixes it into the moments. AdamW keeps shrinkage separate from gradient normalization, so (λ) has a clearer parameter-space meaning.</p>
+<p>For plain SGD, L2 regularization and multiplicative weight decay can be equivalent after matching conventions. Under Adam's diagonal preconditioner they are not: placing <span aria-label="λθ" class="inline-math" role="math">λθ</span> inside the gradient divides the penalty by a different denominator in every coordinate and also mixes it into the moments. AdamW keeps shrinkage separate from gradient normalization, so <span aria-label="λ" class="inline-math" role="math">λ</span> has a clearer parameter-space meaning.</p>
 <p>“Decoupled” means separate from the gradient preconditioner, not independent of the learning rate or training duration. To see the remaining coupling, set the loss-gradient update to zero. Repeated AdamW decay gives:</p>
 <div aria-label="theta T equals theta zero times the product over t of one minus eta t lambda" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mrow><msub><mi>θ</mi><mi>T</mi></msub><mo>=</mo><msub><mi>θ</mi><mn>0</mn></msub><munderover><mo>∏</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo><mo>.</mo></mrow>
+<mrow><msub><mi>θ</mi><mi>T</mi></msub><mo>=</mo><msub><mi>θ</mi><mn>0</mn></msub><munderover><mo>∏</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow><mo>.</mo></mrow>
 </math>
 </div>
-<p>When every (η_tλ) is small, taking logarithms gives:</p>
+<p>When every <span aria-label="η_tλ" class="inline-math" role="math">η<sub>t</sub>λ</span> is small, taking logarithms gives:</p>
 <div aria-label="theta T is approximately exponential of minus lambda times cumulative learning rate times theta zero" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.55em">
-<mtr><mtd><mrow><mi mathvariant="normal">log</mi><mo>(</mo><mfrac><mrow><mo>‖</mo><msub><mi>θ</mi><mi>T</mi></msub><mo>‖</mo></mrow><mrow><mo>‖</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>‖</mo></mrow></mfrac><mo>)</mo><mo>≈</mo><mo>−</mo><mi>λ</mi><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><msub><mi>η</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
-<mtr><mtd><mrow><msub><mi>θ</mi><mi>T</mi></msub><mo>≈</mo><mi mathvariant="normal">exp</mi><mo>(</mo><mo>−</mo><mi>λ</mi><msub><mi>A</mi><mi>T</mi></msub><mo>)</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><mspace width="1em"></mspace><msub><mi>A</mi><mi>T</mi></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><msub><mi>η</mi><mi>t</mi></msub><mo>.</mo></mrow></mtd></mtr>
+<mtr><mtd><mrow><mi mathvariant="normal">log</mi><mrow><mo>(</mo><mfrac><mrow><mo>‖</mo><msub><mi>θ</mi><mi>T</mi></msub><mo>‖</mo></mrow><mrow><mo>‖</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>‖</mo></mrow></mfrac><mo>)</mo></mrow><mo>≈</mo><mo>−</mo><mi>λ</mi><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><msub><mi>η</mi><mi>t</mi></msub><mo>,</mo></mrow></mtd></mtr>
+<mtr><mtd><mrow><msub><mi>θ</mi><mi>T</mi></msub><mo>≈</mo><mi mathvariant="normal">exp</mi><mrow><mo>(</mo><mo>−</mo><mi>λ</mi><msub><mi>A</mi><mi>T</mi></msub><mo>)</mo></mrow><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><mspace width="1em"></mspace><msub><mi>A</mi><mi>T</mi></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><msub><mi>η</mi><mi>t</mi></msub><mo>.</mo></mrow></mtd></mtr>
 </mtable>
 </math>
 </div>
-<p>The relevant control is therefore (λA_T): weight decay multiplied by the cumulative area under the learning-rate schedule. Two runs with the same nominal (λ) but different schedules or numbers of optimizer steps can apply substantially different total shrinkage.</p>
+<p>The relevant control is therefore <span aria-label="λA_T" class="inline-math" role="math">λA<sub>T</sub></span>: weight decay multiplied by the cumulative area under the learning-rate schedule. Two runs with the same nominal <span aria-label="λ" class="inline-math" role="math">λ</span> but different schedules or numbers of optimizer steps can apply substantially different total shrinkage.</p>
 <h3 id="61-a-pedagogical-pytorch-optimizer">6.1 A pedagogical PyTorch optimizer</h3>
 <figure class="code-block"><figcaption><span class="code-language">Python</span><button aria-label="Copy Python code" class="copy-code" data-copy-target="code-1" type="button">Copy</button></figcaption><pre><code class="language-python" id="code-1">class AdamWFromScratch(torch.optim.Optimizer):
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999),
@@ -3518,7 +3538,7 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <p>In PyTorch-style semantics, <code>p.grad is None</code> means “this parameter did not participate in this update,” so its step counter, moments, parameter value, and weight decay are usually left untouched. An allocated all-zero gradient means “the update was computed and happened to be zero”; state can still advance and decay can still apply. Consequently, <code>optimizer.zero_grad(set_to_none=True)</code> changes both memory use and the semantics of unused parameters.</p>
 <h3 id="63-parameter-groups-are-part-of-the-recipe">6.3 Parameter groups are part of the recipe</h3>
 <p>Karpathy's <a class="external-link" href="https://github.com/karpathy/nanoGPT/blob/master/model.py" rel="noopener noreferrer" target="_blank">nanoGPT configuration</a> demonstrates a common convention: decay matrix-like weights while leaving biases and normalization parameters undecayed. Many LLM codebases use a similar split, but the split is neither part of AdamW's definition nor a theorem. Embeddings, output heads, expert weights, norms, and biases may need architecture-specific treatment.</p>
-<p>When reproducing a run, serialize and report the actual name-to-group mapping and each group's hyperparameters. “AdamW, learning rate (3×10^{-4}), weight decay 0.1” is incomplete if many parameters use another rate or no decay—and a changed naming rule can silently change the experiment after a refactor.</p>
+<p>When reproducing a run, serialize and report the actual name-to-group mapping and each group's hyperparameters. “AdamW, learning rate <span aria-label="3×10^{-4}" class="inline-math" role="math">3×10<sup>-4</sup></span>, weight decay 0.1” is incomplete if many parameters use another rate or no decay—and a changed naming rule can silently change the experiment after a refactor.</p>
 <h3 id="64-verification-before-speed">6.4 Verification before speed</h3>
 <p>A from-scratch implementation should first match a trusted reference in float64, where numerical discrepancies are easier to interpret. Test cases should isolate one semantic choice at a time:</p>
 <ul>
@@ -3534,7 +3554,7 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 
 </section><section aria-labelledby="7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm" class="article-section" data-chapter="implementation" data-section-number="07" id="section-7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm"><p aria-hidden="true" class="section-label">07</p><h2 id="7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm">7. The schedule, clipping, and precision are part of the training algorithm</h2>
 <h3 id="71-warmup">7.1 Warmup</h3>
-<p>An optimizer begins with empty moments and a model begins with unadapted representations, so the earliest updates are unusually sensitive. Linear warmup limits their size by increasing the rate gradually to (η_{max}):</p>
+<p>An optimizer begins with empty moments and a model begins with unadapted representations, so the earliest updates are unusually sensitive. Linear warmup limits their size by increasing the rate gradually to <span aria-label="η_{max}" class="inline-math" role="math">η<sub>max</sub></span>:</p>
 <div aria-label="eta t equals eta max times t divided by T warmup" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mrow><msub><mi>η</mi><mi>t</mi></msub><mo>=</mo><msub><mi>η</mi><mi mathvariant="normal">max</mi></msub><mfrac><mi>t</mi><msub><mi>T</mi><mi mathvariant="normal">warmup</mi></msub></mfrac><mo>.</mo></mrow>
@@ -3545,13 +3565,13 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <p>The original Transformer used a model-dimension-scaled warmup followed by inverse-square-root decay:</p>
 <div aria-label="eta t equals d model to the minus one half times the minimum of t to the minus one half and t times T warmup to the minus three halves" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mrow><msub><mi>η</mi><mi>t</mi></msub><mo>=</mo><msup><msub><mi>d</mi><mi mathvariant="normal">model</mi></msub><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mi mathvariant="normal">min</mi><mo>(</mo><msup><mi>t</mi><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mo>,</mo><mi>t</mi><msup><msub><mi>T</mi><mi>w</mi></msub><mrow><mo>−</mo><mfrac><mn>3</mn><mn>2</mn></mfrac></mrow></msup><mo>)</mo><mo>.</mo></mrow>
+<mrow><msub><mi>η</mi><mi>t</mi></msub><mo>=</mo><msup><msub><mi>d</mi><mi mathvariant="normal">model</mi></msub><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mi mathvariant="normal">min</mi><mrow><mo>(</mo><msup><mi>t</mi><mrow><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow></msup><mo>,</mo><mi>t</mi><msup><msub><mi>T</mi><mi>w</mi></msub><mrow><mo>−</mo><mfrac><mn>3</mn><mn>2</mn></mfrac></mrow></msup><mo>)</mo></mrow><mo>.</mo></mrow>
 </math>
 </div>
 <p>Warmup plus cosine decay is common in decoder-only pretraining:</p>
 <div aria-label="cosine learning rate decay from eta max to eta min after warmup" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mrow><msub><mi>η</mi><mi>t</mi></msub><mo>=</mo><msub><mi>η</mi><mi mathvariant="normal">min</mi></msub><mo>+</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>(</mo><msub><mi>η</mi><mi mathvariant="normal">max</mi></msub><mo>−</mo><msub><mi>η</mi><mi mathvariant="normal">min</mi></msub><mo>)</mo><mo>[</mo><mn>1</mn><mo>+</mo><mi mathvariant="normal">cos</mi><mo>(</mo><mi>π</mi><mfrac><mrow><mi>t</mi><mo>−</mo><msub><mi>T</mi><mi>w</mi></msub></mrow><mrow><mi>T</mi><mo>−</mo><msub><mi>T</mi><mi>w</mi></msub></mrow></mfrac><mo>)</mo><mo>]</mo><mo>.</mo></mrow>
+<mrow><msub><mi>η</mi><mi>t</mi></msub><mo>=</mo><msub><mi>η</mi><mi mathvariant="normal">min</mi></msub><mo>+</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mrow><mo>(</mo><msub><mi>η</mi><mi mathvariant="normal">max</mi></msub><mo>−</mo><msub><mi>η</mi><mi mathvariant="normal">min</mi></msub><mo>)</mo></mrow><mo>[</mo><mn>1</mn><mo>+</mo><mi mathvariant="normal">cos</mi><mrow><mo>(</mo><mi>π</mi><mfrac><mrow><mi>t</mi><mo>−</mo><msub><mi>T</mi><mi>w</mi></msub></mrow><mrow><mi>T</mi><mo>−</mo><msub><mi>T</mi><mi>w</mi></msub></mrow></mfrac><mo>)</mo></mrow><mo>]</mo><mo>.</mo></mrow>
 </math>
 </div>
 <p>Cosine decay ties every learning rate to a planned final step. Warmup–Stable–Decay (WSD) instead separates continued training from finalization: hold a stable rate along a long branch, then run a shorter cooldown when a final checkpoint is needed. <a class="external-link" href="https://arxiv.org/abs/2410.05192" rel="noopener noreferrer" target="_blank">Understanding Warmup-Stable-Decay Learning Rates</a> motivates this flexibility and a “river valley” view of the final loss drop. The 2025 follow-up <a class="external-link" href="https://arxiv.org/abs/2508.01483" rel="noopener noreferrer" target="_blank">Training Dynamics of the Cooldown Stage</a> reports that cooldown shape and AdamW hyperparameters interact materially.</p>
@@ -3594,7 +3614,7 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <p>Global clipping rescales all gradients together when their norm exceeds (c):</p>
 <div aria-label="the clipped gradient equals the gradient times the minimum of one and c divided by the gradient norm" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mrow><mi>g</mi><mo>←</mo><mi>g</mi><mi mathvariant="normal">min</mi><mo>(</mo><mn>1</mn><mo>,</mo><mfrac><mi>c</mi><msub><mrow><mo>‖</mo><mi>g</mi><mo>‖</mo></mrow><mn>2</mn></msub></mfrac><mo>)</mo><mo>.</mo></mrow>
+<mrow><mi>g</mi><mo>←</mo><mi>g</mi><mi mathvariant="normal">min</mi><mrow><mo>(</mo><mn>1</mn><mo>,</mo><mfrac><mi>c</mi><msub><mrow><mo>‖</mo><mi>g</mi><mo>‖</mo></mrow><mn>2</mn></msub></mfrac><mo>)</mo></mrow><mo>.</mo></mrow>
 </math>
 </div>
 <p>Global-norm clipping preserves the gradient's direction because every coordinate receives the same multiplier. This differs from Sophia's coordinate-wise update clipping and from clipping attention logits. Under FP16 loss scaling, unscale before measuring or clipping the norm. If clipping fires almost every step, it may be masking an excessive learning rate or bad data; log the pre-clip norm and the fraction of clipped steps.</p>
@@ -3616,13 +3636,13 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 </section><section aria-labelledby="8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore" class="article-section" data-chapter="implementation" data-section-number="08" id="section-8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore"><p aria-hidden="true" class="section-label">08</p><h2 id="8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore">8. Memory-first optimizers: Adafactor, quantized state, Adam-mini, and GaLore</h2>
 <p>AdamW stores a first and second moment for every parameter. At billions of parameters, those two simple recurrences become a major memory allocation and checkpoint burden. The methods in this section retain some form of adaptivity while answering different compression questions: fewer statistics, fewer bits, fewer distinct rates, or a smaller subspace.</p>
 <h3 id="81-adafactor">8.1 Adafactor</h3>
-<p>For a matrix gradient (G_t ∈ ℝ^{r×c}), <a class="external-link" href="https://proceedings.mlr.press/v80/shazeer18a.html" rel="noopener noreferrer" target="_blank">Adafactor</a> approximates a full second-moment matrix using row and column statistics. Let (S_t=G_t⊙G_t). Exponentially averaged row and column sums are:</p>
+<p>For a matrix gradient <span aria-label="G_t ∈ ℝ^{r×c}" class="inline-math" role="math">G<sub>t</sub> ∈ ℝ<sup>r×c</sup></span>, <a class="external-link" href="https://proceedings.mlr.press/v80/shazeer18a.html" rel="noopener noreferrer" target="_blank">Adafactor</a> approximates a full second-moment matrix using row and column statistics. Let <span aria-label="S_t=G_t⊙G_t" class="inline-math" role="math">S<sub>t</sub>=G<sub>t</sub>⊙G<sub>t</sub></span>. Exponentially averaged row and column sums are:</p>
 <div aria-label="Adafactor row and column second moment accumulators" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.45em">
 <mtr><mtd><msub><mi>S</mi><mi>t</mi></msub><mo>=</mo><msub><mi>G</mi><mi>t</mi></msub><mo>⊙</mo><msub><mi>G</mi><mi>t</mi></msub><mo>,</mo></mtd></mtr>
-<mtr><mtd><msub><mi>a</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><msub><mi>a</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo>)</mo></mrow><msub><mi>S</mi><mi>t</mi></msub><msub><mn>1</mn><mi>c</mi></msub><mo>∈</mo><msup><mi>ℝ</mi><mi>r</mi></msup><mo>,</mo></mtd></mtr>
-<mtr><mtd><msub><mi>b</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><msub><mi>b</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo>)</mo></mrow><msubsup><mn>1</mn><mi>r</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>S</mi><mi>t</mi></msub><mo>∈</mo><msup><mi>ℝ</mi><mi>c</mi></msup><mo>.</mo></mtd></mtr>
+<mtr><mtd><msub><mi>a</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><msub><mi>a</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo>)</mo></mrow></mrow><msub><mi>S</mi><mi>t</mi></msub><msub><mn>1</mn><mi>c</mi></msub><mo>∈</mo><msup><mi>ℝ</mi><mi>r</mi></msup><mo>,</mo></mtd></mtr>
+<mtr><mtd><msub><mi>b</mi><mi>t</mi></msub><mo>=</mo><mi>β</mi><msub><mi>b</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo>)</mo></mrow></mrow><msubsup><mn>1</mn><mi>r</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>S</mi><mi>t</mi></msub><mo>∈</mo><msup><mi>ℝ</mi><mi>c</mi></msup><mo>.</mo></mtd></mtr>
 </mtable>
 </math>
 </div>
@@ -3805,21 +3825,21 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <div aria-label="Lion updates parameters with the sign of an interpolation between momentum and gradient, then updates the stored momentum with beta two" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.45em">
-<mtr><mtd><msub><mi>u</mi><mi>t</mi></msub><mo>=</mo><mi mathvariant="normal">sign</mi><mo>(</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo></mrow><msub><mi>g</mi><mi>t</mi></msub><mo>)</mo><mo>,</mo></mtd></mtr>
-<mtr><mtd><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>u</mi><mi>t</mi></msub><mo>,</mo></mtd></mtr>
-<mtr><mtd><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo>)</mo></mrow><msub><mi>g</mi><mi>t</mi></msub><mo>.</mo></mtd></mtr>
+<mtr><mtd><msub><mi>u</mi><mi>t</mi></msub><mo>=</mo><mi mathvariant="normal">sign</mi><mrow><mo>(</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo></mrow></mrow><msub><mi>g</mi><mi>t</mi></msub><mo>)</mo></mrow><mo>,</mo></mtd></mtr>
+<mtr><mtd><msub><mi>θ</mi><mi>t</mi></msub><mo>=</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow></mrow><msub><mi>θ</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>u</mi><mi>t</mi></msub><mo>,</mo></mtd></mtr>
+<mtr><mtd><msub><mi>m</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>m</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo>)</mo></mrow></mrow><msub><mi>g</mi><mi>t</mi></msub><mo>.</mo></mtd></mtr>
 </mtable>
 </math>
 </div>
-<p>Lion stores one momentum tensor rather than Adam's two moments. Before weight decay, every nonzero coordinate update has magnitude (η_t), regardless of the raw gradient magnitude. This changes the meaning of the learning rate, so Lion usually needs a substantially smaller value than AdamW. The original paper reports similar or better results for several language tasks and larger benefits at large batch size; controlled LLM studies find a more conditional advantage.</p>
+<p>Lion stores one momentum tensor rather than Adam's two moments. Before weight decay, every nonzero coordinate update has magnitude <span aria-label="η_t" class="inline-math" role="math">η<sub>t</sub></span>, regardless of the raw gradient magnitude. This changes the meaning of the learning rate, so Lion usually needs a substantially smaller value than AdamW. The original paper reports similar or better results for several language tasks and larger benefits at large batch size; controlled LLM studies find a more conditional advantage.</p>
 <h3 id="102-lamb-match-update-norm-to-parameter-norm">10.2 LAMB: match update norm to parameter norm</h3>
 <p><a class="external-link" href="https://openreview.net/forum?id=Syx4wnEtvH" rel="noopener noreferrer" target="_blank">LAMB</a> starts with an Adam-like direction, then asks a block-level question: how large is the proposed update relative to the parameter itself? It rescales each layer or parameter block by a trust ratio:</p>
 <div aria-label="the LAMB block update is scaled by the norm of the parameter divided by the norm of the Adam-like direction" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.45em">
-<mtr><mtd><msubsup><mi>r</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>=</mo><mfrac><msubsup><mover accent="true"><mi>m</mi><mo>ˆ</mo></mover><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mrow><msqrt><msubsup><mover accent="true"><mi>v</mi><mo>ˆ</mo></mover><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>+</mo><mi>λ</mi><msubsup><mi>θ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>,</mo></mtd></mtr>
-<mtr><mtd><msubsup><mi>τ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>=</mo><mfrac><mrow><mi>φ</mi><mo>(</mo><msub><mrow><mo>‖</mo><msubsup><mi>θ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>‖</mo></mrow><mn>2</mn></msub><mo>)</mo></mrow><msub><mrow><mo>‖</mo><msubsup><mi>r</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>‖</mo></mrow><mn>2</mn></msub></mfrac><mo>,</mo></mtd></mtr>
-<mtr><mtd><msubsup><mi>θ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>=</mo><msubsup><mi>θ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msubsup><mi>τ</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><msubsup><mi>r</mi><mi>t</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>.</mo></mtd></mtr>
+<mtr><mtd><msubsup><mi>r</mi><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><mo>=</mo><mfrac><msubsup><mover accent="true"><mi>m</mi><mo>ˆ</mo></mover><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><mrow><msqrt><msubsup><mover accent="true"><mi>v</mi><mo>ˆ</mo></mover><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>+</mo><mi>λ</mi><msubsup><mi>θ</mi><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><mo>,</mo></mtd></mtr>
+<mtr><mtd><msubsup><mi>τ</mi><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><mo>=</mo><mfrac><mrow><mi>φ</mi><mrow><mo>(</mo><msub><mrow><mo>‖</mo><msubsup><mi>θ</mi><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><mo>‖</mo></mrow><mn>2</mn></msub><mo>)</mo></mrow></mrow><msub><mrow><mo>‖</mo><msubsup><mi>r</mi><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><mo>‖</mo></mrow><mn>2</mn></msub></mfrac><mo>,</mo></mtd></mtr>
+<mtr><mtd><msubsup><mi>θ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><mo>=</mo><msubsup><mi>θ</mi><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msubsup><mi>τ</mi><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><msubsup><mi>r</mi><mi>t</mi><mrow><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></mrow></msubsup><mo>.</mo></mtd></mtr>
 </mtable>
 </math>
 </div>
@@ -3828,7 +3848,7 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <p><a class="external-link" href="https://proceedings.iclr.cc/paper_files/paper/2024/hash/06960915ba8674c7a898ec0b472b80ff-Abstract-Conference.html" rel="noopener noreferrer" target="_blank">Sophia (ICLR 2024)</a> replaces Adam's gradient-scale denominator with a more direct diagonal curvature estimate. It periodically estimates a Hessian or Gauss–Newton diagonal, divides momentum by that estimate with a floor, and clips each coordinate's update. Refreshing curvature only every several steps controls overhead but makes the estimate stale between refreshes.</p>
 <p>The authors report roughly 2× fewer steps, compute, and wall time than Adam on GPT models from 125M to 1.5B. Later equal-tuning comparisons do not find a universal 2× gain. Sophia remains conceptually important: it demonstrates that lightweight curvature information plus aggressive clipping can be practical for language-model pretraining.</p>
 <h3 id="104-shampoo-use-the-tensors-own-axes">10.4 Shampoo: use the tensor's own axes</h3>
-<p>For a matrix gradient (G_t ∈ ℝ^{m×n}), original <a class="external-link" href="https://proceedings.mlr.press/v80/gupta18a.html" rel="noopener noreferrer" target="_blank">Shampoo</a> accumulates left and right statistics:</p>
+<p>For a matrix gradient <span aria-label="G_t ∈ ℝ^{m×n}" class="inline-math" role="math">G<sub>t</sub> ∈ ℝ<sup>m×n</sup></span>, original <a class="external-link" href="https://proceedings.mlr.press/v80/gupta18a.html" rel="noopener noreferrer" target="_blank">Shampoo</a> accumulates left and right statistics:</p>
 <div aria-label="L t accumulates G G transpose, R t accumulates G transpose G, and Shampoo preconditions G with inverse fourth roots" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.45em">
@@ -3838,26 +3858,26 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 </mtable>
 </math>
 </div>
-<p>The two statistics summarize different interactions: (L_t) couples rows, while (R_t) couples columns. Shampoo therefore captures structure that a diagonal scale cannot, while storing (O(m²+n²)) matrix state instead of an impossible (O(m²n²)) full preconditioner over all entries. Practical implementations block large tensors, refresh inverse roots less often, graft the update magnitude to a familiar first-order method, and distribute the preconditioner work.</p>
+<p>The two statistics summarize different interactions: <span aria-label="L_t" class="inline-math" role="math">L<sub>t</sub></span> couples rows, while <span aria-label="R_t" class="inline-math" role="math">R<sub>t</sub></span> couples columns. Shampoo therefore captures structure that a diagonal scale cannot, while storing <span aria-label="O(m²+n²)" class="inline-math" role="math">O(m<sup>2</sup>+n<sup>2</sup>)</span> matrix state instead of an impossible <span aria-label="O(m²n²)" class="inline-math" role="math">O(m<sup>2</sup>n<sup>2</sup>)</span> full preconditioner over all entries. Practical implementations block large tensors, refresh inverse roots less often, graft the update magnitude to a familiar first-order method, and distribute the preconditioner work.</p>
 <p>The benefit is richer geometry; the price is matrix state and matrix algebra. Inverse roots can require high precision, infrequent refreshes make preconditioners stale, and block layouts must map efficiently to accelerators and collectives. <a class="external-link" href="https://arxiv.org/abs/2002.09018" rel="noopener noreferrer" target="_blank">Practical Scalable Shampoo</a> and <a class="external-link" href="https://arxiv.org/abs/2309.06497" rel="noopener noreferrer" target="_blank">Distributed Shampoo</a> are therefore as important operationally as the original equation.</p>
 
 </section><section aria-labelledby="11-soap-and-muon-two-matrix-aware-paths" class="article-section" data-chapter="systems" data-section-number="11" id="section-11-soap-and-muon-two-matrix-aware-paths"><p aria-hidden="true" class="section-label">11</p><h2 id="11-soap-and-muon-two-matrix-aware-paths">11. SOAP and Muon: two matrix-aware paths</h2>
 <h3 id="111-soap-adam-in-shampoos-eigenbasis">11.1 SOAP: Adam in Shampoo's eigenbasis</h3>
-<p>SOAP is easiest to understand as a two-stage procedure: use Shampoo-style statistics to discover a coordinate system, then run Adam inside that rotated system. For a matrix parameter (W_t∈ℝ^{m×n}) with gradient (G_t), <a class="external-link" href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/e988664070e9591f93fdcf605f7dc623-Abstract-Conference.html" rel="noopener noreferrer" target="_blank">SOAP (ICLR 2025)</a> first maintains row and column statistics:</p>
+<p>SOAP is easiest to understand as a two-stage procedure: use Shampoo-style statistics to discover a coordinate system, then run Adam inside that rotated system. For a matrix parameter <span aria-label="W_t∈ℝ^{m×n}" class="inline-math" role="math">W<sub>t</sub>∈ℝ<sup>m×n</sup></span> with gradient <span aria-label="G_t" class="inline-math" role="math">G<sub>t</sub></span>, <a class="external-link" href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/e988664070e9591f93fdcf605f7dc623-Abstract-Conference.html" rel="noopener noreferrer" target="_blank">SOAP (ICLR 2025)</a> first maintains row and column statistics:</p>
 <div aria-label="SOAP left and right preconditioner recurrences" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.45em">
-<mtr><mtd><msub><mi>L</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mi>s</mi></msub><msub><mi>L</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mi>s</mi></msub><mo>)</mo></mrow><msub><mi>G</mi><mi>t</mi></msub><msubsup><mi>G</mi><mi>t</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr>
-<mtr><mtd><msub><mi>R</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mi>s</mi></msub><msub><mi>R</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mi>s</mi></msub><mo>)</mo></mrow><msubsup><mi>G</mi><mi>t</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>G</mi><mi>t</mi></msub><mo>.</mo></mtd></mtr>
+<mtr><mtd><msub><mi>L</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mi>s</mi></msub><msub><mi>L</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mi>s</mi></msub><mo>)</mo></mrow></mrow><msub><mi>G</mi><mi>t</mi></msub><msubsup><mi>G</mi><mi>t</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr>
+<mtr><mtd><msub><mi>R</mi><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mi>s</mi></msub><msub><mi>R</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mi>s</mi></msub><mo>)</mo></mrow></mrow><msubsup><mi>G</mi><mi>t</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>G</mi><mi>t</mi></msub><mo>.</mo></mtd></mtr>
 </mtable>
 </math>
 </div>
-<p>Every (f) steps it refreshes approximate eigenbases (Q_L,Q_R). The columns of (Q_L) define directions among rows, and the columns of (Q_R) define directions among columns. Between refreshes, SOAP rotates the gradient into this basis and stores its first moment there:</p>
+<p>Every <span aria-label="f" class="inline-math" role="math">f</span> steps it refreshes approximate eigenbases <span aria-label="Q_L,Q_R" class="inline-math" role="math">Q<sub>L</sub>,Q<sub>R</sub></span>. The columns of <span aria-label="Q_L" class="inline-math" role="math">Q<sub>L</sub></span> define directions among rows, and the columns of <span aria-label="Q_R" class="inline-math" role="math">Q<sub>R</sub></span> define directions among columns. Between refreshes, SOAP rotates the gradient into this basis and stores its first moment there:</p>
 <div aria-label="SOAP rotates the gradient and stores its first moment in the active eigenbasis, transporting that moment exactly when the basis changes" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.45em">
 <mtr><mtd><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><msubsup><mi>Q</mi><mi>L</mi><mi mathvariant="normal">T</mi></msubsup><msub><mi>G</mi><mi>t</mi></msub><msub><mi>Q</mi><mi>R</mi></msub><mo>,</mo></mtd></mtr>
-<mtr><mtd><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo></mrow><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>,</mo></mtd></mtr>
+<mtr><mtd><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>1</mn></msub><mo>)</mo></mrow></mrow><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>,</mo></mtd></mtr>
 <mtr><mtd><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mtext>new</mtext></msub><mo>=</mo><msubsup><mi>Q</mi><mrow><mi>L</mi><mo>,</mo><mtext>new</mtext></mrow><mi mathvariant="normal">T</mi></msubsup><msub><mi>Q</mi><mrow><mi>L</mi><mo>,</mo><mtext>old</mtext></mrow></msub><msub><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mtext>old</mtext></msub><msubsup><mi>Q</mi><mrow><mi>R</mi><mo>,</mo><mtext>old</mtext></mrow><mi mathvariant="normal">T</mi></msubsup><msub><mi>Q</mi><mrow><mi>R</mi><mo>,</mo><mtext>new</mtext></mrow></msub><mo>.</mo></mtd></mtr>
 </mtable>
 </math>
@@ -3866,10 +3886,10 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <div aria-label="SOAP second moment and update in the rotated basis" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.45em">
-<mtr><mtd><msub><mover accent="true"><mi>V</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mover accent="true"><mi>V</mi><mo>¯</mo></mover><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo>)</mo></mrow><mrow><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>⊙</mo><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub></mrow><mo>,</mo></mtd></mtr>
+<mtr><mtd><msub><mover accent="true"><mi>V</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mover accent="true"><mi>V</mi><mo>¯</mo></mover><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>β</mi><mn>2</mn></msub><mo>)</mo></mrow></mrow><mrow><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>⊙</mo><msub><mover accent="true"><mi>G</mi><mo>¯</mo></mover><mi>t</mi></msub></mrow><mo>,</mo></mtd></mtr>
 <mtr><mtd><msub><mover accent="true"><mi>D</mi><mo>¯</mo></mover><mi>t</mi></msub><mo>=</mo><mfrac><msub><mover accent="true"><mover accent="true"><mi>M</mi><mo>¯</mo></mover><mo>ˆ</mo></mover><mi>t</mi></msub><mrow><msqrt><msub><mover accent="true"><mover accent="true"><mi>V</mi><mo>¯</mo></mover><mo>ˆ</mo></mover><mi>t</mi></msub></msqrt><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>,</mo></mtd></mtr>
 <mtr><mtd><msub><mi>D</mi><mi>t</mi></msub><mo>=</mo><msub><mi>Q</mi><mi>L</mi></msub><msub><mover accent="true"><mi>D</mi><mo>¯</mo></mover><mi>t</mi></msub><msubsup><mi>Q</mi><mi>R</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr>
-<mtr><mtd><msub><mi>W</mi><mi>t</mi></msub><mo>=</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow><msub><mi>W</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>D</mi><mi>t</mi></msub><mo>.</mo></mtd></mtr>
+<mtr><mtd><msub><mi>W</mi><mi>t</mi></msub><mo>=</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow></mrow><msub><mi>W</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>D</mi><mi>t</mi></msub><mo>.</mo></mtd></mtr>
 </mtable>
 </math>
 </div>
@@ -3886,17 +3906,17 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 </math>
 </div>
 <p>Under those assumptions, factorized Adafactor in the rotated space recovers the same scaling up to a layerwise scalar. This result explains the design; it is not an identity between production implementations. EMA statistics, damping, stale bases, grafting, and finite refresh frequency all break exact equivalence.</p>
-<p>The refresh exposes the key approximation. A first moment transforms linearly between old and new bases, but an elementwise second moment does not: in general, (Q^T(M⊙M)Q)≠(Q^TMQ)⊙(Q^TMQ). SOAP relies on the bases changing slowly while (V̄_t) is updated every step in the current basis. The paper's implementation refreshes eigenvectors with power iteration plus QR, routes one-dimensional tensors to AdamW, and may use an identity basis on very large axes. If both bases are identity, that layer reduces to AdamW.</p>
-<p>Full two-sided SOAP is state-heavy. Besides Adam-shaped (M,V̄), it stores (L,R) and their bases: roughly (2mn+2m²+2n²) state values before blocking or one-sided variants. The refresh interval (f) trades fresh geometry for eigensolver cost, so state layout and refresh frequency are central systems hyperparameters. In the paper's 360M/660M large-batch experiments, SOAP reports over 40% fewer iterations and over 35% lower wall-clock time than AdamW; those figures remain specific to that setup.</p>
+<p>The refresh exposes the key approximation. A first moment transforms linearly between old and new bases, but an elementwise second moment does not: in general, <span aria-label="Q^T(M⊙M)Q" class="inline-math" role="math">Q<sup>T</sup>(M⊙M)Q</span>≠<span aria-label="Q^TMQ" class="inline-math" role="math">Q<sup>T</sup>MQ</span>⊙<span aria-label="Q^TMQ" class="inline-math" role="math">Q<sup>T</sup>MQ</span>. SOAP relies on the bases changing slowly while <span aria-label="V̄_t" class="inline-math" role="math">V̄<sub>t</sub></span> is updated every step in the current basis. The paper's implementation refreshes eigenvectors with power iteration plus QR, routes one-dimensional tensors to AdamW, and may use an identity basis on very large axes. If both bases are identity, that layer reduces to AdamW.</p>
+<p>Full two-sided SOAP is state-heavy. Besides Adam-shaped (M,V̄), it stores <span aria-label="L,R" class="inline-math" role="math">L,R</span> and their bases: roughly <span aria-label="2mn+2m²+2n²" class="inline-math" role="math">2mn+2m<sup>2</sup>+2n<sup>2</sup></span> state values before blocking or one-sided variants. The refresh interval <span aria-label="f" class="inline-math" role="math">f</span> trades fresh geometry for eigensolver cost, so state layout and refresh frequency are central systems hyperparameters. In the paper's 360M/660M large-batch experiments, SOAP reports over 40% fewer iterations and over 35% lower wall-clock time than AdamW; those figures remain specific to that setup.</p>
 <h3 id="113-muon-the-polar-factor-as-a-steepest-descent-direction">11.3 Muon: the polar factor as a steepest-descent direction</h3>
-<p>Muon—<strong>MomentUm Orthogonalized by Newton–Schulz</strong>—takes a different matrix-aware path: it does not accumulate row and column preconditioners. Instead, it forms a momentum matrix and normalizes its singular directions at every update. Keller Jordan's <a class="external-link" href="https://kellerjordan.github.io/posts/muon/" rel="noopener noreferrer" target="_blank">write-up and reference implementation</a> introduced the method. For a two-dimensional hidden weight, form momentum (B_t) and, commonly, a Nesterov-like matrix (N_t):</p>
+<p>Muon—<strong>MomentUm Orthogonalized by Newton–Schulz</strong>—takes a different matrix-aware path: it does not accumulate row and column preconditioners. Instead, it forms a momentum matrix and normalizes its singular directions at every update. Keller Jordan's <a class="external-link" href="https://kellerjordan.github.io/posts/muon/" rel="noopener noreferrer" target="_blank">write-up and reference implementation</a> introduced the method. For a two-dimensional hidden weight, form momentum <span aria-label="B_t" class="inline-math" role="math">B<sub>t</sub></span> and, commonly, a Nesterov-like matrix <span aria-label="N_t" class="inline-math" role="math">N<sub>t</sub></span>:</p>
 <div aria-label="Muon momentum and Nesterov recurrences" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>B</mi><mi>t</mi></msub><mo>=</mo><mi>μ</mi><msub><mi>B</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>G</mi><mi>t</mi></msub><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>N</mi><mi>t</mi></msub><mo>=</mo><msub><mi>G</mi><mi>t</mi></msub><mo>+</mo><mi>μ</mi><msub><mi>B</mi><mi>t</mi></msub><mspace width="0.8em"></mspace><mtext>(Nesterov).</mtext></mtd></mtr></mtable>
 </math>
 </div>
-<p>If the compact SVD is (N_t=UΣV^T), Muon's exact target is the polar factor (UV^T): keep the left and right singular directions while replacing every nonzero singular value by one. The object being processed is the <strong>momentum update</strong>, not the weight matrix; Muon does not force the learned weights themselves to be orthogonal.</p>
-<p>Why is (UV^T) a sensible direction? Linearize the loss and ask for the step that decreases it most while constraining the step's spectral norm:</p>
+<p>If the compact SVD is <span aria-label="N_t=UΣV^T" class="inline-math" role="math">N<sub>t</sub>=UΣV<sup>T</sup></span>, Muon's exact target is the polar factor <span aria-label="UV^T" class="inline-math" role="math">UV<sup>T</sup></span>: keep the left and right singular directions while replacing every nonzero singular value by one. The object being processed is the <strong>momentum update</strong>, not the weight matrix; Muon does not force the learned weights themselves to be orthogonal.</p>
+<p>Why is <span aria-label="UV^T" class="inline-math" role="math">UV<sup>T</sup></span> a sensible direction? Linearize the loss and ask for the step that decreases it most while constraining the step's spectral norm:</p>
 <div aria-label="the polar factor solves steepest descent under a spectral norm constraint" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
 <mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>N</mi><mi>t</mi></msub><mo>=</mo><mi>U</mi><mi>Σ</mi><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>,</mo></mtd></mtr><mtr><mtd><msup><mi>Δ</mi><mo>*</mo></msup><mo>=</mo><munder><mrow><mi mathvariant="normal">arg</mi><mspace width="0.35em"></mspace><mi mathvariant="normal">min</mi></mrow><mrow><msub><mrow><mo>‖</mo><mi>Δ</mi><mo>‖</mo></mrow><mn>2</mn></msub><mo>≤</mo><mi>η</mi></mrow></munder><msub><mrow><mo>⟨</mo><msub><mi>N</mi><mi>t</mi></msub><mo>,</mo><mi>Δ</mi><mo>⟩</mo></mrow><mi>F</mi></msub><mo>=</mo><mo>−</mo><mi>η</mi><mi>U</mi><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>,</mo></mtd></mtr><mtr><mtd><mi mathvariant="normal">min</mi><mo>=</mo><mo>−</mo><mi>η</mi><msub><mrow><mo>‖</mo><msub><mi>N</mi><mi>t</mi></msub><mo>‖</mo></mrow><mo>*</mo></msub><mo>.</mo></mtd></mtr></mtable>
@@ -3914,16 +3934,16 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <p>An exact SVD for every eligible matrix at every step would be expensive. Newton–Schulz replaces that decomposition with matrix multiplications, which accelerators handle well. Muon transposes tall matrices so the smaller Gram matrix is formed, normalizes the input, and runs about five quintic iterations in BF16:</p>
 <div aria-label="Muon Newton Schulz quintic matrix iteration" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>X</mi><mn>0</mn></msub><mo>=</mo><mfrac><msub><mover accent="true"><mi>N</mi><mo>˜</mo></mover><mi>t</mi></msub><mrow><msub><mrow><mo>‖</mo><msub><mover accent="true"><mi>N</mi><mo>˜</mo></mover><mi>t</mi></msub><mo>‖</mo></mrow><mi>F</mi></msub><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>A</mi><mi>k</mi></msub><mo>=</mo><msub><mi>X</mi><mi>k</mi></msub><msubsup><mi>X</mi><mi>k</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>X</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mi>a</mi><msub><mi>X</mi><mi>k</mi></msub><mo>+</mo><mrow><mo>(</mo><mi>b</mi><msub><mi>A</mi><mi>k</mi></msub><mo>+</mo><mi>c</mi><msubsup><mi>A</mi><mi>k</mi><mn>2</mn></msubsup><mo>)</mo></mrow><msub><mi>X</mi><mi>k</mi></msub><mo>,</mo></mtd></mtr><mtr><mtd><mrow><mo>(</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo>,</mo><mi>c</mi><mo>)</mo></mrow><mo>=</mo><mrow><mo>(</mo><mn>3.4445</mn><mo>,</mo><mo>−</mo><mn>4.7750</mn><mo>,</mo><mn>2.0315</mn><mo>)</mo></mrow><mo>.</mo></mtd></mtr></mtable>
+<mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>X</mi><mn>0</mn></msub><mo>=</mo><mfrac><msub><mover accent="true"><mi>N</mi><mo>˜</mo></mover><mi>t</mi></msub><mrow><msub><mrow><mo>‖</mo><msub><mover accent="true"><mi>N</mi><mo>˜</mo></mover><mi>t</mi></msub><mo>‖</mo></mrow><mi>F</mi></msub><mo>+</mo><mi>ε</mi></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>A</mi><mi>k</mi></msub><mo>=</mo><msub><mi>X</mi><mi>k</mi></msub><msubsup><mi>X</mi><mi>k</mi><mi mathvariant="normal">T</mi></msubsup><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>X</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mi>a</mi><msub><mi>X</mi><mi>k</mi></msub><mo>+</mo><mrow><mrow><mo>(</mo><mi>b</mi><msub><mi>A</mi><mi>k</mi></msub><mo>+</mo><mi>c</mi><msubsup><mi>A</mi><mi>k</mi><mn>2</mn></msubsup><mo>)</mo></mrow></mrow><msub><mi>X</mi><mi>k</mi></msub><mo>,</mo></mtd></mtr><mtr><mtd><mrow><mrow><mo>(</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo>,</mo><mi>c</mi><mo>)</mo></mrow></mrow><mo>=</mo><mrow><mrow><mo>(</mo><mn>3.4445</mn><mo>,</mo><mo>−</mo><mn>4.7750</mn><mo>,</mo><mn>2.0315</mn><mo>)</mo></mrow></mrow><mo>.</mo></mtd></mtr></mtable>
 </math>
 </div>
-<p>Because the iteration is a polynomial in (X_kX_k^T) multiplied by (X_k), it preserves the singular vectors. If (X_k=UΣ_kV^T), only the singular values change:</p>
+<p>Because the iteration is a polynomial in <span aria-label="X_kX_k^T" class="inline-math" role="math">X<sub>k</sub>X<sub>k</sub><sup>T</sup></span> multiplied by <span aria-label="X_k" class="inline-math" role="math">X<sub>k</sub></span>, it preserves the singular vectors. If <span aria-label="X_k=UΣ_kV^T" class="inline-math" role="math">X<sub>k</sub>=UΣ<sub>k</sub>V<sup>T</sup></span>, only the singular values change:</p>
 <div aria-label="Newton Schulz maps each singular value through a quintic polynomial" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><mi>φ</mi><mo>⁡</mo><mo>(</mo><mi>σ</mi><mo>)</mo><mo>=</mo><mi>a</mi><mi>σ</mi><mo>+</mo><mi>b</mi><msup><mi>σ</mi><mn>3</mn></msup><mo>+</mo><mi>c</mi><msup><mi>σ</mi><mn>5</mn></msup><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>X</mi><mi>K</mi></msub><mo>=</mo><mi>U</mi><msup><mi>φ</mi><mrow><mo>∘</mo><mi>K</mi></mrow></msup><mo>⁡</mo><mo>(</mo><msub><mi>Σ</mi><mn>0</mn></msub><mo>)</mo><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>.</mo></mtd></mtr></mtable>
+<mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><mi>φ</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>σ</mi><mo stretchy="false">)</mo></mrow><mo>=</mo><mi>a</mi><mi>σ</mi><mo>+</mo><mi>b</mi><msup><mi>σ</mi><mn>3</mn></msup><mo>+</mo><mi>c</mi><msup><mi>σ</mi><mn>5</mn></msup><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>X</mi><mi>K</mi></msub><mo>=</mo><mi>U</mi><msup><mi>φ</mi><mrow><mo>∘</mo><mi>K</mi></mrow></msup><mo>⁡</mo><mrow><mo stretchy="false">(</mo><msub><mi>Σ</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>.</mo></mtd></mtr></mtable>
 </math>
 </div>
-<p>The tuned coefficients move a broad range of singular values toward one quickly, trading exact convergence for a small, fixed number of matrix multiplications. After five steps, the result is typically (UΣ′V^T), not exactly (UV^T). “Orthogonalized” should therefore be read as an <strong>approximate polar direction</strong>, not a guarantee that the output is exactly semi-orthogonal.</p>
+<p>The tuned coefficients move a broad range of singular values toward one quickly, trading exact convergence for a small, fixed number of matrix multiplications. After five steps, the result is typically <span aria-label="UΣ′V^T" class="inline-math" role="math">UΣ′V<sup>T</sup></span>, not exactly <span aria-label="UV^T" class="inline-math" role="math">UV<sup>T</sup></span>. “Orthogonalized” should therefore be read as an <strong>approximate polar direction</strong>, not a guarantee that the output is exactly semi-orthogonal.</p>
 <figure class="code-block"><figcaption><span class="code-language">Python</span><button aria-label="Copy Python code" class="copy-code" data-copy-target="code-2" type="button">Copy</button></figcaption><pre><code class="language-python" id="code-2">@torch.no_grad()
 def approximate_polar(x, steps=5, eps=1e-7):
     a, b, c = 3.4445, -4.7750, 2.0315
@@ -3939,16 +3959,16 @@ def approximate_polar(x, steps=5, eps=1e-7):
     return x.mT if tall else x
 </code></pre></figure>
 <h3 id="115-shape-scaling-and-routing-are-part-of-muon">11.5 Shape scaling and routing are part of Muon</h3>
-<p>For an exact polar factor (O=UV^T) of rank (r), (‖O‖_F²=r). Its entrywise RMS is therefore:</p>
+<p>For an exact polar factor <span aria-label="O=UV^T" class="inline-math" role="math">O=UV<sup>T</sup></span> of rank <span aria-label="r" class="inline-math" role="math">r</span>, <span aria-label="‖O‖_F²=r" class="inline-math" role="math">‖O‖<sub>F</sub><sup>2</sup>=r</span>. Its entrywise RMS is therefore:</p>
 <div aria-label="polar update RMS equals square root rank over matrix size and one over square root maximum dimension at full rank" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><mi>O</mi><mo>=</mo><mi>U</mi><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>,</mo><mspace width="0.8em"></mspace><msubsup><mrow><mo>‖</mo><mi>O</mi><mo>‖</mo></mrow><mi>F</mi><mn>2</mn></msubsup><mo>=</mo><mi>r</mi><mo>,</mo></mtd></mtr><mtr><mtd><mi mathvariant="normal">RMS</mi><mo>⁡</mo><mo>(</mo><mi>O</mi><mo>)</mo><mo>=</mo><msqrt><mfrac><mi>r</mi><mrow><mi>m</mi><mi>n</mi></mrow></mfrac></msqrt><mo>=</mo><mfrac><mn>1</mn><msqrt><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo></mrow></msqrt></mfrac><mspace width="0.8em"></mspace><mtext>when </mtext><mi>r</mi><mo>=</mo><mi mathvariant="normal">min</mi><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo><mo>.</mo></mtd></mtr></mtable>
+<mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><mi>O</mi><mo>=</mo><mi>U</mi><msup><mi>V</mi><mi mathvariant="normal">T</mi></msup><mo>,</mo><mspace width="0.8em"></mspace><msubsup><mrow><mo>‖</mo><mi>O</mi><mo>‖</mo></mrow><mi>F</mi><mn>2</mn></msubsup><mo>=</mo><mi>r</mi><mo>,</mo></mtd></mtr><mtr><mtd><mi mathvariant="normal">RMS</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>O</mi><mo stretchy="false">)</mo></mrow><mo>=</mo><msqrt><mfrac><mi>r</mi><mrow><mi>m</mi><mi>n</mi></mrow></mfrac></msqrt><mo>=</mo><mfrac><mn>1</mn><msqrt><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo stretchy="false">)</mo></mrow></mrow></msqrt></mfrac><mspace width="0.8em"></mspace><mtext>when</mtext><mspace width="0.28em"></mspace><mi>r</mi><mo>=</mo><mi mathvariant="normal">min</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><mo>.</mo></mtd></mtr></mtable>
 </math>
 </div>
-<p>The formula shows why shape scaling is necessary: without it, the entrywise RMS of a full-rank polar update shrinks as the larger matrix dimension grows. <a class="external-link" href="https://arxiv.org/abs/2502.16982" rel="noopener noreferrer" target="_blank">Muon is Scalable for LLM Training</a> proposes multiplying by (0.2√max(m,n)), giving the matrix update an RMS near 0.2 and making the global learning-rate scale more comparable to AdamW:</p>
+<p>The formula shows why shape scaling is necessary: without it, the entrywise RMS of a full-rank polar update shrinks as the larger matrix dimension grows. <a class="external-link" href="https://arxiv.org/abs/2502.16982" rel="noopener noreferrer" target="_blank">Muon is Scalable for LLM Training</a> proposes multiplying by <span aria-label="0.2√max(m,n)" class="inline-math" role="math">0.2√<span class="inline-math__operator">max</span>(m,n)</span>, giving the matrix update an RMS near 0.2 and making the global learning-rate scale more comparable to AdamW:</p>
 <div aria-label="Moonlight Muon update with shape aware RMS scaling and weight decay" class="formula-note" role="img">
 <math class="formula-math" display="block" xmlns="http://www.w3.org/1998/Math/MathML">
-<mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>s</mi><mtext>original</mtext></msub><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo><mo>=</mo><msqrt><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo><mo>(</mo><mn>1</mn><mo>,</mo><mfrac><mi>m</mi><mi>n</mi></mfrac><mo>)</mo></mrow></msqrt><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>s</mi><mtext>match</mtext></msub><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo><mo>=</mo><mn>0.2</mn><msqrt><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo></mrow></msqrt><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>W</mi><mi>t</mi></msub><mo>=</mo><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow><msub><mi>W</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>s</mi><mtext>match</mtext></msub><mo>⁡</mo><mo>(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo>)</mo><mover accent="true"><mi mathvariant="normal">Polar</mi><mo>˜</mo></mover><mo>⁡</mo><mo>(</mo><msub><mi>N</mi><mi>t</mi></msub><mo>)</mo><mo>.</mo></mtd></mtr></mtable>
+<mtable columnalign="left" rowspacing="0.45em"><mtr><mtd><msub><mi>s</mi><mtext>original</mtext></msub><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><mo>=</mo><msqrt><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>,</mo><mfrac><mi>m</mi><mi>n</mi></mfrac><mo stretchy="false">)</mo></mrow></mrow></msqrt><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>s</mi><mtext>match</mtext></msub><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><mo>=</mo><mn>0.2</mn><msqrt><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo stretchy="false">)</mo></mrow></mrow></msqrt><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>W</mi><mi>t</mi></msub><mo>=</mo><mrow><mrow><mo>(</mo><mn>1</mn><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><mi>λ</mi><mo>)</mo></mrow></mrow><msub><mi>W</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>η</mi><mi>t</mi></msub><msub><mi>s</mi><mtext>match</mtext></msub><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>m</mi><mo>,</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><mover accent="true"><mi mathvariant="normal">Polar</mi><mo>˜</mo></mover><mo>⁡</mo><mrow><mo stretchy="false">(</mo><msub><mi>N</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow><mo>.</mo></mtd></mtr></mtable>
 </math>
 </div>
 <p>Keller Jordan's original dimension factor and the newer “match AdamW RMS” factor assign different numerical meanings to the same learning rate. Current <a class="external-link" href="https://docs.pytorch.org/docs/stable/generated/torch.optim.Muon.html" rel="noopener noreferrer" target="_blank">PyTorch Muon</a> exposes <code>original</code>, <code>match_rms_adamw</code>, and <code>spectral_unclamped</code> conventions. Naming only “Muon” is therefore insufficient; every experiment log must include the scaling convention.</p>
@@ -3963,7 +3983,6 @@ def approximate_polar(x, steps=5, eps=1e-7):
 </section><section aria-labelledby="12-what-the-current-evidence-actually-says" class="article-section" data-chapter="frontier" data-section-number="12" id="section-12-what-the-current-evidence-actually-says"><p aria-hidden="true" class="section-label">12</p><h2 id="12-what-the-current-evidence-actually-says">12. What the current evidence actually says</h2>
 <p>Optimizer comparisons are unusually sensitive to tuning budget, schedule, model scale, data regime, hardware, and the checkpoint chosen for evaluation. A strong abstract may be accurate for its experiment and still fail to transfer. The following three tiers separate an operational default from promising replicated directions and paper-specific frontier claims.</p>
 <h3 id="121-practice">12.1 Practice</h3>
-<p><span class="evidence-tier evidence-tier--practice">practice</span></p>
 <ul>
 <li>AdamW is a well-supported baseline for Transformer pretraining.</li>
 <li>Warmup plus a controlled decay remains a strong recipe.</li>
@@ -3972,7 +3991,6 @@ def approximate_polar(x, steps=5, eps=1e-7):
 <li>Gradient clipping, loss reduction, and parameter grouping must be logged as part of the configuration.</li>
 </ul>
 <h3 id="122-strong-emerging-evidence">12.2 Strong emerging evidence</h3>
-<p><span class="evidence-tier evidence-tier--emerging">strong emerging evidence</span></p>
 <ul>
 <li>Matrix-aware updates can improve token efficiency over diagonal AdamW in some regimes.</li>
 <li>SOAP and Muon are credible challengers, not merely toy optimizers.</li>
@@ -3981,7 +3999,6 @@ def approximate_polar(x, steps=5, eps=1e-7):
 <li>Optimizer state and communication can be reduced without abandoning full-parameter learning.</li>
 </ul>
 <h3 id="123-paper-reported-frontier">12.3 Paper-reported frontier</h3>
-<p><span class="evidence-tier evidence-tier--frontier">paper-reported frontier</span></p>
 <p>Exact 1.4–2× claims, hybrid methods such as COSMOS, state-allocation schemes such as APOLLO, and new 2026 Muon variants remain conditional on their experimental regimes. Use these results to choose experiments and priors—not as constants to insert into a training budget without local validation.</p>
 <h3 id="124-the-iclr-2026-reality-check">12.4 The ICLR 2026 reality check</h3>
 <p><a class="external-link" href="https://openreview.net/forum?id=2J51qUZ0iG" rel="noopener noreferrer" target="_blank">Fantastic Pretraining Optimizers and Where to Find Them</a> compares ten optimizers across 0.1B–1.2B models and data budgets from 1–8× Chinchilla-optimal tokens. Its main lesson is methodological: optimizer rank is a function of scale, tuning, schedule phase, and data ratio. Concretely:</p>
