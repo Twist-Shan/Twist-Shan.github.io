@@ -99,5 +99,5 @@ domains:
               - label: "Code repo"
                 url: "https://github.com/Twist-Shan/DLM_Reasoning_Interp"    
             advisor: 
-              name: 
-              url: 
+              name: "Prof. Song Mei"
+              url: "https://www.stat.berkeley.edu/~songmei/"
