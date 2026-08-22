@@ -19,10 +19,11 @@ slug: misc
     <p>I love traveling and experiencing new things. I enjoy and appreciate delicious food, fine wine and cocktails. Photography then gives me the chance to remember the moments. Recent journeys have taken me through Spain, Norway, Iceland, and Japan.</p>
   </article>
   <div class="misc-list reveal delay-1">
-    <div><span>01</span><h3>Culinary arts</h3><p>Cooking, mixology, coffee</p></div>
-    <div><span>02</span><h3>Models</h3><p>Gundam and LEGO</p></div>
-    <div><span>03</span><h3>Stories</h3><p>RPG-like games and film</p></div>
-    <div><span>04</span><h3>Sports</h3><p>Basketball, hiking and kayaking</p></div>
+    <div><span>01</span><h3>Photography</h3><p>Digital, film, Polaroid</p></div>
+    <div><span>02</span><h3>Culinary arts</h3><p>Cooking, mixology, coffee</p></div>
+    <div><span>03</span><h3>Models</h3><p>Gundam, LEGO</p></div>
+    <div><span>04</span><h3>Stories</h3><p>RPG-like games, fictions, films</p></div>
+    <div><span>05</span><h3>Sports</h3><p>Basketball, hiking, kayaking</p></div>
   </div>
 </section>
 
@@ -39,6 +40,6 @@ slug: misc
 </section>
 
 <section class="social-note shell ruled-section reveal">
-  <p>For less academic updates, find me on Rednote.</p>
+  <p>For less academic updates, find me on Rednote (Xiaohongshu).</p>
   <a href="https://xhslink.com/m/9dxau6bGaAh">Follow Twist. <span>↗</span></a>
 </section>
