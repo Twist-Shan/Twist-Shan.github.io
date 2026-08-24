@@ -30,12 +30,13 @@ slug: misc
 <section class="course-notes shell reveal">
   <header class="course-notes-heading">
     <p class="project-number">M / 02</p>
-    <h2>Course notes</h2>
-    <p>Materials I made while learning.</p>
+    <h2>Personal notes</h2>
+    <p>Materials I made while learning and doing research.</p>
   </header>
   <div class="note-links">
-    <a href="{{ '/files/Lecture_Notes_Statistical_Thinking.pdf' | relative_url }}"><span>Statistical Thinking</span><small>Lecture notes 25 Spring· PDF</small><b>↓</b></a>
+    <a href="{{ '/files/Palette.pdf' | relative_url }}"><span>Paper Palette</span><small>Color palettes I used in research · PDF</small><b>↓</b></a>
     <a href="{{ '/files/Applied_Stochastic_Processes_Exercises.pdf' | relative_url }}"><span>Applied Stochastic Processes (in Chinese)</span><small>Solution manual · PDF</small><b>↓</b></a>
+    <a href="{{ '/files/Lecture_Notes_Statistical_Thinking.pdf' | relative_url }}"><span>Statistical Thinking</span><small>Lecture notes 25 Spring · PDF</small><b>↓</b></a>
   </div>
 </section>
 
