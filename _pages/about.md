@@ -37,7 +37,7 @@ redirect_from:
     <div class="portrait-frame">
       <img src="{{ '/images/profile.jpg' | relative_url }}" alt="Portrait of Liang Shan" width="720" height="900">
     </div>
-    <figcaption><span>Liang Shan</span><span>Madison</span></figcaption>
+    <figcaption><span>Liang Shan</span><span>Beijing</span></figcaption>
   </figure>
 </section>
 
