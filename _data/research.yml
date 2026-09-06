@@ -48,10 +48,8 @@ domains:
             description: >-
               We study Pareto frontier identification algorithms for evaluating models from human preferences, especially in AI Arena, through binary pairwise-feedback bandits with the Bradley-Terry model and Borda-score successive elimination.
             resources:
-              - label: "Synthetic repo"
-                url: "https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Syn"
-              - label: "Realistic repo"
-                url: "https://github.com/Twist-Shan/Binary_Pairwise_Pareto_Rea_Arena"
+              - label: "Code"
+                url: "https://github.com/Twist-Shan/Beyond_Scalar_Leaderboards"
             advisor:
               name: "Prof. Zhimei Ren"
               url: "https://zhimeir.github.io/"
