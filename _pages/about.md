@@ -52,7 +52,7 @@ redirect_from:
       <span class="place">Beijing</span>
     </article>
     <article>
-      <time>2025.8 — 2026.1</time>
+      <time>2025.08 — 2026.01</time>
       <div><h3>University of Copenhagen</h3><p>Exchange student · Department of SCIENCE</p></div>
       <span class="place">Copenhagen</span>
     </article>
