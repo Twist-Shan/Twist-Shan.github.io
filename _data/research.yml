@@ -35,9 +35,7 @@ domains:
             resources: 
               - label: "Code repo"
                 url: "https://github.com/Twist-Shan/Loop_Optimizer_Dynamics"
-            advisor:
-              name: ""
-              url: ""
+
 
   - id: reinforcement-learning
     number: "R / 02"
@@ -116,9 +114,7 @@ domains:
             resources: 
               - label: "Code repo"
                 url: "https://github.com/Twist-Shan/understanding_CoVT"
-            advisor:
-              name: ""
-              url: ""
+
 
 
   # Reserved direction; hidden until a real project is ready.
@@ -138,6 +134,3 @@ domains:
             resources: 
               - label: "Code repo"
                 url: "https://github.com/Twist-Shan/confidence_agents_consensus"
-            advisor:
-              name: ""
-              url: ""
