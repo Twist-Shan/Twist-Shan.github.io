@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" class="heading-mark-svg" aria-hidden="true" focusable="false"><g fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+<path stroke="var(--ink, #20231f)" opacity=".3" d="M15 37C15 22 22 15 31 15"/>
+<path stroke="var(--accent, #3f9877)" opacity=".8" d="M71 70C55 81 30 79 18 69"/>
+<path stroke="var(--accent, #3f9877)" opacity=".8" d="M19 74L18 69L23 69"/>
+<path stroke="var(--ink, #20231f)" opacity=".55" d="M44 23V29M34 47L23 59M54 47L65 59"/>
+<path stroke="var(--mint, #9986df)" d="M54 39L70.5 23"/>
+<rect x="36" y="7" width="16" height="16" stroke="var(--ink, #20231f)" fill="var(--paper, #f7f7f2)"/>
+<path stroke="var(--mint, #9986df)" d="M40 15H48M44 11V19"/>
+<rect x="7" y="51" width="16" height="16" stroke="var(--mint, #9986df)" fill="var(--paper, #f7f7f2)"/>
+<path stroke="var(--ink, #20231f)" opacity=".7" d="M11 56L14 59L11 62M17 62H20"/>
+<rect x="65" y="51" width="16" height="16" stroke="var(--accent, #3f9877)" fill="var(--paper, #f7f7f2)"/>
+<path stroke="var(--accent, #3f9877)" d="M69 59L72 62L77 56"/>
+<path stroke="var(--accent, #3f9877)" fill="var(--paper, #f7f7f2)" d="M44 29L58 43L44 57L30 43Z"/>
+<circle cx="44" cy="43" r="6" stroke="var(--ink, #20231f)" opacity=".6"/>
+<circle cx="44" cy="43" r="2.3" fill="var(--accent, #3f9877)" stroke="none"/>
+<circle cx="73" cy="21" r="3" fill="var(--mint, #9986df)" stroke="none"/></g></svg>

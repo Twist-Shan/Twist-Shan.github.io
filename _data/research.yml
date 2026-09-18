@@ -13,6 +13,10 @@
 # 5. Leave advisor name blank to hide the advisor field.
 #
 # To add a new research direction, copy one complete item under "domains".
+# Available marks: dl, rl, llm, dlm, vlm, agent.
+# Set domain draft: true to hide the entire direction.
+# VLM and Agent below are placeholders: fill the project, then set BOTH
+# the domain and project draft flags to false to publish.
 # The page template and CSS should not need to change.
 
 domains:
@@ -21,19 +25,19 @@ domains:
     title: "Deep Learning"
     mark: dl
     tracks:
-      - label: "DL / Architecture / Recurrent Model"
+      - label: "DL / Optimizer / Learning Dynamics"
         projects:
-          - id: loop-test-time-training
+          - id: optimizer-dynamics-loop
             draft: false
-            title: "Looped Transformer & Test-Time Training"
+            title: "Optimizer Learning Dynamics of Recurrent Models"
             description: >-
-              We want to study how lightweight test-time parameter updates interact with recurrent-depth computation in looped Transformers, aiming to jointly reduce operator mismatch and finite-iteration error.
+              We want to study how different optimizers affects the learning dynamics of looped transformers, including outer-loop geometry and inter-loop algorithms.
             resources: 
               - label: "Code repo"
-                url: "https://github.com/Twist-Shan/Loop_Test-Time_Training"            
+                url: "https://github.com/Twist-Shan/Loop_Optimizer_Dynamics"
             advisor:
-              name:
-              url:
+              name: ""
+              url: ""
 
   - id: reinforcement-learning
     number: "R / 02"
@@ -74,12 +78,6 @@ domains:
             advisor:
               name: "Prof. Yiqiao Zhong"
               url: "https://pages.stat.wisc.edu/~zhong35/"
-    aside:
-      before: >-
-        We are also interested in the geometry and compression of hidden-state representations; some toy experiments are available in
-      link_label: "Hidden State Evaluation"
-      link_url: "https://github.com/Twist-Shan/Hidden_State_Evaluation"
-      after: "."
 
   - id: diffusion-language-model
     number: "R / 04"
@@ -99,3 +97,47 @@ domains:
             advisor: 
               name: "Prof. Song Mei"
               url: "https://www.stat.berkeley.edu/~songmei/"
+
+
+  # Reserved direction; hidden until a real project is ready.
+  - id: vision-language-model
+    number: "R / 05"
+    title: "Vision–Language Model"
+    mark: vlm
+    draft: false
+    tracks:
+      - label: "VLM / Interpretability / Chain-of-Visual-Thought" # Fill in the research track.
+        projects:
+          - id: vlm-covt-mechanism # Replace with a unique project id.
+            draft: false
+            title: "Understanding CoVT reasoning in VLMs" # Fill in the project title.
+            description: >-
+              We want to study whether chain-of-visual-thought improves VLMs' reasoning ability, how decodable the vision reasoning tokens are, and whether CoVT's visualizations reflect the information VLMs use to answer questions.
+            resources: 
+              - label: "Code repo"
+                url: "https://github.com/Twist-Shan/understanding_CoVT"
+            advisor:
+              name: ""
+              url: ""
+
+
+  # Reserved direction; hidden until a real project is ready.
+  - id: agent
+    number: "R / 06"
+    title: "Agent"
+    mark: agent
+    draft: false
+    tracks:
+      - label: "Agent / Multi-Agent Systems / Collective Decision-Making" # Fill in the research track.
+        projects:
+          - id: confidence-agents-consensus # Replace with a unique project id.
+            draft: true
+            title: "From Confidence to Consensus in LLM Agents" # Fill in the project title.
+            description: >-
+              We want to study how assigning confidence scores to different agents changes their judgments when evidence and initial opinions remain fixed, and how access to peers' evidence, different personas and different model types affects this influence.
+            resources: 
+              - label: "Code repo"
+                url: "https://github.com/Twist-Shan/confidence_agents_consensus"
+            advisor:
+              name: ""
+              url: ""

@@ -5,8 +5,9 @@ _site/
 # Ignore the directory for local files during development
 local/
 
-# Ignore the Gemfile that is generated
-Gemfile.lock
+# Commit Gemfile.lock so local and CI dependency versions agree.
+.jekyll-cache/
+.jekyll-metadata
 
 # Ignore files created by npm
 node_modules

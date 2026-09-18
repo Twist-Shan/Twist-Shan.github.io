@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" class="heading-mark-svg" aria-hidden="true" focusable="false"><g fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+<path stroke="var(--accent, #3f9877)" d="M13 52C13 5 74 5 74 52"/>
+<path stroke="var(--mint, #9986df)" d="M34 52C34 22 74 22 74 52"/>
+<path stroke="var(--ink, #20231f)" opacity=".45" d="M13 52C13 29 54 29 54 52"/>
+<path stroke="var(--ink, #20231f)" opacity=".28" d="M13 62L25 74L44 62L63 74L74 62"/>
+<path stroke="var(--ink, #20231f)" opacity=".6" d="M13 57H75"/>
+<rect x="5" y="49" width="16" height="16" fill="var(--paper, #f7f7f2)" stroke="var(--ink, #20231f)"/>
+<rect x="26" y="49" width="16" height="16" fill="var(--paper, #f7f7f2)" stroke="var(--accent, #3f9877)"/>
+<rect x="46" y="49" width="16" height="16" fill="var(--paper, #f7f7f2)" stroke="var(--mint, #9986df)"/>
+<rect x="67" y="49" width="16" height="16" fill="var(--paper, #f7f7f2)" stroke="var(--ink, #20231f)"/>
+<circle cx="13" cy="57" r="2" fill="var(--mint, #9986df)"/>
+<circle cx="34" cy="57" r="2" fill="var(--accent, #3f9877)"/>
+<circle cx="54" cy="57" r="2" fill="var(--mint, #9986df)"/>
+<circle cx="75" cy="57" r="2" fill="var(--accent, #3f9877)"/>
+<circle cx="43" cy="18" r="3" fill="var(--paper, #f7f7f2)" stroke="var(--mint, #9986df)"/></g></svg>

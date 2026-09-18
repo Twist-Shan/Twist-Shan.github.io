@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" class="heading-mark-svg" aria-hidden="true" focusable="false"><g fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+<path stroke="var(--mint, #9986df)" opacity=".75" d="M44 25H56C67 25 74 32 74 42"/>
+<path stroke="var(--accent, #3f9877)" opacity=".65" d="M53 69C37 79 22 69 22 52"/>
+<path stroke="var(--ink, #20231f)" opacity=".3" d="M10 12H49V35"/>
+<rect x="6" y="17" width="38" height="35" fill="var(--paper, #f7f7f2)" stroke="var(--ink, #20231f)" opacity=".8"/>
+<circle cx="17" cy="28" r="3" stroke="var(--mint, #9986df)"/>
+<path stroke="var(--accent, #3f9877)" d="M11 45L21 35L28 42L34 36L39 41"/>
+<path fill="var(--paper, #f7f7f2)" stroke="var(--accent, #3f9877)" d="M43 42H81V68H63L54 75V68H43Z"/>
+<path stroke="var(--ink, #20231f)" opacity=".6" d="M52 51H73M52 57H67M52 62H60"/>
+<path stroke="var(--paper, #f7f7f2)" stroke-width="5" fill="var(--paper, #f7f7f2)" d="M41 35L48 42L41 49L34 42Z"/>
+<path stroke="var(--mint, #9986df)" fill="var(--paper, #f7f7f2)" d="M41 35L48 42L41 49L34 42Z"/>
+<circle cx="41" cy="42" r="2" fill="var(--accent, #3f9877)" stroke="none"/>
+<circle cx="72" cy="15" r="3" fill="var(--mint, #9986df)" stroke="none"/></g></svg>

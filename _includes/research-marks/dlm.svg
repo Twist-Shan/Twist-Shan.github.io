@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" class="heading-mark-svg" aria-hidden="true" focusable="false"><g fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+<g transform="translate(10 8) scale(.68 .82)">
+<path stroke="var(--accent, #3f9877)" opacity=".48" d="M-8 23C4 13 15 12 27 21C39 31 51 31 63 22C76 12 91 13 104 24"/>
+<path stroke="var(--ink, #20231f)" opacity=".6" d="M-8 43C5 32 17 31 29 41C41 51 52 53 64 43C78 31 92 32 104 42"/>
+<path stroke="var(--mint, #9986df)" d="M-8 62C4 56 11 43 24 41C39 39 44 58 55 59C67 60 72 37 84 35C95 34 102 40 106 47"/>
+<path stroke="var(--accent, #3f9877)" d="M-8 80C4 75 10 60 23 58C35 56 42 71 52 74C64 78 69 61 78 54C88 47 99 52 106 62"/>
+<path stroke="var(--mint, #9986df)" opacity=".7" stroke-width=".9" d="M64 67C70 56 77 48 85 49C93 50 96 57 92 62C88 66 82 62 84 57"/>
+<circle cx="13" cy="9" r="3" stroke="var(--accent, #3f9877)"/>
+<circle cx="71" cy="9" r="4" stroke="var(--mint, #9986df)"/>
+<circle cx="26" cy="20" r="1.8" fill="var(--mint, #9986df)" stroke="none"/>
+<circle cx="82" cy="28" r="2.4" stroke="var(--accent, #3f9877)"/>
+</g></g></svg>
