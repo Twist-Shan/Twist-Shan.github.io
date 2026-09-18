@@ -131,7 +131,7 @@ domains:
       - label: "Agent / Multi-Agent Systems / Collective Decision-Making" # Fill in the research track.
         projects:
           - id: confidence-agents-consensus # Replace with a unique project id.
-            draft: true
+            draft: false
             title: "From Confidence to Consensus in LLM Agents" # Fill in the project title.
             description: >-
               We want to study how assigning confidence scores to different agents changes their judgments when evidence and initial opinions remain fixed, and how access to peers' evidence, different personas and different model types affects this influence.
