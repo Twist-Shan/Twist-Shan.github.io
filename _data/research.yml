@@ -104,12 +104,12 @@ domains:
     number: "R / 05"
     title: "Vision–Language Model"
     mark: vlm
-    draft: false
+    draft: true
     tracks:
       - label: "VLM / Interpretability / Chain-of-Visual-Thought" # Fill in the research track.
         projects:
           - id: vlm-covt-mechanism # Replace with a unique project id.
-            draft: false
+            draft: true
             title: "Understanding CoVT reasoning in VLMs" # Fill in the project title.
             description: >-
               We want to study whether chain-of-visual-thought improves VLMs' reasoning ability, how decodable the vision reasoning tokens are, and whether CoVT's visualizations reflect the information VLMs use to answer questions.
@@ -123,7 +123,7 @@ domains:
     number: "R / 06"
     title: "Agent"
     mark: agent
-    draft: false
+    draft: true
     tracks:
       - label: "Agent / Multi-Agent Systems / Collective Decision-Making" # Fill in the research track.
         projects:
