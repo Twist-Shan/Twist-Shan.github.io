@@ -33,9 +33,8 @@ domains:
             description: >-
               We want to study how different optimizers affects the learning dynamics of looped transformers, including outer-loop geometry and inter-loop algorithms.
             resources: 
-              - label: "Code repo"
+              - label: "Code Repo"
                 url: "https://github.com/Twist-Shan/Loop_Optimizer_Dynamics"
-
 
   - id: reinforcement-learning
     number: "R / 02"
@@ -48,8 +47,11 @@ domains:
             draft: false
             title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
             description: >-
-              We study Pareto frontier identification algorithms for evaluating models from human preferences, especially in AI Arena, through binary pairwise-feedback bandits with the Bradley-Terry model and Borda-score successive elimination.
+              We develop adaptive sampling algorithms for Pareto frontier identification in multi-objective LLM arenas, using pairwise human preferences and Borda-based successive elimination to identify non-dominated models with provably fewer comparisons.
             resources:
+              - label: "arXiv"
+                url: ""
+                kind: arxiv
               - label: "Reproduction Code"
                 url: "https://github.com/Twist-Shan/Beyond_Scalar_Leaderboards"
             advisor:
@@ -65,14 +67,15 @@ domains:
         projects:
           - id: cot-counting-mechanism
             draft: false
-            title: "CoT Reasoning Mechanism for Counting"
+            title: "Targeted Retrieval, Compact Representations: How CoT Reasoning Improves Long-Context Counting"
             description: >-
-              We investigate how Chain-of-Thought improves LLMs' counting ability by tracing the mechanism from controlled synthetic tasks on GPT-2-like Transformers to realistic needle-in-a-haystack settings in open-weight large models.
+              We study how Chain-of-Thought improves long-context counting in LLMs, showing that it shifts retrieval from broad to targeted and enables compact state-tracking representations of an internal counter, from controlled synthetic Transformers to open-weight models.
             resources:
-              - label: "Synthetic repo"
-                url: "https://github.com/Twist-Shan/Synthetic_CoT_NiaH_Count"
-              - label: "Realistic repo"
-                url: "https://github.com/Twist-Shan/Realistic_CoT_NiaH_Count"
+              - label: "arXiv"
+                url: ""
+                kind: arxiv
+              - label: "Reproduction Code"
+                url: "https://github.com/Twist-Shan/CoT_NIAH_Counting"
             advisor:
               name: "Prof. Yiqiao Zhong"
               url: "https://pages.stat.wisc.edu/~zhong35/"
@@ -90,12 +93,11 @@ domains:
             description: >-
               We want to study how diffusion language models enable efficient planning and reasoning on tasks such as Sudoku, and how different adaptive decoding orders affect their reasoning behavior.
             resources: 
-              - label: "Code repo"
+              - label: "Code Repo"
                 url: "https://github.com/Twist-Shan/DLM_Reasoning_Interp"    
             advisor: 
               name: "Prof. Song Mei"
               url: "https://www.stat.berkeley.edu/~songmei/"
-
 
   # Reserved direction; hidden until a real project is ready.
   - id: vision-language-model
@@ -112,9 +114,8 @@ domains:
             description: >-
               We want to study whether chain-of-visual-thought improves VLMs' reasoning ability, how decodable the vision reasoning tokens are, and whether CoVT's visualizations reflect the information VLMs use to answer questions.
             resources: 
-              - label: "Code repo"
+              - label: "Code Repo"
                 url: "https://github.com/Twist-Shan/understanding_CoVT"
-
 
 
   # Reserved direction; hidden until a real project is ready.
@@ -132,5 +133,5 @@ domains:
             description: >-
               We want to study how assigning confidence scores to different agents changes their judgments when evidence and initial opinions remain fixed, and how access to peers' evidence, different personas and different model types affects this influence.
             resources: 
-              - label: "Code repo"
+              - label: "Code Repo"
                 url: "https://github.com/Twist-Shan/confidence_agents_consensus"
