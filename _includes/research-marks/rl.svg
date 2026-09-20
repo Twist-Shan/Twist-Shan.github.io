@@ -4,9 +4,14 @@
 <ellipse cx="44" cy="44" rx="31" ry="17" transform="rotate(-35 44 44)" stroke="var(--paper, #f7f7f2)" stroke-width="3.8"/>
 <ellipse cx="44" cy="44" rx="31" ry="17" transform="rotate(-35 44 44)" stroke="var(--accent, #3f9877)"/>
 <circle cx="44" cy="44" r="10" fill="var(--paper, #f7f7f2)" stroke="var(--accent, #3f9877)"/>
-<circle cx="44" cy="44" r="3.5" fill="var(--accent, #3f9877)" stroke="none"/>
+<circle class="mark-motion mark-pulse" cx="44" cy="44" r="3.5" fill="var(--accent, #3f9877)" stroke="none"/>
+<path stroke="var(--accent, #3f9877)" d="M55.305528777457155 23.597635750604876L59.452620540570834 21.461838497044823L55.61652095772905 18.8077209430316"/>
+<g data-orbit-phase="3.141592653589793" data-orbit-x="18.61" data-orbit-y="61.78">
 <circle cx="18.61" cy="61.78" r="5.3" fill="var(--paper, #f7f7f2)" stroke="none"/>
 <circle cx="18.61" cy="61.78" r="4" fill="var(--paper, #f7f7f2)" stroke="var(--mint, #9986df)"/>
+</g>
+<g data-orbit-phase="0" data-orbit-x="69.39" data-orbit-y="26.22">
 <circle cx="69.39" cy="26.22" r="4.8" fill="var(--paper, #f7f7f2)" stroke="none"/>
 <circle cx="69.39" cy="26.22" r="3.5" fill="var(--mint, #9986df)" stroke="none"/>
-<path stroke="var(--accent, #3f9877)" d="M55.305528777457155 23.597635750604876L59.452620540570834 21.461838497044823L55.61652095772905 18.8077209430316"/></g></svg>
+</g>
+</g></svg>

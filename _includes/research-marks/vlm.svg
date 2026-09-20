@@ -3,11 +3,17 @@
 <path stroke="var(--accent, #3f9877)" opacity=".65" d="M53 69C37 79 22 69 22 52"/>
 <path stroke="var(--ink, #20231f)" opacity=".3" d="M10 12H49V35"/>
 <rect x="6" y="17" width="38" height="35" fill="var(--paper, #f7f7f2)" stroke="var(--ink, #20231f)" opacity=".8"/>
-<circle cx="17" cy="28" r="3" stroke="var(--mint, #9986df)"/>
-<path stroke="var(--accent, #3f9877)" d="M11 45L21 35L28 42L34 36L39 41"/>
+<circle class="mark-motion mark-sketch" pathLength="1" cx="17" cy="28" r="3" stroke="var(--mint, #9986df)"/>
+<path class="mark-motion mark-sketch" style="--motion-delay:-6.8s" pathLength="1" stroke="var(--accent, #3f9877)" d="M11 45L21 35L28 42L34 36L39 41"/>
+<g class="mark-motion mark-vlm-bubble">
 <path fill="var(--paper, #f7f7f2)" stroke="var(--accent, #3f9877)" d="M43 42H81V68H63L54 75V68H43Z"/>
-<path stroke="var(--ink, #20231f)" opacity=".6" d="M52 51H73M52 57H67M52 62H60"/>
+<path stroke="var(--ink, #20231f)" opacity=".18" d="M52 51H73M52 57H67M52 62H60"/>
+<path class="mark-motion mark-write" style="--motion-delay:-6.4s" pathLength="1" stroke="var(--ink, #20231f)" opacity=".85" d="M52 51H73"/>
+<path class="mark-motion mark-write" style="--motion-delay:-5.5s" pathLength="1" stroke="var(--ink, #20231f)" opacity=".85" d="M52 57H67"/>
+<path class="mark-motion mark-write" style="--motion-delay:-4.6s" pathLength="1" stroke="var(--ink, #20231f)" opacity=".85" d="M52 62H60"/>
+</g>
 <path stroke="var(--paper, #f7f7f2)" stroke-width="5" fill="var(--paper, #f7f7f2)" d="M41 35L48 42L41 49L34 42Z"/>
 <path stroke="var(--mint, #9986df)" fill="var(--paper, #f7f7f2)" d="M41 35L48 42L41 49L34 42Z"/>
-<circle cx="41" cy="42" r="2" fill="var(--accent, #3f9877)" stroke="none"/>
-<circle cx="72" cy="15" r="3" fill="var(--mint, #9986df)" stroke="none"/></g></svg>
+<circle class="mark-motion mark-node" style="--motion-delay:-7s" cx="41" cy="42" r="2" fill="var(--accent, #3f9877)" stroke="none"/>
+<circle class="mark-motion mark-float" style="--motion-delay: -2s" cx="72" cy="15" r="3" fill="var(--mint, #9986df)" stroke="none"/>
+</g></svg>

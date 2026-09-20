@@ -1,0 +1,98 @@
+/* Motion stays inside the existing marks; their layout and size are unchanged. */
+:root { --research-motion-period: 8s; }
+.motion-toggle {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.motion-toggle[hidden] { display: none; }
+.motion-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.motion-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.motion-toggle:disabled { cursor: default; opacity: .5; }
+.motion-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.motion-toggle .motion-play { display: none; }
+html[data-motion="paused"] .motion-toggle .motion-pause { display: none; }
+html[data-motion="paused"] .motion-toggle .motion-play { display: block; }
+
+.motion-ready .mark-motion {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-duration: var(--research-motion-period);
+  animation-delay: var(--motion-delay, 0s);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+}
+.motion-ready .is-motion-visible .mark-motion { animation-play-state: running; }
+.motion-ready .mark-layer-top { animation-name: mark-layer-top; }
+.motion-ready .mark-layer-bottom { animation-name: mark-layer-bottom; }
+.motion-ready .mark-layer-guide { animation-name: mark-layer-guide; }
+.motion-ready .mark-layer-top,
+.motion-ready .mark-layer-bottom,
+.motion-ready .mark-layer-guide { animation-timing-function: linear; }
+.motion-ready .mark-pulse { animation-name: mark-pulse; }
+.motion-ready .mark-signal { animation-name: mark-signal; }
+.motion-ready .mark-token { animation-name: mark-token; }
+.motion-ready .mark-float { animation-name: mark-float; }
+.motion-ready .mark-sketch { animation-name: mark-sketch; stroke-dasharray: 1; }
+.motion-ready .mark-write { animation-name: mark-write; stroke-dasharray: 1; }
+.motion-ready .mark-node { animation-name: mark-node; }
+.motion-ready .mark-vlm-bubble { animation-name: mark-vlm-bubble; transform-box: view-box; transform-origin: 43px 42px; }
+.motion-ready .mark-agent-step { animation-name: mark-agent-step; transform-box: view-box; transform-origin: var(--node-origin); }
+.motion-ready .mark-agent-core { animation-name: mark-agent-core; }
+.mark-packet { opacity: 0; }
+
+@keyframes mark-layer-top { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4.5px); } }
+@keyframes mark-layer-bottom { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4.5px); } }
+@keyframes mark-layer-guide { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.28125); } }
+@keyframes mark-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+@keyframes mark-signal {
+  0%, 55%, 100% { opacity: .5; transform: scale(1); }
+  20% { opacity: 1; transform: scale(1.25); }
+}
+@keyframes mark-token { 0%, 50%, 100% { transform: translateY(0); } 22% { transform: translateY(-4px); } }
+@keyframes mark-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3.5px); } }
+@keyframes mark-sketch {
+  0%, 10% { stroke-dashoffset: 1; opacity: 0; }
+  12% { stroke-dashoffset: 1; opacity: 1; }
+  42%, 65% { stroke-dashoffset: 0; opacity: 1; }
+  82%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes mark-write { 0%, 80%, 100% { stroke-dashoffset: 1; } 25%, 55% { stroke-dashoffset: 0; } }
+@keyframes mark-node { 0%, 60%, 100% { transform: scale(1); } 25% { transform: scale(1.45); } }
+@keyframes mark-vlm-bubble { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.10, 1.08); } }
+@keyframes mark-agent-step { 0%, 45%, 100% { transform: scale(1); } 20% { transform: scale(1.16); } }
+@keyframes mark-agent-core { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+/* The color field follows the pointer; the text itself never moves. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .motion-ready .motion-name {
+    background-image: radial-gradient(ellipse 90px 70px at var(--name-x, 48%) var(--name-y, 50%), var(--mint) 0%, var(--accent) 38%, var(--ink) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+html.motion-ready[data-motion="paused"] .mark-motion,
+html.motion-ready[data-motion="paused"] .motion-name,
+html.motion-ready[data-motion="paused"] .status-dot { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-ready .mark-motion { animation: none; }
+  .motion-ready .motion-name {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+@media (forced-colors: active) {
+  .motion-ready .motion-name { background: none; -webkit-text-fill-color: currentColor; }
+}

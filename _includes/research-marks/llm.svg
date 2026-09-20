@@ -4,12 +4,21 @@
 <path stroke="var(--ink, #20231f)" opacity=".45" d="M13 52C13 29 54 29 54 52"/>
 <path stroke="var(--ink, #20231f)" opacity=".28" d="M13 62L25 74L44 62L63 74L74 62"/>
 <path stroke="var(--ink, #20231f)" opacity=".6" d="M13 57H75"/>
+<g class="mark-motion mark-token" style="--motion-delay:-8.0s">
 <rect x="5" y="49" width="16" height="16" fill="var(--paper, #f7f7f2)" stroke="var(--ink, #20231f)"/>
+<circle style="--motion-delay:-8.0s" class="mark-motion mark-node" cx="13" cy="57" r="2" fill="var(--mint, #9986df)"/>
+</g>
+<g class="mark-motion mark-token" style="--motion-delay:-6.3s">
 <rect x="26" y="49" width="16" height="16" fill="var(--paper, #f7f7f2)" stroke="var(--accent, #3f9877)"/>
+<circle style="--motion-delay:-6.3s" class="mark-motion mark-node" cx="34" cy="57" r="2" fill="var(--accent, #3f9877)"/>
+</g>
+<g class="mark-motion mark-token" style="--motion-delay:-4.6s">
 <rect x="46" y="49" width="16" height="16" fill="var(--paper, #f7f7f2)" stroke="var(--mint, #9986df)"/>
+<circle style="--motion-delay:-4.6s" class="mark-motion mark-node" cx="54" cy="57" r="2" fill="var(--mint, #9986df)"/>
+</g>
+<g class="mark-motion mark-token" style="--motion-delay:-2.9s">
 <rect x="67" y="49" width="16" height="16" fill="var(--paper, #f7f7f2)" stroke="var(--ink, #20231f)"/>
-<circle cx="13" cy="57" r="2" fill="var(--mint, #9986df)"/>
-<circle cx="34" cy="57" r="2" fill="var(--accent, #3f9877)"/>
-<circle cx="54" cy="57" r="2" fill="var(--mint, #9986df)"/>
-<circle cx="75" cy="57" r="2" fill="var(--accent, #3f9877)"/>
-<circle cx="43" cy="18" r="3" fill="var(--paper, #f7f7f2)" stroke="var(--mint, #9986df)"/></g></svg>
+<circle style="--motion-delay:-2.9s" class="mark-motion mark-node" cx="75" cy="57" r="2" fill="var(--accent, #3f9877)"/>
+</g>
+<circle class="mark-motion mark-pulse" style="--motion-delay: -2.6s" cx="43" cy="18" r="3" fill="var(--paper, #f7f7f2)" stroke="var(--mint, #9986df)"/>
+</g></svg>

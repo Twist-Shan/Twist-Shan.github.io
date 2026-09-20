@@ -12,7 +12,7 @@ redirect_from:
 <section class="hero shell">
   <div class="hero-copy reveal">
     <p class="eyebrow"><span class="status-dot"></span> Undergraduate student · Peking University</p>
-    <h1>Liang <em>(Twist)</em> Shan</h1>
+    <h1 class="motion-name">Liang <em>(Twist)</em> Shan</h1>
     <blockquote class="personal-motto">
       <p>Be Humble, Romantic, Measured, Rosy and Shoot for the Moon.</p>
     </blockquote>
