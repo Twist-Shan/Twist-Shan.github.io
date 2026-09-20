@@ -72,6 +72,11 @@ html[data-motion="paused"] .motion-toggle .motion-play { display: block; }
 
 /* Color rests on the nickname and follows the pointer while it is over the name. */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
+  .motion-ready .motion-name {
+    /* Tight headline leading needs extra paint space for descenders such as g. */
+    padding-bottom: .22em;
+    margin-bottom: calc(8px - .22em);
+  }
   .motion-ready .motion-name em,
   .motion-ready .motion-name.is-name-following {
     background-clip: text;
@@ -79,12 +84,13 @@ html[data-motion="paused"] .motion-toggle .motion-play { display: block; }
     -webkit-text-fill-color: transparent;
   }
   .motion-ready .motion-name em {
-    background-image: radial-gradient(ellipse 90px 70px at 50% 50%, var(--mint) 0%, var(--accent) 38%, var(--ink) 100%);
+    background-color: color-mix(in srgb, var(--accent) var(--name-rest, 100%), transparent);
   }
   .motion-ready .motion-name.is-name-following {
-    background-image: radial-gradient(ellipse 90px 70px at var(--name-x, 48%) var(--name-y, 50%), var(--mint) 0%, var(--accent) 38%, var(--ink) 100%);
+    background-image: radial-gradient(ellipse 90px 70px at var(--name-x, 48%) var(--name-y, 50%),
+      color-mix(in srgb, var(--accent) calc(100% - var(--name-rest, 100%)), var(--ink)) 38%,
+      var(--ink) 100%);
   }
-  .motion-ready .motion-name.is-name-following em { background-image: none; }
 }
 
 html.motion-ready[data-motion="paused"] .mark-motion,

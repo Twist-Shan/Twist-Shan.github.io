@@ -29,7 +29,7 @@
     const path = mark.querySelector(`[data-packet-route="${node.dataset.packet}"]`);
     return { mark, node, path, length: path.getTotalLength(), delay: Number(node.dataset.packetDelay) };
   }));
-  const nameFields = names.map(node => ({ node, x: 0, y: 0, targetX: 0, targetY: 0, moving: false, initialized: false, returning: false }));
+  const nameFields = names.map(node => ({ node, x: 0, y: 0, targetX: 0, targetY: 0, rest: 1, moving: false, initialized: false, returning: false }));
   const visible = element => element.classList.contains('is-motion-visible');
   const stopped = () => paused || reducedMotion.matches || document.hidden;
   const hasWork = () => orbits.some(item => visible(item.mark)) || waves.some(item => visible(item.mark)) || packets.some(item => visible(item.mark)) || nameFields.some(item => item.moving && visible(item.node));
@@ -101,10 +101,19 @@
       const follow = 1 - Math.exp(-delta / (field.returning ? 150 : 95));
       field.x += (field.targetX - field.x) * follow;
       field.y += (field.targetY - field.y) * follow;
-      field.moving = Math.abs(field.targetX - field.x) + Math.abs(field.targetY - field.y) > .15;
-      if (!field.moving) { field.x = field.targetX; field.y = field.targetY; }
+      const distance = Math.abs(field.targetX - field.x) + Math.abs(field.targetY - field.y);
+      // Blend into the full nickname only once the moving color is close to it.
+      const targetRest = field.returning && distance < 24 ? 1 : 0;
+      field.rest += (targetRest - field.rest) * follow;
+      field.moving = distance > .15 || Math.abs(targetRest - field.rest) > .002;
+      if (!field.moving) {
+        field.x = field.targetX;
+        field.y = field.targetY;
+        field.rest = targetRest;
+      }
       field.node.style.setProperty('--name-x', `${field.x.toFixed(2)}px`);
       field.node.style.setProperty('--name-y', `${field.y.toFixed(2)}px`);
+      field.node.style.setProperty('--name-rest', `${(field.rest * 100).toFixed(3)}%`);
       if (!field.moving && field.returning) resetNameHighlight(field);
     });
     if (hasWork()) startFrame();
@@ -115,9 +124,11 @@
     field.moving = false;
     field.initialized = false;
     field.returning = false;
+    field.rest = 1;
     field.node.classList.remove('is-name-following');
     field.node.style.removeProperty('--name-x');
     field.node.style.removeProperty('--name-y');
+    field.node.style.removeProperty('--name-rest');
   }
 
   function returnNameHighlight(field) {
