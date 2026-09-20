@@ -70,14 +70,21 @@ html[data-motion="paused"] .motion-toggle .motion-play { display: block; }
 @keyframes mark-agent-step { 0%, 45%, 100% { transform: scale(1); } 20% { transform: scale(1.16); } }
 @keyframes mark-agent-core { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 
-/* The color field follows the pointer; the text itself never moves. */
+/* Color rests on the nickname and follows the pointer while it is over the name. */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
-  .motion-ready .motion-name {
-    background-image: radial-gradient(ellipse 90px 70px at var(--name-x, 48%) var(--name-y, 50%), var(--mint) 0%, var(--accent) 38%, var(--ink) 100%);
+  .motion-ready .motion-name em,
+  .motion-ready .motion-name.is-name-following {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+  .motion-ready .motion-name em {
+    background-image: radial-gradient(ellipse 90px 70px at 50% 50%, var(--mint) 0%, var(--accent) 38%, var(--ink) 100%);
+  }
+  .motion-ready .motion-name.is-name-following {
+    background-image: radial-gradient(ellipse 90px 70px at var(--name-x, 48%) var(--name-y, 50%), var(--mint) 0%, var(--accent) 38%, var(--ink) 100%);
+  }
+  .motion-ready .motion-name.is-name-following em { background-image: none; }
 }
 
 html.motion-ready[data-motion="paused"] .mark-motion,
@@ -86,7 +93,9 @@ html.motion-ready[data-motion="paused"] .status-dot { animation-play-state: paus
 
 @media (prefers-reduced-motion: reduce) {
   .motion-ready .mark-motion { animation: none; }
-  .motion-ready .motion-name {
+  .motion-ready .motion-name,
+  .motion-ready .motion-name.is-name-following,
+  .motion-ready .motion-name em {
     animation: none;
     background: none;
     -webkit-text-fill-color: currentColor;
@@ -94,5 +103,7 @@ html.motion-ready[data-motion="paused"] .status-dot { animation-play-state: paus
 }
 
 @media (forced-colors: active) {
-  .motion-ready .motion-name { background: none; -webkit-text-fill-color: currentColor; }
+  .motion-ready .motion-name,
+  .motion-ready .motion-name.is-name-following,
+  .motion-ready .motion-name em { background: none; -webkit-text-fill-color: currentColor; }
 }

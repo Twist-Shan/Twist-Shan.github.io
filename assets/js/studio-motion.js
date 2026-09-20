@@ -29,7 +29,7 @@
     const path = mark.querySelector(`[data-packet-route="${node.dataset.packet}"]`);
     return { mark, node, path, length: path.getTotalLength(), delay: Number(node.dataset.packetDelay) };
   }));
-  const nameFields = names.map(node => ({ node, x: 0, y: 0, targetX: 0, targetY: 0, moving: false, initialized: false }));
+  const nameFields = names.map(node => ({ node, x: 0, y: 0, targetX: 0, targetY: 0, moving: false, initialized: false, returning: false }));
   const visible = element => element.classList.contains('is-motion-visible');
   const stopped = () => paused || reducedMotion.matches || document.hidden;
   const hasWork = () => orbits.some(item => visible(item.mark)) || waves.some(item => visible(item.mark)) || packets.some(item => visible(item.mark)) || nameFields.some(item => item.moving && visible(item.node));
@@ -96,18 +96,41 @@
       node.style.opacity = String(Math.min(1, progress * 8, (1 - progress) * 8));
     });
 
-    const follow = 1 - Math.exp(-delta / 95);
     nameFields.forEach(field => {
       if (!field.moving || !visible(field.node)) return;
+      const follow = 1 - Math.exp(-delta / (field.returning ? 150 : 95));
       field.x += (field.targetX - field.x) * follow;
       field.y += (field.targetY - field.y) * follow;
       field.moving = Math.abs(field.targetX - field.x) + Math.abs(field.targetY - field.y) > .15;
       if (!field.moving) { field.x = field.targetX; field.y = field.targetY; }
       field.node.style.setProperty('--name-x', `${field.x.toFixed(2)}px`);
       field.node.style.setProperty('--name-y', `${field.y.toFixed(2)}px`);
+      if (!field.moving && field.returning) resetNameHighlight(field);
     });
     if (hasWork()) startFrame();
     else previousTime = 0;
+  }
+
+  function resetNameHighlight(field) {
+    field.moving = false;
+    field.initialized = false;
+    field.returning = false;
+    field.node.classList.remove('is-name-following');
+    field.node.style.removeProperty('--name-x');
+    field.node.style.removeProperty('--name-y');
+  }
+
+  function returnNameHighlight(field) {
+    if (!field.initialized) return;
+    if (stopped()) { resetNameHighlight(field); return; }
+    const rect = field.node.getBoundingClientRect();
+    const nickname = (field.node.querySelector('em') || field.node).getBoundingClientRect();
+    field.targetX = nickname.left - rect.left + nickname.width / 2;
+    field.targetY = nickname.top - rect.top + nickname.height / 2;
+    field.returning = true;
+    field.moving = true;
+    // Keep the same gradient visible until it reaches the nickname.
+    startFrame();
   }
 
   nameFields.forEach(field => {
@@ -115,15 +138,22 @@
       if (stopped() || event.pointerType === 'touch') return;
       const rect = field.node.getBoundingClientRect();
       if (!field.initialized) {
-        field.x = rect.width * .48;
-        field.y = rect.height * .5;
+        const nickname = (field.node.querySelector('em') || field.node).getBoundingClientRect();
+        field.x = nickname.left - rect.left + nickname.width / 2;
+        field.y = nickname.top - rect.top + nickname.height / 2;
+        field.node.style.setProperty('--name-x', `${field.x.toFixed(2)}px`);
+        field.node.style.setProperty('--name-y', `${field.y.toFixed(2)}px`);
         field.initialized = true;
       }
+      field.node.classList.add('is-name-following');
+      field.returning = false;
       field.targetX = event.clientX - rect.left;
       field.targetY = event.clientY - rect.top;
       field.moving = true;
       startFrame();
     }, { passive: true });
+    field.node.addEventListener('pointerleave', () => returnNameHighlight(field));
+    field.node.addEventListener('pointercancel', () => returnNameHighlight(field));
   });
 
   function syncMotion() {
@@ -139,7 +169,7 @@
       orbits.forEach(({ node }) => node.removeAttribute('transform'));
       waves.forEach(({ node, original }) => node.setAttribute('d', original));
       packets.forEach(({ node }) => { node.style.opacity = '0'; });
-      nameFields.forEach(field => { field.moving = false; });
+      nameFields.forEach(resetNameHighlight);
     }
     if (stopped() || !hasWork()) {
       cancelAnimationFrame(frame);
