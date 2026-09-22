@@ -7,7 +7,7 @@ slug: blog
 
 <header class="page-hero shell reveal">
   <p class="eyebrow">02 — Blog</p>
-  <h1>Notes from the <em>learning process.</em></h1>
+  <h1 class="motion-title">Notes from the <em>learning process.</em></h1>
   <p>Writings about research, people, places, and things I want to remember.</p>
 </header>
 

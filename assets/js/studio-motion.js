@@ -1,7 +1,7 @@
 (() => {
   const root = document.documentElement;
   const marks = [...document.querySelectorAll('.heading-mark--research')];
-  const names = [...document.querySelectorAll('.motion-name')];
+  const names = [...document.querySelectorAll('.motion-name, .motion-title')];
   if (!marks.length && !names.length) return;
 
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -102,7 +102,7 @@
       field.x += (field.targetX - field.x) * follow;
       field.y += (field.targetY - field.y) * follow;
       const distance = Math.abs(field.targetX - field.x) + Math.abs(field.targetY - field.y);
-      // Blend into the full nickname only once the moving color is close to it.
+      // Blend into the emphasized text only once the moving color is close to it.
       const targetRest = field.returning && distance < 24 ? 1 : 0;
       field.rest += (targetRest - field.rest) * follow;
       field.moving = distance > .15 || Math.abs(targetRest - field.rest) > .002;
@@ -140,7 +140,7 @@
     field.targetY = nickname.top - rect.top + nickname.height / 2;
     field.returning = true;
     field.moving = true;
-    // Keep the same gradient visible until it reaches the nickname.
+    // Keep the same gradient visible until it reaches the emphasized text.
     startFrame();
   }
 

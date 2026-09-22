@@ -7,7 +7,7 @@ slug: research
 
 <header class="page-hero shell reveal">
   <p class="eyebrow">01 — Research</p>
-  <h1>Questions I’m <em>interested in.</em></h1>
+  <h1 class="motion-title">Questions I’m <em>interested in.</em></h1>
   <p>I’m a slow learner, but I keep learning and moving forward.</p>
 </header>
 

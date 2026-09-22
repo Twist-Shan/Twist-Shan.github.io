@@ -7,7 +7,7 @@ slug: misc
 
 <header class="page-hero shell reveal">
   <p class="eyebrow">03 — Miscellany</p>
-  <h1>My life beyond <em>the loss function.</em></h1>
+  <h1 class="motion-title">My life beyond <em>the loss function.</em></h1>
   <p>About experiences, recording and sharing, about the meaning of life.</p>
 </header>
 
