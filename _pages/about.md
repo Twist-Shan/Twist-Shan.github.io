@@ -19,7 +19,7 @@ redirect_from:
     <div class="about-copy">
       <h2>About</h2>
       <p class="hero-intro">I’m an undergraduate at Peking University pursuing a double major in Statistics in the School of Mathematical Sciences and Economics in the National School of Development.</p>
-      <p>My research interests span the statistical foundations, optimization, and mechanistic interpretability of <strong>Modern Machine Learning</strong>, with a focus on deep learning, reinforcement learning, language models and diffusion models. For me, statistics begins not with numbers, but with the ambition to understand the world. That belief drives me to embrace the unfamiliar, explore new ideas, and turn uncertainty into structure and understanding.</p>
+      <p>My research interests span the statistical foundations, optimization, and mechanistic interpretability of <strong>Modern Machine Learning</strong>, with a focus on deep learning, reinforcement learning, and generative models including language models and diffusion models. My research begins with the curiosity to understand the world, which drives me to embrace the unfamiliar, explore new ideas, and turn uncertainty into structure.</p>
       <p>I'm seeking PhD opportunities in Statistics, Computer Science, and Operations Research beginning in Fall 2028.</p>
     </div>
     <div class="hero-actions">
