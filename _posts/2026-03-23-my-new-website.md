@@ -2,6 +2,7 @@
 title: 'Welcome to my personal website!'
 date: 2026-03-23
 permalink: /posts/2026/03/my-new-website/
+blog_category: others
 tags:
   - Life
 ---

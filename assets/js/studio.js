@@ -30,6 +30,24 @@
     });
   }
 
+  const filters = document.querySelector('.blog-filters');
+  if (filters) {
+    const buttons = [...filters.querySelectorAll('[data-blog-filter]')];
+    const posts = [...document.querySelectorAll('.post-row[data-blog-category]')];
+    const empty = document.querySelector('.blog-filter-empty');
+    filters.hidden = false;
+    buttons.forEach((button) => button.addEventListener('click', () => {
+      const category = button.dataset.blogFilter;
+      buttons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+      let visible = 0;
+      posts.forEach((post) => {
+        post.hidden = category !== 'all' && post.dataset.blogCategory !== category;
+        if (!post.hidden) visible += 1;
+      });
+      if (empty) empty.hidden = visible > 0 || posts.length === 0;
+    }));
+  }
+
   const items = document.querySelectorAll('.reveal');
   if (!('IntersectionObserver' in window)) {
     items.forEach((item) => item.classList.add('is-visible'));

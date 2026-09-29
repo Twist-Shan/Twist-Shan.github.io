@@ -41,7 +41,8 @@ redirect_from:
   </figure>
 </section>
 
-<section class="education shell ruled-section reveal">
+<div class="home-secondary shell">
+<section class="education ruled-section reveal">
   <header class="section-label">
     <span>02</span><h2>Education</h2><i class="heading-mark heading-mark--education" aria-hidden="true"></i>
   </header>
@@ -59,18 +60,20 @@ redirect_from:
   </div>
 </section>
 
-<section class="news shell ruled-section reveal">
+<section class="news ruled-section reveal">
   <header class="section-label">
     <span>03</span><h2>Short news</h2><i class="heading-mark heading-mark--notes" aria-hidden="true"></i><p>Small updates from my desk.</p>
   </header>
-  <div class="news-list">
-    {% for item in site.data.news limit:3 %}
+  <div class="news-list" tabindex="0" role="region" aria-label="Latest news">
+    {% for item in site.data.news %}
       {% if item.link != '' %}<a class="news-item" href="{{ item.link }}">{% else %}<div class="news-item">{% endif %}
         <time>{{ item.date }}</time><p>{{ item.text }}</p><span aria-hidden="true">{% if item.link != '' %}↗{% endif %}</span>
       {% if item.link != '' %}</a>{% else %}</div>{% endif %}
     {% endfor %}
   </div>
 </section>
+
+</div>
 
 <aside class="contact-band">
   <div class="shell reveal">
