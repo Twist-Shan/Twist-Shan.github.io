@@ -52,6 +52,8 @@ domains:
               - label: "arXiv"
                 url: ""
                 kind: arxiv
+              - label: "Blog"
+                url: ""
               - label: "Reproduction Code"
                 url: "https://github.com/Twist-Shan/Beyond_Scalar_Leaderboards"
             advisor:
@@ -74,6 +76,8 @@ domains:
               - label: "arXiv"
                 url: ""
                 kind: arxiv
+              - label: "Blog"
+                url: ""
               - label: "Reproduction Code"
                 url: "https://github.com/Twist-Shan/CoT_NIAH_Counting"
             advisor:
