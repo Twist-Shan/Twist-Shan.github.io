@@ -27,6 +27,7 @@ redirect_from:
       <a class="text-link quiet" href="{{ '/files/cv_Liang_Shan.pdf' | relative_url }}">Read my CV <span>↓</span></a>
     </div>
     <nav class="hero-socials" aria-label="Social profiles">
+      <a href="{{ site.author.googlescholar | escape }}">Google Scholar <span>↗</span></a>
       <a href="https://github.com/Twist-Shan">GitHub <span>↗</span></a>
       <a href="https://www.linkedin.com/in/liang-twist-shan">LinkedIn <span>↗</span></a>
       <a href="https://instagram.com/twist_shan">Instagram <span>↗</span></a>

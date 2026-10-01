@@ -74,10 +74,10 @@ domains:
               We study how Chain-of-Thought improves long-context counting in LLMs, showing that it shifts retrieval from broad to targeted and enables compact state-tracking representations of an internal counter, from controlled synthetic Transformers to open-weight models.
             resources:
               - label: "arXiv"
-                url: ""
+                url: "https://arxiv.org/abs/2609.38958"
                 kind: arxiv
               - label: "Blog"
-                url: ""
+                url: "/posts/2026/10/llm-counting/"
               - label: "Reproduction Code"
                 url: "https://github.com/Twist-Shan/CoT_NIAH_Counting"
             advisor:

@@ -3,6 +3,8 @@ root = ARGV.fetch(0, '_site')
 required = %w[
   index.html research/index.html blog/index.html misc/index.html
   posts/2026/07/tokenization/index.html posts/2026/08/optimizer/index.html
+  posts/2026/10/llm-counting/index.html
+  posts/2026/10/llm-counting/app.js posts/2026/10/llm-counting/assets/geometry-data.js
   files/cv.pdf assets/css/studio.css assets/js/studio.js
   assets/css/studio-motion.css assets/js/studio-motion.js
 ]

@@ -1,0 +1,673 @@
+{
+  "description": "Display-only theme and viewport variants. Original SVG files remain the canonical, unmodified figures.",
+  "light_background": "#fafaf7",
+  "dark_background": "#171a1e",
+  "explicit_neutral_source_ink_colors": [
+    "rgb(18.818665%,19.219971%,18.03894%)",
+    "rgb(18.823242%,19.215393%,18.03894%)",
+    "rgb(8.627319%,9.803772%,13.725281%)"
+  ],
+  "data_integrity": "All original chromatic fills and strokes except the explicitly identified near-neutral text/control ink are retained exactly. Original white heatmap cells, embedded images, path geometry, transforms, and plot data are retained. Only white page/axes/annotation background rectangles are recolored; small heatmap rectangles are excluded.",
+  "figures": [
+    {
+      "source": "broad-head-distribution.svg",
+      "source_sha256": "ddcfec104161d4f2591999425e0927eb14b1a66b8901cbfb49a80f35e3abb6fe",
+      "width": 236.0,
+      "height": 136.2,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/broad-head-distribution.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 4,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/broad-head-distribution.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 4,
+            "neutral_ink_properties": 41,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "targeted-head-distribution.svg",
+      "source_sha256": "34dcd7e066dd11bcf8f5a9e9dc93cbb61885165b6911b6c25c2a223c46a1b1d8",
+      "width": 236.0,
+      "height": 136.2,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/targeted-head-distribution.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 4,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/targeted-head-distribution.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 4,
+            "neutral_ink_properties": 69,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig2-accuracy.svg",
+      "source_sha256": "5ccb12b4fb58ea0d3a347581d35e97b99644567d9e08b5041f87e9f836de463b",
+      "width": 468.0,
+      "height": 140.4,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig2-accuracy.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 5,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig2-accuracy.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 5,
+            "neutral_ink_properties": 138,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig3a-broad-attention.svg",
+      "source_sha256": "dcd8003c6794d45fdb84f4017befd1d01e80312a6f9307a2e7ebe7c2dc1772b1",
+      "width": 242.0,
+      "height": 136.2,
+      "cropped_title_band_points": 15,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig3a-broad-attention.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 4,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig3a-broad-attention.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 4,
+            "neutral_ink_properties": 92,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig4a-nonthinking-mechanism.svg",
+      "source_sha256": "4868364eb7c2482fbeabab767172158707aa384cb59fbdb07394572fdb265968",
+      "width": 1166.0,
+      "height": 274.0,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark background and explicit semantic box/text palette; original colored arrows and results retained.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig4a-nonthinking-mechanism.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 2,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig4a-nonthinking-mechanism.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 2,
+            "neutral_ink_properties": 228,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig4b-record-span-patching.svg",
+      "source_sha256": "8026a99703065af99439cf096ea23627aacbb5dfb164c8a7862d337567205477",
+      "width": 447.0,
+      "height": 285.08002,
+      "cropped_title_band_points": 40,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig4b-record-span-patching.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig4b-record-span-patching.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 21,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig4c-head-ablation.svg",
+      "source_sha256": "4595dafae6909bd786f2f58c633783bb93cf45488a88e899e5169da9bfc0487f",
+      "width": 290.0,
+      "height": 285.08002,
+      "cropped_title_band_points": 40,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig4c-head-ablation.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig4c-head-ablation.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 29,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig4d-answer-state-patching.svg",
+      "source_sha256": "84b16826826a944d4b4539b969fb453dbb1bea5d8b53d8641cd796778ca1f42a",
+      "width": 459.95996,
+      "height": 285.08002,
+      "cropped_title_band_points": 40,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig4d-answer-state-patching.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig4d-answer-state-patching.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 19,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig5a-targeted-attention.svg",
+      "source_sha256": "c7ecc1eda7549cd4eec603ca40cbca0e354c905fd46c81eb91753984533981d7",
+      "width": 242.0,
+      "height": 136.2,
+      "cropped_title_band_points": 15,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig5a-targeted-attention.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 4,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 712
+          }
+        },
+        "dark": {
+          "filename": "display/fig5a-targeted-attention.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 4,
+            "neutral_ink_properties": 80,
+            "heatmap_cells_crisp_edges": 712
+          }
+        }
+      }
+    },
+    {
+      "source": "fig6a-thinking-mechanism.svg",
+      "source_sha256": "c6e6a8af2b4d5a356279397ac9c7d1f6c2832d796ae8099482b18d725970d906",
+      "width": 830.0,
+      "height": 187.0,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark background and explicit semantic box/text palette; original colored arrows and results retained.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig6a-thinking-mechanism.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 1,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig6a-thinking-mechanism.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 1,
+            "neutral_ink_properties": 89,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig6b-head-ablation.svg",
+      "source_sha256": "fd893d061c1730cc035206d61320e5bb81f5d57d03e0cb6717c557704ee5fb68",
+      "width": 219.0,
+      "height": 258.2,
+      "cropped_title_band_points": 24,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig6b-head-ablation.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 11,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig6b-head-ablation.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 11,
+            "neutral_ink_properties": 42,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig6c-counter-state-patching.svg",
+      "source_sha256": "03054612422d6a01dbb53f482697394b572afdd1a2e58479b1681ded9cf9cfbd",
+      "width": 370.0,
+      "height": 254.2,
+      "cropped_title_band_points": 28,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark background and explicit semantic box/text palette; original colored arrows and results retained.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig6c-counter-state-patching.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 1,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig6c-counter-state-patching.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 1,
+            "neutral_ink_properties": 83,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig6d-answer-state-patching.svg",
+      "source_sha256": "9c253c6dc99a92c0e17b80cd3ff303ebf736e8e8a2dad80d1550372ecd39425e",
+      "width": 226.4,
+      "height": 230.0,
+      "cropped_title_band_points": 28,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig6d-answer-state-patching.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 2,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig6d-answer-state-patching.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 2,
+            "neutral_ink_properties": 30,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig7a-training-accuracy.svg",
+      "source_sha256": "d190c0f7e140db5ba48f871eeac6ada17565148f4c7e00d12bda840e8e03834b",
+      "width": 158.0,
+      "height": 144.0,
+      "cropped_title_band_points": 16,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig7a-training-accuracy.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig7a-training-accuracy.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 76,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig7b-broad-retrieval.svg",
+      "source_sha256": "096573a444b4c278c88011a77ee9bd9c380dcfba4f63a106cac4c803e5d66d28",
+      "width": 156.0,
+      "height": 144.0,
+      "cropped_title_band_points": 16,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig7b-broad-retrieval.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 3488
+          }
+        },
+        "dark": {
+          "filename": "display/fig7b-broad-retrieval.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 79,
+            "heatmap_cells_crisp_edges": 3488
+          }
+        }
+      }
+    },
+    {
+      "source": "fig7c-targeted-retrieval.svg",
+      "source_sha256": "c2787edbc8c93d0188688b9de46c70565cfa27027cbe46a8104c7073ce748fa6",
+      "width": 154.0,
+      "height": 144.0,
+      "cropped_title_band_points": 16,
+      "crop_note": "Only the duplicated panel title/letter band is outside the display viewport; all axes, legends, and subtitles are retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig7c-targeted-retrieval.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 3488
+          }
+        },
+        "dark": {
+          "filename": "display/fig7c-targeted-retrieval.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 87,
+            "heatmap_cells_crisp_edges": 3488
+          }
+        }
+      }
+    },
+    {
+      "source": "fig9-empirical-fits.svg",
+      "source_sha256": "1c9d3a2e210b8ae44725a45002bbcd7c30c9a4a3fa91c6ff1a876ae343d702e6",
+      "width": 468.0,
+      "height": 154.8,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig9-empirical-fits.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig9-empirical-fits.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 96,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig8-relative-noise.svg",
+      "source_sha256": "3c7deccd3834ac97ba858f98318f61fb0c65f8ba12ade3b9dc4e1c9b58bb5fec",
+      "width": 468.0,
+      "height": 205.2,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig8-relative-noise.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 2,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig8-relative-noise.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 2,
+            "neutral_ink_properties": 36,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig26-head-ablation-dose.svg",
+      "source_sha256": "b53e2fb3199e05a24166dd2f8486142c46589ac9f8794110d47f853dc0abca7c",
+      "width": 468.0,
+      "height": 334.8,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig26-head-ablation-dose.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 5,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig26-head-ablation-dose.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 5,
+            "neutral_ink_properties": 223,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig42-training-attention-decoding.svg",
+      "source_sha256": "3ca51fbb7e35aef88bbe4d12678516a48d9c895e0829557f97ff6431166fa161",
+      "width": 468.0,
+      "height": 385.2,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig42-training-attention-decoding.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 7,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig42-training-attention-decoding.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 7,
+            "neutral_ink_properties": 132,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig42-training-attention.svg",
+      "source_sha256": "ab08f87b538008901d3917ae8af5d78d3fff403aaceda42417b040858b23fcb8",
+      "width": 468.0,
+      "height": 205.0,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig42-training-attention.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 5,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig42-training-attention.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 5,
+            "neutral_ink_properties": 83,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "fig42-training-decoding.svg",
+      "source_sha256": "9c4877ccbec84b5c9a4bf94bbd13fb336d864dacdd0b3c936de7a6db86e1f610",
+      "width": 468.0,
+      "height": 178.2,
+      "cropped_title_band_points": 0,
+      "crop_note": "Full original extent retained.",
+      "dark_mode_policy": "Dark page/axes backgrounds; achromatic ink and the two explicitly identified near-neutral source ink colors adapted; all scientific chromatic colors unchanged.",
+      "chromatic_rgb_preserved": true,
+      "variants": {
+        "light": {
+          "filename": "display/fig42-training-decoding.svg",
+          "background": "#fafaf7",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 0,
+            "heatmap_cells_crisp_edges": 0
+          }
+        },
+        "dark": {
+          "filename": "display/fig42-training-decoding.dark.svg",
+          "background": "#171a1e",
+          "changes": {
+            "background_rectangles": 3,
+            "neutral_ink_properties": 49,
+            "heatmap_cells_crisp_edges": 0
+          }
+        }
+      }
+    }
+  ]
+}

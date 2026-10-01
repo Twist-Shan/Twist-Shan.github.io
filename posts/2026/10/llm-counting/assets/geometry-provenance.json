@@ -1,0 +1,89 @@
+{
+  "schema": "count-state-blog-geometry-provenance-v1",
+  "sourceReport": {
+    "path": "C:\\Users\\HP\\Desktop\\Research\\UWM Yiqiao Zhong\\CoT for Counting\\Realistic_CoT_NiaH_Count\\reports\\NiaH_Geometry_Comparison.html",
+    "sha256": "e2b2559c8cca5bc500454b7bfa5196d967ef91ba4c845bf441280e38ebeafd08"
+  },
+  "sourceSupplement": {
+    "path": "C:\\Users\\HP\\Desktop\\Research\\UWM Yiqiao Zhong\\CoT for Counting\\Figures\\geometry_interactive_20260912\\release\\index.html",
+    "sha256": "cad7c970ae08817017fc948baeec90436fd89542fb733c63b37000f0937c5575"
+  },
+  "originalFigureSettings": {
+    "path": "C:\\Users\\HP\\Desktop\\Research\\UWM Yiqiao Zhong\\CoT for Counting\\Figures\\aurora_attention_pca_concept\\main_figure_v2_settings.json",
+    "sha256": "405feefb137e0ad027ff0e3bbc04f57331c44bbb60285d5e43f6e3ad00f05920"
+  },
+  "sourceField": "INDEXED_NUMERIC_N10.models[\"Qwen3-8B\"]",
+  "extraction": "Supplement embedded geometry-data JSON; source coordinate values independently checked against original report; only selected-layer secondary-confirmation points exported.",
+  "pointMapping": {
+    "x": "PC1, unchanged",
+    "y": "PC2, unchanged",
+    "z": "PC3, unchanged",
+    "count": "occurrence / running count index k, 1...10",
+    "sampleId": "Consistently anonymized paired trajectory identifier from the supplement"
+  },
+  "layerNumbering": "layer is one-based (L13 / L31); internalIndex is zero-based (12 / 30).",
+  "condition": {
+    "model": "Qwen3-8B",
+    "context": "10K tokens, per current Figure 1 caption",
+    "goldCount": 10,
+    "modes": [
+      "Non-thinking: evidence span-end state",
+      "Thinking: strict indexed numeric trace item-end state"
+    ],
+    "subset": "10 paired complete trajectories, 100 states per mode, secondary confirmation"
+  },
+  "selectionRule": "Each mode independently maximizes discovery grouped-out-of-fold NCC balanced accuracy; ties use discovery logistic balanced accuracy, then earlier layer. Confirmation is not used for layer selection.",
+  "pca": "PCA fitted separately on discovery states for each mode and layer. Stored coordinates of first three components are retained exactly; no refitting or inference.",
+  "centroids": "Arithmetic means of the displayed 10 secondary-confirmation states at each running index. Connecting these means is a descriptive centroid path, not a single observed trajectory or classifier centers.",
+  "classifier": "Saved secondary-confirmation nearest-centroid balanced accuracy after whitened 16-component PCA. Chance is 10%. Not a classifier fit in the displayed 3D coordinates.",
+  "cohortCaveat": "Selected complete strict indexed numeric traces; 30 paired trajectories total (20 secondary discovery, 10 secondary confirmation). All 11 original discovery seeds are retained; 10 of 19 original confirmation seeds are hash-selected as secondary confirmation; the remaining 9 are added to secondary discovery. Trace-format selection and the secondary split followed exploration, so this is not a fresh confirmatory cohort or the full output population.",
+  "displayCaveat": "PCA bases and signs can differ across modes; shared camera is not shared coordinates. If independently centered and fitted, cloud size must not be interpreted as comparable absolute magnitudes.",
+  "validation": {
+    "non_thinking": {
+      "internalIndex": 12,
+      "layer": 13,
+      "states": 100,
+      "pairedTrajectories": 10,
+      "counts": {
+        "1": 10,
+        "2": 10,
+        "3": 10,
+        "4": 10,
+        "5": 10,
+        "6": 10,
+        "7": 10,
+        "8": 10,
+        "9": 10,
+        "10": 10
+      },
+      "ncc": 0.4600000000000001,
+      "coordinatesMatchUpstreamExactly": true
+    },
+    "native_thinking": {
+      "internalIndex": 30,
+      "layer": 31,
+      "states": 100,
+      "pairedTrajectories": 10,
+      "counts": {
+        "1": 10,
+        "2": 10,
+        "3": 10,
+        "4": 10,
+        "5": 10,
+        "6": 10,
+        "7": 10,
+        "8": 10,
+        "9": 10,
+        "10": 10
+      },
+      "ncc": 0.9800000000000001,
+      "coordinatesMatchUpstreamExactly": true
+    }
+  },
+  "pairedKeysMatch": true,
+  "syntheticPointsAdded": 0,
+  "output": {
+    "path": "C:\\Users\\HP\\Desktop\\Research\\UWM Yiqiao Zhong\\CoT for Counting\\Blog\\assets\\geometry-data.js",
+    "sha256": "8e449b4dce489bbf2263eb4a4d4a9b4fe8fb2ad03ea13d290b67bcad00e884c9"
+  }
+}

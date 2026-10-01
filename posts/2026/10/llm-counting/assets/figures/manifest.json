@@ -1,0 +1,719 @@
+{
+  "description": "Original paper figures and isolated original panels, exported as self-contained vector SVG using pypdf and Poppler pdftocairo.",
+  "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+  "figures": [
+    {
+      "filename": "fig2-accuracy.svg",
+      "source_pdf": "Paper_Draft/figures/empirical_accuracy_1x4.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 2",
+      "crop_bbox": [
+        0,
+        0,
+        468.0,
+        140.4
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468.0,
+      "height": 140.4,
+      "bytes": 441151
+    },
+    {
+      "filename": "appendix-accuracy-laws.svg",
+      "source_pdf": "Paper_Draft/figures/empirical_accuracy_laws.pdf",
+      "source_page": 1,
+      "paper_reference": "Supplementary empirical-law source graphic",
+      "crop_bbox": [
+        0,
+        0,
+        518.061375,
+        169.2662164119
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 518.061375,
+      "height": 169.2662164119,
+      "bytes": 604659
+    },
+    {
+      "filename": "fig3-broad-retrieval.svg",
+      "source_pdf": "Paper_Draft/figures/nonthinking_broad_retrieval.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 3",
+      "crop_bbox": [
+        0,
+        0,
+        468.0,
+        151.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468.0,
+      "height": 151.2,
+      "bytes": 1050807
+    },
+    {
+      "filename": "fig4-nonthinking-pathway.svg",
+      "source_pdf": "Paper_Draft/figures/nonthinking_form_retrieve_consolidate.pdf",
+      "source_pdf_sha256": "971d16c2f51ffe15e2f4b23276b1ad1d7f5671b92cb81bccada09ecd2b5393d5",
+      "source_page": 1,
+      "paper_reference": "Figure 4",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 6,
+      "crop_bbox": [
+        0,
+        0,
+        1224.95996,
+        598.08002
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 1224.95996,
+      "height": 598.08002,
+      "bytes": 432942,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig4a-nonthinking-mechanism.svg",
+      "source_pdf": "Paper_Draft/figures/nonthinking_form_retrieve_consolidate.pdf",
+      "source_pdf_sha256": "971d16c2f51ffe15e2f4b23276b1ad1d7f5671b92cb81bccada09ecd2b5393d5",
+      "source_page": 1,
+      "paper_reference": "Figure 4A",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 6,
+      "crop_bbox": [
+        8,
+        0,
+        1174,
+        274
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 1166,
+      "height": 274,
+      "bytes": 227997,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig4b-record-span-patching.svg",
+      "source_pdf": "Paper_Draft/figures/nonthinking_form_retrieve_consolidate.pdf",
+      "source_pdf_sha256": "971d16c2f51ffe15e2f4b23276b1ad1d7f5671b92cb81bccada09ecd2b5393d5",
+      "source_page": 1,
+      "paper_reference": "Figure 4B",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 6,
+      "crop_bbox": [
+        8,
+        273,
+        455,
+        598.08002
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 447,
+      "height": 325.08002,
+      "bytes": 99193,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig4c-head-ablation.svg",
+      "source_pdf": "Paper_Draft/figures/nonthinking_form_retrieve_consolidate.pdf",
+      "source_pdf_sha256": "971d16c2f51ffe15e2f4b23276b1ad1d7f5671b92cb81bccada09ecd2b5393d5",
+      "source_page": 1,
+      "paper_reference": "Figure 4C",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 6,
+      "crop_bbox": [
+        464,
+        273,
+        754,
+        598.08002
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 290,
+      "height": 325.08002,
+      "bytes": 107792,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig4d-answer-state-patching.svg",
+      "source_pdf": "Paper_Draft/figures/nonthinking_form_retrieve_consolidate.pdf",
+      "source_pdf_sha256": "971d16c2f51ffe15e2f4b23276b1ad1d7f5671b92cb81bccada09ecd2b5393d5",
+      "source_page": 1,
+      "paper_reference": "Figure 4D",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 6,
+      "crop_bbox": [
+        765,
+        273,
+        1224.95996,
+        598.08002
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 459.9599599999999,
+      "height": 325.08002,
+      "bytes": 92055,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig5-targeted-retrieval.svg",
+      "source_pdf": "Paper_Draft/figures/native_targeted_retrieval.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 5",
+      "crop_bbox": [
+        0,
+        0,
+        468.0,
+        151.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468.0,
+      "height": 151.2,
+      "bytes": 1673906
+    },
+    {
+      "filename": "fig6-thinking-pathway.svg",
+      "source_pdf": "Paper_Draft/figures/native_retrieve_encode_count_loop.pdf",
+      "source_pdf_sha256": "207f110af03961ef8aae547ad2ea225429d97b62b8c60fc021a14ac31cd24cee",
+      "source_page": 1,
+      "paper_reference": "Figure 6",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 8,
+      "crop_bbox": [
+        0,
+        0,
+        842.4,
+        475.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 842.4,
+      "height": 475.2,
+      "bytes": 425576,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig6a-thinking-mechanism.svg",
+      "source_pdf": "Paper_Draft/figures/native_retrieve_encode_count_loop.pdf",
+      "source_pdf_sha256": "207f110af03961ef8aae547ad2ea225429d97b62b8c60fc021a14ac31cd24cee",
+      "source_page": 1,
+      "paper_reference": "Figure 6A",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 8,
+      "crop_bbox": [
+        8,
+        0,
+        838,
+        187
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 830,
+      "height": 187,
+      "bytes": 144298,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig6b-head-ablation.svg",
+      "source_pdf": "Paper_Draft/figures/native_retrieve_encode_count_loop.pdf",
+      "source_pdf_sha256": "207f110af03961ef8aae547ad2ea225429d97b62b8c60fc021a14ac31cd24cee",
+      "source_page": 1,
+      "paper_reference": "Figure 6B",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 8,
+      "crop_bbox": [
+        0,
+        193,
+        219,
+        475.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 219,
+      "height": 282.2,
+      "bytes": 136233,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig6c-counter-state-patching.svg",
+      "source_pdf": "Paper_Draft/figures/native_retrieve_encode_count_loop.pdf",
+      "source_pdf_sha256": "207f110af03961ef8aae547ad2ea225429d97b62b8c60fc021a14ac31cd24cee",
+      "source_page": 1,
+      "paper_reference": "Figure 6C",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 8,
+      "crop_bbox": [
+        233,
+        193,
+        603,
+        475.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 370,
+      "height": 282.2,
+      "bytes": 134115,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig6d-answer-state-patching.svg",
+      "source_pdf": "Paper_Draft/figures/native_retrieve_encode_count_loop.pdf",
+      "source_pdf_sha256": "207f110af03961ef8aae547ad2ea225429d97b62b8c60fc021a14ac31cd24cee",
+      "source_page": 1,
+      "paper_reference": "Figure 6D",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 8,
+      "crop_bbox": [
+        616,
+        193,
+        842.4,
+        451
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 226.39999999999998,
+      "height": 258,
+      "bytes": 90716,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "appendix-counter-controls.svg",
+      "source_pdf": "Paper_Draft/figures/native_counter_readout_controls.pdf",
+      "source_page": 1,
+      "paper_reference": "Supplementary counter-readout controls source graphic",
+      "crop_bbox": [
+        0,
+        0,
+        842.4,
+        262.8
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 842.4,
+      "height": 262.8,
+      "bytes": 172717
+    },
+    {
+      "filename": "fig7-training-dynamics.svg",
+      "source_pdf": "Paper_Draft/figures/synthetic_section.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 7",
+      "crop_bbox": [
+        0,
+        0,
+        468.0,
+        162.72
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468.0,
+      "height": 162.72,
+      "bytes": 3411523
+    },
+    {
+      "filename": "fig3a-broad-attention.svg",
+      "source_pdf": "Paper_Draft/figures/nonthinking_broad_retrieval.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 3A",
+      "crop_bbox": [
+        [
+          0,
+          0,
+          230,
+          124
+        ],
+        [
+          0,
+          124,
+          242,
+          151.2
+        ]
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "segmented_crops": [
+        {
+          "crop_bbox": [
+            0,
+            0,
+            230,
+            124
+          ],
+          "destination_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            124,
+            242,
+            151.2
+          ],
+          "destination_top_left": [
+            0,
+            124
+          ]
+        }
+      ],
+      "note": "Adjacent titles/axis labels are excluded using separate source crops. Original vectors and colors are retained; panels are not redrawn.",
+      "width": 242,
+      "height": 151.2,
+      "bytes": 119939
+    },
+    {
+      "filename": "fig5a-targeted-attention.svg",
+      "source_pdf": "Paper_Draft/figures/native_targeted_retrieval.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 5A",
+      "crop_bbox": [
+        [
+          0,
+          0,
+          230,
+          124
+        ],
+        [
+          0,
+          124,
+          242,
+          151.2
+        ]
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "segmented_crops": [
+        {
+          "crop_bbox": [
+            0,
+            0,
+            230,
+            124
+          ],
+          "destination_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            124,
+            242,
+            151.2
+          ],
+          "destination_top_left": [
+            0,
+            124
+          ]
+        }
+      ],
+      "note": "Adjacent titles/axis labels are excluded using separate source crops. Original vectors and colors are retained; panels are not redrawn.",
+      "width": 242,
+      "height": 151.2,
+      "bytes": 598952
+    },
+    {
+      "filename": "fig7a-training-accuracy.svg",
+      "source_pdf": "Paper_Draft/figures/synthetic_section.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 7A",
+      "crop_bbox": [
+        [
+          0,
+          0,
+          135,
+          16
+        ],
+        [
+          0,
+          16,
+          158,
+          160
+        ]
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "segmented_crops": [
+        {
+          "crop_bbox": [
+            0,
+            0,
+            135,
+            16
+          ],
+          "destination_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            16,
+            158,
+            160
+          ],
+          "destination_top_left": [
+            0,
+            16
+          ]
+        }
+      ],
+      "note": "Adjacent titles/axis labels are excluded using separate source crops. Original vectors and colors are retained; panels are not redrawn.",
+      "width": 158,
+      "height": 160,
+      "bytes": 120180
+    },
+    {
+      "filename": "fig7b-broad-retrieval.svg",
+      "source_pdf": "Paper_Draft/figures/synthetic_section.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 7B",
+      "crop_bbox": [
+        [
+          140,
+          0,
+          289,
+          16
+        ],
+        [
+          158,
+          16,
+          314,
+          160
+        ]
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "segmented_crops": [
+        {
+          "crop_bbox": [
+            140,
+            0,
+            289,
+            16
+          ],
+          "destination_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_bbox": [
+            158,
+            16,
+            314,
+            160
+          ],
+          "destination_top_left": [
+            0,
+            16
+          ]
+        }
+      ],
+      "note": "Adjacent titles/axis labels are excluded using separate source crops. Original vectors and colors are retained; panels are not redrawn.",
+      "width": 156,
+      "height": 160,
+      "bytes": 1618272
+    },
+    {
+      "filename": "fig7c-targeted-retrieval.svg",
+      "source_pdf": "Paper_Draft/figures/synthetic_section.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 7C",
+      "crop_bbox": [
+        [
+          296,
+          0,
+          438,
+          16
+        ],
+        [
+          314,
+          16,
+          468,
+          160
+        ]
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "segmented_crops": [
+        {
+          "crop_bbox": [
+            296,
+            0,
+            438,
+            16
+          ],
+          "destination_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_bbox": [
+            314,
+            16,
+            468,
+            160
+          ],
+          "destination_top_left": [
+            0,
+            16
+          ]
+        }
+      ],
+      "note": "Adjacent titles/axis labels are excluded using separate source crops. Original vectors and colors are retained; panels are not redrawn.",
+      "width": 154,
+      "height": 160,
+      "bytes": 1606651
+    },
+    {
+      "filename": "fig9-empirical-fits.svg",
+      "source_pdf": "Paper_Draft/figures/empirical_appendix/empirical_median_fits.pdf",
+      "source_page": 1,
+      "paper_reference": "Figure 9",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 22,
+      "crop_bbox": [
+        0,
+        0,
+        468,
+        154.8
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468,
+      "height": 154.8,
+      "bytes": 287733,
+      "verification": "Figure 9 in the supplied 61-page manuscript; original source graphic retained."
+    },
+    {
+      "filename": "fig8-relative-noise.svg",
+      "source_pdf": "Paper_Draft/figures/empirical_appendix/empirical_relative_noise.pdf",
+      "source_pdf_sha256": "7dde3cad6dacbc7505467571612a89793a05a43d032acc5982fe4a0f14a56cde",
+      "source_page": 1,
+      "paper_reference": "Figure 8",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 21,
+      "crop_bbox": [
+        0,
+        0,
+        468.0,
+        205.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468.0,
+      "height": 205.2,
+      "bytes": 93863,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig26-head-ablation-dose.svg",
+      "source_pdf": "Paper_Draft/figures/cot_appendix/cot_current_bank_dose.pdf",
+      "source_pdf_sha256": "6d5e6dfa115c9ae8e2674d974f833c60b02f853f4166b9d9a3470b01d744c2b4",
+      "source_page": 1,
+      "paper_reference": "Figure 26",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 38,
+      "crop_bbox": [
+        0,
+        0,
+        468.0,
+        334.8
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468.0,
+      "height": 334.8,
+      "bytes": 210715,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig42-training-attention-decoding.svg",
+      "source_pdf": "Paper_Draft/figures/synthetic_appendix/08_training_dynamics.pdf",
+      "source_pdf_sha256": "a5d78abebda5e2b8e0d2319c45efefa19d6c8e3ce8be385067ae1d2edbbee090",
+      "source_page": 1,
+      "paper_reference": "Figure 42",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 55,
+      "crop_bbox": [
+        0,
+        0,
+        468.0,
+        385.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468.0,
+      "height": 385.2,
+      "bytes": 261872,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig42-training-attention.svg",
+      "source_pdf": "Paper_Draft/figures/synthetic_appendix/08_training_dynamics.pdf",
+      "source_pdf_sha256": "a5d78abebda5e2b8e0d2319c45efefa19d6c8e3ce8be385067ae1d2edbbee090",
+      "source_page": 1,
+      "paper_reference": "Figure 42A\u2013D",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 55,
+      "crop_bbox": [
+        0,
+        0,
+        468,
+        205
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468,
+      "height": 205,
+      "bytes": 158585,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "fig42-training-decoding.svg",
+      "source_pdf": "Paper_Draft/figures/synthetic_appendix/08_training_dynamics.pdf",
+      "source_pdf_sha256": "a5d78abebda5e2b8e0d2319c45efefa19d6c8e3ce8be385067ae1d2edbbee090",
+      "source_page": 1,
+      "paper_reference": "Figure 42E\u2013F",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 55,
+      "crop_bbox": [
+        0,
+        207,
+        468,
+        385.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 468,
+      "height": 178.2,
+      "bytes": 149092,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "broad-head-distribution.svg",
+      "source_pdf": "Paper_Draft/figures/nonthinking_broad_retrieval.pdf",
+      "source_pdf_sha256": "cb972003c9a1d3554fdf9c9ad667cf8c13b68544a25d0d8cc565ee8badb9a53e",
+      "source_page": 1,
+      "paper_reference": "Section 3.1 / Appendix D.2",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 5,
+      "crop_bbox": [
+        232,
+        15,
+        468,
+        151.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 236,
+      "height": 136.2,
+      "bytes": 931710,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    },
+    {
+      "filename": "targeted-head-distribution.svg",
+      "source_pdf": "Paper_Draft/figures/native_targeted_retrieval.pdf",
+      "source_pdf_sha256": "0ccbdf5ec70af67bc0b03631af0160f70c237abdf1418f6d5b28a04dc6ce6aac",
+      "source_page": 1,
+      "paper_reference": "Section 4.1 / Appendix E.2",
+      "canonical_paper": "CoT_NIAH_Counting_ICLR2027.pdf",
+      "canonical_paper_page": 7,
+      "crop_bbox": [
+        232,
+        15,
+        468,
+        151.2
+      ],
+      "crop_coordinate_system": "PDF points, top-left origin: [left, top, right, bottom]",
+      "width": 236,
+      "height": 136.2,
+      "bytes": 1070349,
+      "verification": "Matched to the supplied ICLR manuscript; source plot vectors and scientific colors retained."
+    }
+  ],
+  "canonical_paper_sha256": "33471dc02a18960cbe3fc1cfdfb7014a21eb967bcbb241080cb1b01950679004",
+  "canonical_paper_pages": 61,
+  "version_note": "Blog text and refreshed panels follow the September 25, 2026 PDF supplied by the user. No manuscript links are exposed on the page."
+}

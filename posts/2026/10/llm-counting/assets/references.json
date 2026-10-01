@@ -1,0 +1,87 @@
+{
+  "source": "Selected from the bibliography of CoT_NIAH_Counting_ICLR2027.pdf, pages 10–13.",
+  "verified": "2026-09-26",
+  "year_convention": "Conference publication year when applicable; otherwise the original publication year.",
+  "references": [
+    {
+      "id": "wei2022cot",
+      "authors": "Wei et al.",
+      "year": 2022,
+      "title": "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models",
+      "url": "https://proceedings.neurips.cc/paper/2022/hash/9d5609613524ecf4f15af0f7b31abca4-Abstract-Conference.html",
+      "note": "Reasoning traces improve performance on arithmetic, symbolic, and commonsense tasks."
+    },
+    {
+      "id": "hsieh2024ruler",
+      "authors": "Hsieh et al.",
+      "year": 2024,
+      "title": "RULER: What’s the Real Context Size of Your Long-Context Language Models?",
+      "url": "https://arxiv.org/abs/2404.06654",
+      "note": "Extends needle retrieval to controlled long-context tasks involving multiple records, tracing, and aggregation."
+    },
+    {
+      "id": "wu2025retrieval",
+      "authors": "Wu et al.",
+      "year": 2025,
+      "title": "Retrieval Head Mechanistically Explains Long-Context Factuality",
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/9b77f07301b1ef1fe810aae96c12cb7b-Abstract-Conference.html",
+      "note": "Identifies attention heads that retrieve information from context and tests their contribution through ablation."
+    },
+    {
+      "id": "behrens2025counting",
+      "authors": "Behrens, Biggio, and Zdeborová",
+      "year": 2025,
+      "title": "Counting in Small Transformers: The Delicate Interplay between Attention and Feed-Forward Layers",
+      "url": "https://proceedings.mlr.press/v267/behrens25a.html",
+      "note": "Characterizes distinct counting strategies and how attention and feed-forward layers implement them in small transformers."
+    },
+    {
+      "id": "engels2025features",
+      "authors": "Engels et al.",
+      "year": 2025,
+      "title": "Not All Language Model Features Are One-Dimensionally Linear",
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/d3221cdb27e49d9c1cd35ad254feccfe-Abstract-Conference.html",
+      "note": "Demonstrates circular, multidimensional features and tests their causal role, motivating analysis beyond a single linear direction."
+    },
+    {
+      "id": "gurnee2025manifolds",
+      "authors": "Gurnee et al.",
+      "year": 2025,
+      "title": "When Models Manipulate Manifolds: The Geometry of a Counting Task",
+      "url": "https://transformer-circuits.pub/2025/linebreaks/index.html",
+      "note": "Studies curved count representations and the attention computations that construct and use them during text linebreaking."
+    },
+    {
+      "id": "heimersheim2024patching",
+      "authors": "Heimersheim and Nanda",
+      "year": 2024,
+      "title": "How to Use and Interpret Activation Patching",
+      "url": "https://arxiv.org/abs/2404.15255",
+      "note": "Clarifies how prompt choice, intervention direction, and evaluation metrics affect the interpretation of patching results."
+    },
+    {
+      "id": "mcgrath2023hydra",
+      "authors": "McGrath et al.",
+      "year": 2023,
+      "title": "The Hydra Effect: Emergent Self-repair in Language Model Computations",
+      "url": "https://arxiv.org/abs/2307.15771",
+      "note": "Documents compensation after ablation, showing why the measured effect of removal can understate a component’s contribution."
+    },
+    {
+      "id": "cabannes2024iteration",
+      "authors": "Cabannes et al.",
+      "year": 2024,
+      "title": "Iteration Head: A Mechanistic Study of Chain-of-Thought",
+      "url": "https://papers.nips.cc/paper_files/paper/2024/hash/c50f8180ef34060ec59b75d6e1220f7a-Abstract-Conference.html",
+      "note": "Tracks how attention mechanisms for iterative computation emerge during controlled training."
+    },
+    {
+      "id": "li2025state",
+      "authors": "Li, Guo, and Andreas",
+      "year": 2025,
+      "title": "(How) Do Language Models Track State?",
+      "url": "https://proceedings.mlr.press/v267/li25r.html",
+      "note": "Identifies alternative state-tracking mechanisms in permutation tasks and relates their emergence to training and generalization."
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Credits and licenses — Liang (Twist) Shan</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('liang-theme')||'light'}catch(e){}</script>
+  <style>
+    .credits-page{width:min(850px,calc(100% - 40px));margin:auto;padding:70px 0 60px}
+    .credits-back{font:10px/1.6 var(--mono);letter-spacing:.08em;text-decoration:none;color:var(--muted)}
+    .credits-page h1{font:400 clamp(38px,6vw,58px)/1.1 var(--serif);letter-spacing:-.035em;margin:45px 0 24px}
+    .credits-page h2{font:400 28px/1.2 var(--serif);letter-spacing:-.025em;margin:0 0 18px}
+    .credits-page p{font:16px/1.75 var(--sans);color:var(--muted);max-width:68ch}
+    .credits-page section{border-top:1px solid var(--line);margin-top:32px;padding-top:28px}
+    .credits-page a:not(.credits-back){color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:.2em}
+    .credits-page .license-links{font-size:14px}
+    .credits-page footer{border-top:1px solid var(--line);margin-top:50px;padding-top:25px;color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+<main class="credits-page">
+  <a class="credits-back" href="index.html">← BACK TO THE ARTICLE</a>
+  <h1>Credits and licenses</h1>
+  <p>Sources and notices for the materials used in this research blog.</p>
+  <section id="stix">
+    <h2>STIX fonts</h2>
+    <p>The source PDFs for the scientific figures use STIXGeneral Regular and Italic for some mathematical lettering. The exported SVG figures preserve this lettering as vector outlines. The STIX notice and SIL Open Font License 1.1 are reproduced from the Matplotlib distribution.</p>
+    <p class="license-links"><a href="assets/licenses/STIX-LICENSE.txt">Read the STIX font license</a> · <a href="https://raw.githubusercontent.com/matplotlib/matplotlib/v3.10.0/lib/matplotlib/mpl-data/fonts/ttf/LICENSE_STIX" target="_blank" rel="noopener">Upstream notice</a></p>
+  </section>
+  <section id="design">
+    <h2>Design guidance</h2>
+    <p>The implementation consulted the design-taste-frontend guidance from Antigravity Awesome Skills, distributed under the MIT license. This is a design reference, not a browser dependency. The visual template follows the author’s existing Pareto Frontier blog.</p>
+    <p class="license-links"><a href="assets/licenses/design-guidance-MIT.txt">Read the design guidance license</a> · <a href="https://github.com/sickn33/antigravity-awesome-skills/tree/9bad53f2426e310c33ef5bacf9f845855197be6a" target="_blank" rel="noopener">Source revision</a></p>
+  </section>
+  <section id="implementation">
+    <h2>Page implementation and typography</h2>
+    <p>The interactive diagrams and 3D view use native JavaScript, SVG, and Canvas. This page does not bundle Plotly.js, KaTeX, or their fonts. Body typography uses fonts installed on the reader’s device. Times New Roman lettering in the scientific figures is exported from the supplied paper PDFs as vector outlines; no Times New Roman font file is bundled.</p>
+  </section>
+  <section id="research">
+    <h2>Research and figures</h2>
+    <p>The article is by Liang (Twist) Shan, based on joint research with Tianyu Hu, Hao Yan, and Yiqiao Zhong. The scientific figures and experimental data are credited to the research authors. The licenses above apply to the named third-party materials, not to the research article or its data.</p>
+    <p class="license-links"><a href="assets/figures/manifest.json">Figure provenance</a> · <a href="assets/geometry-provenance.json">3D data provenance</a></p>
+  </section>
+  <footer>© 2026 Liang (Twist) Shan.</footer>
+</main>
+</body>
+</html>

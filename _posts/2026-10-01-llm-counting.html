@@ -1,0 +1,436 @@
+---
+layout: standalone
+title: 'How do LLMs count with “thinking” mode on or off?'
+date: 2026-10-01 12:00:00 +0800
+permalink: /posts/2026/10/llm-counting/
+blog_category: research
+tags:
+  - LLM
+excerpt: 'Retrieval strategies, count representations, causal interventions, and training dynamics in long-context counting.'
+sitemap: true
+---
+{% raw %}
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A mechanistic study of long-context counting: retrieval strategies, count representations, causal interventions, and training dynamics.">
+  <meta name="author" content="Liang (Twist) Shan">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#fafaf7">
+  <meta property="og:title" content="How do LLMs count with thinking mode on or off? — Liang (Twist) Shan">
+  <meta property="og:description" content="Retrieval, progress representations, and causal evidence for how language models count with and without reasoning traces.">
+  <meta property="og:type" content="article">
+  <title>How do LLMs count with “thinking” mode on or off? — Liang (Twist) Shan</title>
+  <link rel="icon" href="/images/favicon.svg?v=ls-serif-1" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="pathway-visuals.css?v=wide-captions-1">
+  <link rel="stylesheet" href="editorial.css?v=citation-4">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('liang-theme')||'light'}catch(e){}</script>
+  <script defer src="assets/vendor/katex/katex.min.js"></script>
+  <script defer src="equations.js?v=head-definitions-1"></script>
+  <script defer src="assets/geometry-data.js"></script>
+  <script defer src="app.js?v=dark-figures-2"></script>
+  <script defer src="pathway-visuals.js?v=update-label-3"></script>
+<link rel="canonical" href="https://twist-shan.github.io/posts/2026/10/llm-counting/">
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to the article</a>
+  <div class="reading-progress" aria-hidden="true"><i id="reading-fill"></i></div>
+  <header class="site-header shell">
+    <a class="brand" href="/"><svg class="monogram" viewBox="190 221 390 462" aria-hidden="true" focusable="false"><g fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M520 319 L520 415 L515 415 C497 363 468 333 429 333 C399 333 378 348 378 379 C378 412 412 428 460 451 C510 476 552 500 552 546 C552 609 493 649 434 649 C397 649 380 637 367 637 C356 637 349 644 346 655 L342 655 L332 569 L339 574 C366 615 398 639 432 639 C475 639 500 610 500 575 C500 535 474 516 427 493 C375 467 334 447 334 405 C334 358 375 325 429 325 C461 325 480 336 492 336 C505 336 513 330 517 319 Z"/><path d="M218 249 L367 249 L367 254 C332 258 318 269 318 298 L318 568 L342 568 C386 568 413 553 429 506 L435 506 L429 580 L218 580 L218 575 C252 569 263 561 263 533 L263 298 C263 269 251 257 218 254 Z"/></g></svg><span>Liang Shan</span></a>
+    <nav aria-label="Main navigation"><a href="/research/">Research</a><a class="current" href="/blog/" aria-current="page">Blog</a><a href="/misc/">Misc.</a></nav>
+    <button id="theme-toggle" class="icon-button" aria-label="Switch to dark theme" title="Switch theme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.1A8.5 8.5 0 0 1 9.9 3.5 8.5 8.5 0 1 0 20.5 14.1Z"/></svg></button>
+  </header>
+
+  
+<main>
+  <section class="hero shell" aria-labelledby="page-title">
+    <div class="hero-orb large" aria-hidden="true"></div>
+<div class="hero-orb small" aria-hidden="true"></div>
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="hero-top"><a href="/blog/">← ALL NOTES</a><time datetime="2026-09">SEPTEMBER, 2026</time></div>
+        <p class="eyebrow"><i class="small-dot" aria-hidden="true"></i><span><strong>LLM INTERPRETABILITY</strong> · RESEARCH BLOG</span></p>
+        <h1 id="page-title">How do LLMs count with <em>“thinking”</em> mode on or off?</h1>
+        <p class="hero-authors">This work is joint with <strong><a href="https://thewaylost.github.io/" target="_blank" rel="noopener">Tianyu Hu</a></strong>, <strong><a href="https://ezyhdxm.github.io/academic-site/" target="_blank" rel="noopener">Hao Yan</a></strong>, and <strong><a href="https://pages.stat.wisc.edu/~zhong35/" target="_blank" rel="noopener">Yiqiao Zhong</a></strong>.</p>
+        <p class="hero-description">Many studies compare LLM performance with and without reasoning, but fewer examine what changes inside the model. We use Needle-in-a-Haystack counting to compare long-context retrieval and state tracking, then examine how these mechanisms develop during training.</p>
+        <div class="hero-actions"><a class="button primary" href="#mechanism">Explore the mechanisms <span aria-hidden="true">↓</span></a><a class="text-link" href="https://arxiv.org/abs/2609.38958" target="_blank" rel="noopener noreferrer">Paper on arXiv ↗</a></div>
+        <!-- Article prose and captions; controls, navigation, and diagram labels excluded. Reading estimate: 240 words/minute. -->
+        <dl class="article-facts" aria-label="Article facts"><div><dt>Reading</dt><dd>15 min</dd></div><div><dt>Words</dt><dd>3,520</dd></div></dl>
+      </div>
+      <figure class="cover-figure">
+        <div class="cover-heading"><span>ONE TASK, TWO RETRIEVAL STRATEGIES</span><span class="cover-tag"><i aria-hidden="true"></i>SCHEMATIC</span></div>
+        <div class="cover-diagrams">
+        <div class="cover-path off"><p><span>Thinking off</span><strong>Broad retrieval</strong></p>
+          <svg viewBox="0 0 440 145" role="img" aria-label="An answer query distributes attention over four prompt records.">
+            <defs><marker id="cover-off-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="#B52F6B"/></marker></defs>
+            <g class="cover-records"><rect x="22" y="10" width="74" height="32" rx="5"/><rect x="130" y="10" width="74" height="32" rx="5"/><rect x="238" y="10" width="74" height="32" rx="5"/><rect x="346" y="10" width="74" height="32" rx="5"/><text x="59" y="31">Paris</text><text x="167" y="31">Vienna</text><text x="275" y="31">Tokyo</text><text x="383" y="31">Hongkong</text></g>
+            <g fill="none" stroke="#B52F6B" stroke-width="1.4" marker-end="url(#cover-off-arrow)"><path d="M220 95Q65 80 59 47"/><path d="M220 95Q167 75 167 47"/><path d="M220 95Q275 75 275 47"/><path d="M220 95Q379 80 383 47"/></g>
+            <rect class="cover-query" x="163" y="97" width="114" height="32" rx="5"/><text class="cover-label" x="220" y="118">Answer query</text>
+          </svg>
+          
+        </div>
+        <div class="cover-path on"><p><span>Thinking on</span><strong>Targeted retrieval</strong></p>
+          <svg viewBox="0 0 440 145" role="img" aria-label="Successive trace queries preferentially attend to successive prompt records.">
+            <defs><marker id="cover-on-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="#007EAB"/></marker><marker id="cover-trace-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="#D55E00"/></marker></defs>
+            <g class="cover-records"><rect x="22" y="10" width="74" height="32" rx="5"/><rect x="130" y="10" width="74" height="32" rx="5"/><rect x="238" y="10" width="74" height="32" rx="5"/><rect x="346" y="10" width="74" height="32" rx="5"/><text x="59" y="31">Paris</text><text x="167" y="31">Vienna</text><text x="275" y="31">Tokyo</text><text x="383" y="31">Hongkong</text></g>
+            <g fill="none" stroke="#007EAB" stroke-width="1.4" marker-end="url(#cover-on-arrow)"><path d="M59 97V48"/><path d="M167 97V48"/><path d="M275 97V48"/><path d="M383 97V48"/></g>
+            <g class="cover-trace"><rect x="31" y="97" width="56" height="32" rx="5"/><rect x="139" y="97" width="56" height="32" rx="5"/><rect x="247" y="97" width="56" height="32" rx="5"/><rect x="355" y="97" width="56" height="32" rx="5"/><text x="59" y="118">q₁</text><text x="167" y="118">q₂</text><text x="275" y="118">q₃</text><text x="383" y="118">q₄</text></g>
+            <g stroke="#D55E00" stroke-width="1.2" marker-end="url(#cover-trace-arrow)"><path d="M92 113H131"/><path d="M200 113H239"/><path d="M308 113H347"/></g>
+          </svg>
+          
+        </div>
+        </div>
+        <figcaption>One answer query gathers broadly; successive trace queries retrieve records in order. Arrows toward records show attention.</figcaption>
+      </figure>
+    </div>
+  </section>
+  <div class="article-layout shell">
+    <aside class="desktop-toc"><div class="toc-sticky"><p class="eyebrow">ON THIS PAGE</p>
+<nav id="toc" aria-label="Table of contents"><a href="#question"><span>01</span>Motivation & task</a>
+<a href="#behavior"><span>02</span>Behavior & empirical laws</a>
+<a href="#geometry"><span>03</span>Feature representations</a>
+<a href="#mechanism"><span>04</span>Two causal pathways</a>
+<a href="#training"><span>05</span>Training dynamics</a>
+<a href="#limits"><span>06</span>Future work</a>
+<a href="#references"><span>07</span>References</a>
+</nav>
+<a class="toc-citation" href="#how-to-cite">How to cite</a>
+</div>
+</aside>
+    <article id="article">
+      <details class="mobile-toc"><summary>ON THIS PAGE</summary><nav aria-label="Mobile table of contents"><a href="#question">01 · Motivation</a><a href="#behavior">02 · Behavior</a><a href="#geometry">03 · Representations</a><a href="#mechanism">04 · Mechanisms</a><a href="#training">05 · Training</a><a href="#limits">06 · Future work</a><a href="#references">07 · References</a></nav><a class="toc-citation" href="#how-to-cite">How to cite</a></details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section id="question" class="article-section first">
+<p class="section-kicker">01 / MOTIVATION & TASK</p>
+<h2>Counting as a test of retrieval and state tracking.</h2>
+<p class="lede">Long-context reasoning is important for LLM agents working with long documents or on multi-step tasks. We want to understand how models retrieve relevant information and keep track of what they have already processed. Therefore, we use counting as a testbed: the model must find every relevant record without skipping or counting any record twice.</p>
+<p>In our Needle-in-a-Haystack task, city-score audit records are scattered throughout a passage of unrelated text, and the model is asked to count them. This separates the difficulty of finding and tracking records from the difficulty of interpreting their meaning. We know both the correct total and which records the model should account for, so we can examine where counting goes wrong.</p>
+<div class="passage-example"><div class="panel-label">A LONG PASSAGE <span>ILLUSTRATIVE EXCERPT</span></div>
+<p class="distractor">… the report described changes to the transport network …</p>
+<p class="needle-example"><span>N₁</span> In the 2024 city score audit, <strong>Paris</strong> received a score of <strong>92</strong>.</p>
+<p class="distractor">… several thousand words of unrelated text …</p>
+<p class="needle-example"><span>N₂</span> In the 2024 city score audit, <strong>Vienna</strong> received a score of <strong>73</strong>.</p>
+<div class="example-query"><span>QUESTION</span> How many audit records are there? <strong>2</strong></div>
+</div>
+<p>We find that a model achieves substantially higher counting accuracy with chain-of-thought reasoning enabled than with it disabled. We want to understand what changes inside the model when CoT reasoning is enabled. Does it change which records are retrieved? Does the model represent how many records it has already processed more clearly? And does that information help it retrieve the next record and produce the final count? We compare <strong>Non-thinking</strong>, which gives a direct answer, with <strong>Thinking</strong>, which generates a reasoning trace before answering.</p>
+<p>In what follows, the <strong><em>running index</em></strong> <em>k</em> denotes progress through records in the prompt for Non-thinking or through items in the reasoning trace for Thinking. The <strong><em>final count</em></strong> <em>N</em> is the total number of records.</p>
+<p>We compare counting accuracy, examine hidden-state representations, and intervene on attention heads and states to test how they affect the answer. We also train small models on a synthetic counting task to study how retrieval develops. We find two retrieval pathways. In Non-thinking, the model attends to multiple records at the answer query, which we call <strong><em>broad retrieval</em></strong>. In Thinking, it retrieves individual records in sequence, which we call <strong><em>targeted retrieval</em></strong>.</p>
+</section>
+
+<section id="behavior" class="article-section">
+<p class="section-kicker">02 / BEHAVIOR & EMPIRICAL LAWS</p>
+<h2>Accuracy depends on both count and context length.</h2>
+<p>Across twelve model comparison groups, Thinking improves exact counting accuracy by <strong>28–63 percentage points</strong>, averaged over the evaluation grid spanning context lengths from 1k to 20k tokens. At a context length of 1k tokens, median Non-thinking accuracy falls from 100% for three records to 30% for ten and 0% for twenty. Thinking remains accurate over a wider count range, although it also deteriorates as count and context length increase.</p>
+<details class="method-note model-details">
+<summary>Models evaluated <span>12 comparison groups · Table 1</span></summary>
+<div class="model-table-scroll" role="region" aria-label="Model comparison table" tabindex="0">
+<table class="model-table">
+<caption>Parsed exact accuracy (%) for N = 5 over 30 paired seeds. Transposed from Table 1.</caption>
+<thead><tr><th rowspan="2" scope="col">Model / comparison group</th><th colspan="2" scope="colgroup">1k tokens</th><th colspan="2" scope="colgroup">20k tokens</th></tr>
+<tr><th scope="col">Non-thinking</th><th scope="col">Thinking</th><th scope="col">Non-thinking</th><th scope="col">Thinking</th></tr></thead>
+<tbody><tr><th scope="row">Qwen3-4B</th><td>43.3</td><td>100</td><td>3.3</td><td>90</td></tr>
+<tr><th scope="row">Qwen3-8B</th><td>60</td><td>100</td><td>30</td><td>96.7</td></tr>
+<tr><th scope="row">Qwen3-14B</th><td>50</td><td>100</td><td>30</td><td>100</td></tr>
+<tr><th scope="row">Qwen3-32B</th><td>96.7</td><td>100</td><td>46.7</td><td>100</td></tr>
+<tr><th scope="row">Gemma-4-E4B</th><td>36.7</td><td>100</td><td>33.3</td><td>43.3</td></tr>
+<tr><th scope="row">Gemma-4-12B</th><td>73.3</td><td>100</td><td>10</td><td>83.3</td></tr>
+<tr><th scope="row">Gemma-4-26B-A4B</th><td>100</td><td>100</td><td>43.3</td><td>93.3</td></tr>
+<tr><th scope="row">Gemma-4-31B</th><td>100</td><td>100</td><td>63.3</td><td>100</td></tr>
+<tr><th scope="row">NVIDIA-Nemotron-Nano-9B-v2</th><td>40</td><td>100</td><td>3.3</td><td>33.3</td></tr>
+<tr><th scope="row">NVIDIA-Nemotron-3-Nano-4B</th><td>46.7</td><td>96.7</td><td>13.3</td><td>73.3</td></tr>
+<tr><th scope="row">GLM-4-9B-0414 / GLM-Z1-9B-0414 †</th><td>20</td><td>100</td><td>13.3</td><td>46.7</td></tr>
+<tr><th scope="row">Ministral 3 8B Instruct / Reasoning †</th><td>73.3</td><td>96.7</td><td>16.7</td><td>70</td></tr></tbody>
+</table></div>
+<p class="model-table-note">† The GLM and Ministral groups use separate checkpoints, listed as Non-thinking / Thinking. All other groups switch modes within the same checkpoint. Qwen3, Gemma-4, and Nemotron-3-Nano-4B use the thinking flag; Nemotron-Nano-9B-v2 uses a system instruction. Model configurations are described in Appendix C.1.</p>
+</details>
+<details class="reading-details"><summary>Accuracy across models and context lengths</summary><div class="reading-detail-body">
+<figure class="paper-figure wide-figure">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: counting accuracy as record count and context length increase"><img src="assets/figures/display/fig2-accuracy.svg" data-light-src="assets/figures/display/fig2-accuracy.svg" data-dark-src="assets/figures/display/fig2-accuracy.dark.svg?v=2" alt="counting accuracy as record count and context length increase" loading="lazy" decoding="async" width="468" height="140.4"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption><strong>Counting accuracy across models.</strong> A–B show the median and middle 50% across twelve comparison groups. C–D extend evaluation to 25k–100k tokens for two larger models: rose solid lines denote Non-thinking and blue dashed lines denote Thinking. Each condition uses 30 paired seeds. The left curves are smoothed visual guides; the right curves connect observations. Section 2.</figcaption></figure>
+
+</div></details>
+<h3>A heuristic view of counting errors</h3>
+<p>Why does accuracy decline as the number of records grows? We consider two simple approximations: an increasingly imprecise estimate of the total, and an increasing number of opportunities to make a mistake.</p>
+<details class="reading-details"><summary>Error models, equations, and assumptions</summary><div class="reading-detail-body">
+<p>For Non-thinking, imagine a noisy estimate centered on the true count N. Rounding gives the correct integer only when the estimate is within half a count of N. If the standard deviation grows in proportion to N, fewer estimates fall inside this fixed interval as N increases. We model this with Gaussian error whose standard deviation is Nσ(1, L), where L is context length and σ(1, L) is a fitted noise scale in count units.</p>
+<p>For Thinking, imagine processing the records one at a time. Even if each step is usually correct, a longer sequence offers more opportunities for failure. If each of N required steps succeeds independently with probability 1 − γ<sub>L</sub>, the probability that all steps succeed is (1 − γ<sub>L</sub>)<sup>N</sup>. A factor of 1 − α accounts for an additional baseline failure probability.</p>
+<div class="law-pair"><div><span>NON-THINKING</span><div class="formula" data-count-equation="non-thinking">p ≈ 2Φ(1 / [2Nσ(1, L)]) − 1</div></div><div><span>THINKING</span><div class="formula" data-count-equation="thinking">p ≈ (1 − α)(1 − γ<sub>L</sub>)<sup>N</sup></div></div></div>
+<p>Here p is exact counting accuracy and Φ is the standard-normal cumulative distribution. These are descriptive approximations, not established accounts of the model’s internal computation. The first does not imply that activation noise itself grows with N. The second assumes independent step errors that do not cancel; γ<sub>L</sub> is an effective fitted parameter, not a directly measured retrieval error rate.</p>
+
+</div></details>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: descriptive fits of counting accuracy"><img src="assets/figures/display/fig9-empirical-fits.svg" data-light-src="assets/figures/display/fig9-empirical-fits.svg" data-dark-src="assets/figures/display/fig9-empirical-fits.dark.svg?v=2" alt="descriptive fits of counting accuracy" loading="lazy" decoding="async" width="468" height="154.8"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption><strong>Empirical accuracy laws.</strong> Circles and triangles are measured median accuracies; solid and dashed curves fit the Non-thinking and Thinking models. Colors identify context length. The paper also analyzes how count representations become harder to distinguish as count increases, including the roles of noise and separation between adjacent counts (Appendix C.2). Appendix C.</figcaption></figure>
+</section>
+
+<section id="geometry" class="article-section">
+<p class="section-kicker">03 / FEATURE REPRESENTATIONS</p>
+<h2>Representations offer a glimpse of the counter.</h2>
+<details class="reading-details"><summary>Trace parsing, linear probes, and steering</summary><div class="reading-detail-body">
+<p>Thinking traces vary considerably in syntax: records may appear in numbered lists, prose descriptions, or recaps, and enumeration may restart. To compare progress states across these formats, we parse the traces into ordered record items and identify their endpoints. Counting is often expressed in natural language or through cumbersome enumeration rather than a concise, consistent procedure, suggesting room to improve how Thinking organizes and tracks progress.</p>
+<p>A natural starting point is to ask whether hidden states encode a running index. We test both whether a linear model can predict the index and whether states with different indices can be distinguished from one another. At Non-thinking record endpoints, held-out ridge regression achieves R² = <strong>0.910 for Qwen and 0.827 for Gemma</strong>. Yet balanced nearest-centroid accuracy at the same selected layers is only 46% and 40%. Although the class means are ordered by count, individual states from different counts overlap substantially.</p>
+<p>This led us to examine the geometry rather than interpret a high regression score as evidence for a single count axis. PCA reveals curved configurations of count-dependent states. The first three components explain 98.1% and 97.5% of the variance of the <em>ten class centroids</em>. An ordered, low-dimensional configuration need not be a straight line.</p>
+<h3>When linear steering fails</h3>
+<p>Like many researchers studying model representations, we began by looking for a direction that encodes count. We then tried adding or subtracting this direction to make the model report a larger or smaller count—a linear steering intervention. Despite repeated attempts, we could not find a reliable steering direction: adding or subtracting the fitted direction did not consistently increase or decrease the reported count. One possible reason is that count representations follow a curved geometry rather than a straight line. A linear readout in a high-dimensional space can achieve a high R² while obscuring this structure, so successful decoding need not imply that moving along the fitted direction produces a meaningful change in count.</p>
+
+</div></details>
+<h3>Thinking produces more distinguishable progress states</h3>
+<p>In a selected paired Qwen3-8B comparison, completed Thinking-item states form more compact running-index groups than Non-thinking record endpoints. The interactive plot below shows these representations.</p>
+<p class="pca-guide">Each small dot is a snapshot of the model’s hidden state at one point in a counting task. On the left, we take that snapshot at the end of a record in the prompt; on the right, at the end of an item in the reasoning trace. Color marks the running index: for example, dots colored for index 3 come from the third record or completed trace item. Dots of the same color come from different inputs. PCA projects these high-dimensional states into three dimensions so we can view their arrangement.</p>
+<figure class="geometry-lab">
+            <div class="lab-top"><span class="eyebrow">COUNT-STATE GEOMETRY</span><span class="badge">REAL PROJECTED STATES</span></div>
+            <div class="geometry-header"><div><h3>Running-index representations on paired inputs</h3>
+<p>Qwen3-8B · 10k tokens · N = 10 · secondary confirmation subset</p>
+</div>
+<button id="geometry-reset" type="button" class="quiet-button">Reset view ↺</button></div>
+            <div class="geometry-grid">
+              <div class="geometry-pane"><div class="plot-heading"><span>Non-thinking <small>L13 · prompt endpoints</small></span><strong>46<small>% NCC</small></strong></div>
+<canvas id="geometry-direct" tabindex="0" role="img" aria-label="Real 3D projected Non-thinking states. Drag to rotate, use arrow keys to rotate, or plus and minus to zoom."></canvas></div>
+              <div class="geometry-pane"><div class="plot-heading"><span>Thinking <small>L31 · completed CoT items</small></span><strong>98<small>% NCC</small></strong></div>
+<canvas id="geometry-thinking" tabindex="0" role="img" aria-label="Real 3D projected Thinking states. Drag to rotate, use arrow keys to rotate, or plus and minus to zoom."></canvas></div>
+            </div>
+            <div class="geometry-camera"><span>EXPLORE BOTH VIEWS</span><div role="group" aria-label="Rotate and zoom both 3D plots"><button type="button" data-orbit="left" aria-label="Rotate both plots left">←</button><button type="button" data-orbit="right" aria-label="Rotate both plots right">→</button><button type="button" data-orbit="up" aria-label="Tilt both plots up">↑</button><button type="button" data-orbit="down" aria-label="Tilt both plots down">↓</button><button type="button" data-orbit="in" aria-label="Zoom in on both plots">+</button><button type="button" data-orbit="out" aria-label="Zoom out on both plots">−</button></div>
+</div>
+            <div class="geometry-toolbar"><span class="gesture-hint">Drag to orbit · Click, then scroll to zoom · Arrow keys to rotate</span><label><input id="show-centroids" type="checkbox" checked> Centroid path</label><label><input id="show-points" type="checkbox" checked> Individual states</label></div>
+            <div class="count-filter"><span>RUNNING COUNT</span><div id="count-buttons" role="group" aria-label="Highlight running count"></div>
+</div>
+            <div id="geometry-status" class="panel-footnote" aria-live="polite">Loading the saved geometry…</div>
+            <figcaption><details class="caption-details"><summary>How classification accuracy is measured</summary><div><strong>Contrasting representations.</strong> Each point shows a hidden state after a prompt record (Non-thinking) or a reasoning-trace item (Thinking). Colors indicate the running index; numbered points mark the average state for each index. To measure how easily the indices can be distinguished, nearest-centroid classification (NCC) predicts each state’s index from the closest group average. On held-out inputs—inputs not used to fit the classifier—accuracy is 46% for Non-thinking and 98% for Thinking. These scores use 16 PCA components, scaled to equal variance (whitening), rather than only the three dimensions shown here. Both views use Qwen3-8B with 10k-token inputs. See Appendix A for details.</div></details></figcaption>
+          </figure>
+<p class="pca-guide">Look at how tightly the dots of each color group together, and how much different colors overlap. In this example, Thinking states form tighter groups by running index, making progress easier to distinguish across inputs.</p>
+<details class="reading-details"><summary>Additional PCA analyses in the paper</summary><div class="reading-detail-body"><p>In our paper, we extend this PCA analysis beyond the paired example above. We compare running-index representations across the full set of parsed trace formats, examine final-count representations at the answer query, and test whether the geometry transfers across city, flower, and animal records. Across these analyses, count representations are more compact in Thinking and less sensitive to the topic of the records, which indicates a noise reduction process within the thinking trace. See Appendix E.2 for the full readout comparisons and PCA visualizations.</p></div></details>
+</section>
+
+<section id="mechanism" class="article-section">
+<p class="section-kicker">04 / TWO CAUSAL PATHWAYS</p>
+<h2>Causal interventions distinguish two different pathways.</h2>
+<p>The following experiments use Qwen3-8B and Gemma-4-E4B on 10k-token passages. Results are reported in that order. Head selection uses fitting data and is frozen for held-out interventions.</p>
+<p>At the Non-thinking answer query, selected heads distribute attention across multiple records. During Thinking, successive trace queries preferentially attend to successive records. We then ablate these heads and patch hidden states to test how they affect counting.</p>
+<details class="reading-details"><summary>Attention patterns and retrieval-head definitions</summary><div class="reading-detail-body">
+<div class="attention-pair">
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: broad retrieval over prompt records"><img src="assets/figures/display/fig3a-broad-attention.svg" data-light-src="assets/figures/display/fig3a-broad-attention.svg" data-dark-src="assets/figures/display/fig3a-broad-attention.dark.svg?v=2" alt="broad retrieval over prompt records" loading="lazy" decoding="async" width="242" height="136.2"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption><strong>Non-thinking.</strong> At the answer query, selected heads attend broadly across records. Rows: heads; columns: records. Appendix D.2.</figcaption></figure>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: targeted retrieval during enumeration"><img src="assets/figures/display/fig5a-targeted-attention.svg" data-light-src="assets/figures/display/fig5a-targeted-attention.svg" data-dark-src="assets/figures/display/fig5a-targeted-attention.dark.svg?v=2" alt="targeted retrieval during enumeration" loading="lazy" decoding="async" width="242" height="136.2"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption><strong>Thinking.</strong> Successive trace queries target successive records. Marker k precedes item k + 1; marker 0 is initialization. Appendix E.2.</figcaption></figure>
+</div>
+<div class="head-definitions">
+<h3>Defining the two types of retrieval heads</h3>
+<p>We score heads by how much attention they assign to records and how that attention is distributed. One score identifies heads that attend to many records at the answer query; the other identifies heads that attend to the next record during the trace.</p>
+<div class="head-definition">
+<div class="head-definition-copy"><h4>Broad-retrieval heads</h4>
+<p>A broad-retrieval head assigns substantial attention to records and spreads that attention across them. Its score combines the total record-directed attention M<sub>h</sub> with effective coverage:</p>
+<div class="head-score" data-count-equation="broad">B<sub>h</sub> = M<sub>h</sub> exp(H<sub>h</sub>) / N</div>
+<p>H<sub>h</sub> is the entropy of attention shares across records. If attention is uniform over k of N records, effective coverage is k/N. A head focused on just one record therefore receives a lower score than one with the same total attention spread across all records.</p></div>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: Broad-retrieval head scores across layers in Qwen and Gemma"><img src="assets/figures/display/broad-head-distribution.svg" data-light-src="assets/figures/display/broad-head-distribution.svg" data-dark-src="assets/figures/display/broad-head-distribution.dark.svg?v=2" alt="Broad-retrieval head scores across layers in Qwen and Gemma" loading="lazy" decoding="async" width="236" height="136.2"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption>Each point is a head. Highlighted: Qwen Top-32 and Gemma Top-6, selected for causal tests. Scores are averaged over prompts with 2–10 records; Gemma includes global-attention layers only. Appendix D.2.</figcaption></figure>
+</div>
+<div class="head-definition">
+<div class="head-definition-copy"><h4>Targeted-retrieval heads</h4>
+<p>A targeted-retrieval head attends to the prompt record corresponding to the next trace item. At the query q<sub>k</sub> before item k, its score is the attention mass assigned to that record’s token span S<sub>k</sub>:</p>
+<div class="head-score" data-count-equation="targeted">T<sub>h</sub>(q<sub>k</sub>, S<sub>k</sub>) = ∑<sub>s ∈ S<sub>k</sub></sub> A<sub>h</sub>(q<sub>k</sub>, s)</div>
+<p>A<sub>h</sub>(q, s) denotes attention from query q to token s. We average over parsed trace items within each seed, then across seeds. A high score indicates reliable attention to the next record as the trace progresses.</p></div>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: Targeted-retrieval head scores across layers in Qwen and Gemma"><img src="assets/figures/display/targeted-head-distribution.svg" data-light-src="assets/figures/display/targeted-head-distribution.svg" data-dark-src="assets/figures/display/targeted-head-distribution.dark.svg?v=2" alt="Targeted-retrieval head scores across layers in Qwen and Gemma" loading="lazy" decoding="async" width="236" height="136.2"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption>Each point is a head. Highlighted: Qwen Top-128 and Gemma Top-6, selected for causal tests. Gemma includes global-attention layers only. Appendix E.2.</figcaption></figure>
+</div>
+</div>
+
+</div></details>
+<div class="pathway-heading off"><p class="eyebrow">THINKING OFF</p><h3>Form → retrieve → consolidate</h3></div>
+<p>In Non-thinking, early record representations contribute information that is retrieved at the answer query and consolidated into a final answer state.</p>
+<div class="pathway-visual" data-pathway="direct"></div>
+<details class="paper-schematic"><summary>Original mechanism schematic · Section 3.2</summary>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: Non-thinking form–retrieve–consolidate mechanism"><img src="assets/figures/display/fig4a-nonthinking-mechanism.svg" data-light-src="assets/figures/display/fig4a-nonthinking-mechanism.svg" data-dark-src="assets/figures/display/fig4a-nonthinking-mechanism.dark.svg?v=2" alt="Non-thinking form–retrieve–consolidate mechanism" loading="lazy" decoding="async" width="1166" height="274"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption><strong>The Non-thinking pathway.</strong> Record states contribute to retrieval at the answer position, followed by consolidation in deeper layers. Section 3.2 and Appendix D.3.</figcaption></figure>
+</details>
+<details class="reading-details"><summary>Causal evidence: record states, retrieval heads, and answer states</summary><div class="reading-detail-body">
+<div class="evidence-step" data-panel="fig4b-record-span-patching">
+<div class="evidence-copy"><p class="step-label">01 / FORM</p><h4>Record-state contributions are strongest in early layers.</h4><p>We first test at which layers record states have the greatest effect on the final count. We corrupt inputs by replacing records with length-matched ordinary text, then patch clean record-span states from a source run into the corrupted target. Reverse patching inserts corrupted states into a clean target. We measure restoration by the decrease in normalized count error and reverse patching by its increase.</p>
+<div class="evidence-result"><p>Both interventions have effects of approximately <strong>47–50%</strong> at the first layer and little effect at late layers. Record states therefore have the largest effect on counting when patched in early layers.</p></div></div>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: record-span patching by layer"><img src="assets/figures/display/fig4b-record-span-patching.svg" data-light-src="assets/figures/display/fig4b-record-span-patching.svg" data-dark-src="assets/figures/display/fig4b-record-span-patching.dark.svg?v=2" alt="record-span patching by layer" loading="lazy" decoding="async" width="447" height="285.08"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption>Clean-to-corrupted restoration and corrupted-to-clean patching of record spans, measured by changes in normalized count error. Appendix D.3.</figcaption></figure>
+</div>
+<div class="evidence-step" data-panel="fig4c-head-ablation">
+<div class="evidence-copy"><p class="step-label">02 / RETRIEVE</p><h4>Broad-retrieval heads contribute to the reported count.</h4><p>To test whether these heads affect the count, we zero the outputs of 32 selected Qwen heads or six selected Gemma heads at the answer query and compare with layer-matched random head banks.</p>
+<div class="evidence-result"><p>The normalized absolute count change is <strong>54.5% and 24.7%</strong>, compared with 4.0% and 6.0% for random controls. The selected heads contribute more strongly to the answer than these controls.</p></div></div>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: broad-retrieval head ablation"><img src="assets/figures/display/fig4c-head-ablation.svg" data-light-src="assets/figures/display/fig4c-head-ablation.svg" data-dark-src="assets/figures/display/fig4c-head-ablation.dark.svg?v=2" alt="broad-retrieval head ablation" loading="lazy" decoding="async" width="290" height="285.08"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption>Retrieval-head ablation versus layer-matched random and original controls. Effect: absolute count change divided by the true count. Appendix D.3.</figcaption></figure>
+</div>
+<div class="evidence-step" data-panel="fig4d-answer-state-patching">
+<div class="evidence-copy"><p class="step-label">03 / CONSOLIDATE</p><h4>Deep answer-state transfer changes the predicted count.</h4><p>We test whether replacing the answer state with one from a different-count prompt makes the answer follow the source count. We patch answer-query states from a source prompt into a target prompt with a different count, one layer at a time, using pairs with correct baseline answers.</p>
+<div class="evidence-result"><p>At the final layer, the patched answer matches the source count in <strong>95.8% and 100%</strong> of cases. This supports an answer-readout role for the transferred state.</p></div></div>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: source-count match rate after answer-state transfer"><img src="assets/figures/display/fig4d-answer-state-patching.svg" data-light-src="assets/figures/display/fig4d-answer-state-patching.svg" data-dark-src="assets/figures/display/fig4d-answer-state-patching.dark.svg?v=2" alt="source-count match rate after answer-state transfer" loading="lazy" decoding="async" width="459.96" height="285.08"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption>Proportion of predictions matching the source count after answer-state patching. Appendix D.3.</figcaption></figure>
+</div>
+
+</div></details>
+<div class="pathway-heading on"><p class="eyebrow">THINKING ON</p><h3>Retrieve → update → read</h3></div>
+<p>In Thinking, the model retrieves records one by one. The state after each item helps guide the next retrieval, and the model uses the completed trace to produce the final count.</p>
+<div class="pathway-visual" data-pathway="thinking"></div>
+<details class="paper-schematic"><summary>Original mechanism schematic · Section 4.2</summary>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: Thinking retrieve–update–read mechanism"><img src="assets/figures/display/fig6a-thinking-mechanism.svg" data-light-src="assets/figures/display/fig6a-thinking-mechanism.svg" data-dark-src="assets/figures/display/fig6a-thinking-mechanism.dark.svg?v=2" alt="Thinking retrieve–update–read mechanism" loading="lazy" decoding="async" width="830" height="187"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption><strong>The Thinking pathway.</strong> N<sub>k</sub> is a prompt record, q<sub>k</sub> the query before retrieving it, and H<sub>k</sub> the state after completing its trace item. The previous item state guides the next query. Section 4.2 and Appendix E.3.</figcaption></figure>
+</details>
+<details class="reading-details"><summary>Causal evidence: next-record retrieval, progress, and final count</summary><div class="reading-detail-body">
+<div class="evidence-step" data-panel="fig6b-head-ablation">
+<div class="evidence-copy"><p class="step-label">01 / RETRIEVE</p><h4>Targeted-retrieval heads support trace continuation.</h4><p>To test whether retrieving the next record depends on these targeted heads, we ablate them starting at the selected trace marker and continuing at every subsequent token. This increases the next-item failure rate by <strong>60% and 80%</strong>, compared with 10% and 6.7% for random heads, across ten confirmation transitions per model.</p>
+<div class="evidence-result"><p>Final-count failure increases by 100 percentage points in both models. The intervention establishes a contribution of the selected heads to continuing the trace and completing the count.</p></div></div>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: targeted-retrieval head ablation effects"><img src="assets/figures/display/fig6b-head-ablation.svg" data-light-src="assets/figures/display/fig6b-head-ablation.svg" data-dark-src="assets/figures/display/fig6b-head-ablation.dark.svg?v=2" alt="targeted-retrieval head ablation effects" loading="lazy" decoding="async" width="219" height="258.2"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption>Retrieval-head ablation versus layer-matched random and original controls: next-item and final-count failure rates. Qualitative inspection also suggests compensatory retrieval in Qwen’s unablated later heads. Appendix E.3.</figcaption></figure>
+</div>
+<div class="evidence-step large-panel" data-panel="fig6c-counter-state-patching">
+<div class="evidence-copy"><p class="step-label">02 / UPDATE</p><h4>Completed-item states influence subsequent retrieval.</h4><p>We test whether replacing the state after one item with a state from one item further ahead makes the model skip the next record. To avoid explicit numbering as a cue, we use unnumbered traces for both Qwen and Gemma. We remove non-record filler to align source and target token positions.</p><p>We patch the full state span of source item k into target item k−1, aligning the ends of the two item spans. We then test whether the next generated record is k+1 and whether enumeration continues from there without another patch.</p>
+<div class="evidence-result"><p>The model skips the next record in <strong>24/30 and 21/30 trials</strong>, compared with 0/30 and 2/30 when patched with its own states. After a successful skip, it usually continues from the shifted position without another patch.</p></div></div>
+<div class="evidence-figure-column"><figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: completed-item state transfer and subsequent retrieval"><img src="assets/figures/display/fig6c-counter-state-patching.svg" data-light-src="assets/figures/display/fig6c-counter-state-patching.svg" data-dark-src="assets/figures/display/fig6c-counter-state-patching.dark.svg?v=2" alt="completed-item state transfer and subsequent retrieval" loading="lazy" decoding="async" width="370" height="254.2"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption>Counter-state patching from a later trace item to an earlier one, without explicit indices. Later columns condition on preceding success and a remaining item. Appendix E.3.</figcaption></figure><div class="evidence-side-note"><p>We also tried patching in the reverse direction, transferring an earlier item state to a later position. However, repeating a record prompted the model to reconsider its enumeration, making it difficult to determine whether the patched state directly guided the next retrieval.</p></div></div>
+</div>
+<div class="evidence-step" data-panel="fig6d-answer-state-patching">
+<div class="evidence-copy"><p class="step-label">03 / READ</p><h4>The model uses the completed trace to produce the final count.</h4><p>We test whether the model still needs the original records once the trace is complete. We hold the generated trace fixed and separately zero out prompt-record and trace representations while preserving token positions. Removing prompt-record states leaves exact-count accuracy unchanged at <strong>97% and 70%</strong>; removing trace states reduces it to <strong>1% and 15%</strong>. Once the trace is complete, the model relies mainly on it to produce the final count.</p>
+<div class="evidence-result"><p>We then patch answer-query states between different-count prompts with correct baseline answers, one layer at a time. At the last layer, the patched answer matches the source count in <strong>97.5% and 90%</strong> of the 40 shared directed prompt pairs.</p></div></div>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: source-count match rate across intervention layers"><img src="assets/figures/display/fig6d-answer-state-patching.svg" data-light-src="assets/figures/display/fig6d-answer-state-patching.svg" data-dark-src="assets/figures/display/fig6d-answer-state-patching.dark.svg?v=2" alt="source-count match rate across intervention layers" loading="lazy" decoding="async" width="226.4" height="230"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption>Proportion of predictions matching the source count after answer-state patching. Appendix E.3.</figcaption></figure>
+</div>
+
+</div></details>
+<p>Together, these experiments support two counting pathways. Non-thinking retrieves broadly and consolidates record information into a final count. Thinking retrieves records sequentially, tracks progress without explicit numbering, and reads the final count from the completed trace.</p>
+</section>
+
+<section id="training" class="article-section">
+<p class="section-kicker">05 / TRAINING DYNAMICS</p>
+<h2>Retrieval heads emerge<br class="training-title-break"> during training.</h2>
+<details class="reading-details training-details"><summary>Training setup and results</summary><div class="reading-detail-body">
+<p>Can the two retrieval strategies emerge through autoregressive training? We train two Transformers from scratch, each with four layers, eight heads per layer, and approximately 12.7 million parameters. Inputs contain 256 shuffled Shakespeare characters and a query specifying three target characters, with one to ten matching occurrences.</p>
+<p>The Non-thinking model reports the count directly. The Thinking model first enumerates matching characters in source order, without explicit indices. Architecture, input distribution, training budget, and final-count loss weight are matched; the two modes are separately trained models.</p>
+<div class="training-example"><p class="panel-label">UNSHUFFLED ILLUSTRATION · TARGET CHARACTERS: T, b, n</p>
+<p class="synthetic-prefix"><code>&lt;BOS&gt; &lt;CountChar&gt; T b n &lt;Sep&gt;</code></p>
+<div class="character-strip">… <mark>T</mark>o <mark>b</mark>e, … or <mark>n</mark>ot to <mark>b</mark>e …</div>
+<div class="output-pair token-outputs"><p><span>Non-thinking:</span><code class="synthetic-answer">&lt;Ans&gt; &lt;4&gt; &lt;EOS&gt;</code></p>
+<p><span>Thinking:</span><code class="synthetic-trace">&lt;Think&gt; &lt;Sep&gt;T &lt;Sep&gt;b &lt;Sep&gt;n &lt;Sep&gt;b &lt;/Think&gt;</code><code class="synthetic-answer">&lt;Ans&gt; &lt;4&gt; &lt;EOS&gt;</code></p>
+</div>
+</div>
+<p>Because RoPE and the regular synthetic format may let the models exploit token position as a shortcut for counting, counter readouts are less informative here; we focus instead on the emergence of retrieval heads.</p>
+<div class="evidence-step training-overview" data-panel="fig7a-training-accuracy">
+<div class="evidence-copy">
+<h3>Learning to retrieve</h3>
+<p>Both models initially predict the full sequence. At step 1,500, we switch the loss to task outputs: the final count for Non-thinking, and the enumeration trace plus final count for Thinking.</p>
+<p>The accuracy gap widens later in training. By step 10,000, Thinking reaches <strong>95%</strong> count accuracy, while Non-thinking plateaus at <strong>21%</strong>. We track individual heads throughout training to examine how their retrieval patterns develop.</p>
+</div>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: free-generation count accuracy during training"><img src="assets/figures/display/fig7a-training-accuracy.svg" data-light-src="assets/figures/display/fig7a-training-accuracy.svg" data-dark-src="assets/figures/display/fig7a-training-accuracy.dark.svg?v=2" alt="free-generation count accuracy during training" loading="lazy" decoding="async" width="158" height="144"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption><strong>Counting accuracy during training.</strong> Evaluated on the same 100 held-out inputs. The dashed line marks the objective switch. Section 5 and Appendix G.4.</figcaption></figure>
+</div>
+<h3>Broad and targeted retrieval emerge in different layers</h3>
+<p>Using the same retrieval scores as in the pretrained models, we track how attention changes during training. Broad-retrieval heads emerge in the Non-thinking model’s first layer, while targeted-retrieval heads emerge in the Thinking model’s last layer.</p>
+<div class="training-heatmaps">
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: Layer-wise broad retrieval during Non-thinking training"><img src="assets/figures/display/fig7b-broad-retrieval.svg" data-light-src="assets/figures/display/fig7b-broad-retrieval.svg" data-dark-src="assets/figures/display/fig7b-broad-retrieval.dark.svg?v=2" alt="Layer-wise broad retrieval during Non-thinking training" loading="lazy" decoding="async" width="156" height="144"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption><strong>Non-thinking.</strong> Broad retrieval emerges in the first layer. The dashed line marks the switch to task-output loss. Section 5.</figcaption></figure>
+<figure class="paper-figure ">
+<button type="button" class="figure-zoom" data-zoom aria-haspopup="dialog" aria-controls="figure-dialog" aria-label="Enlarge: Layer-wise targeted retrieval during Thinking training"><img src="assets/figures/display/fig7c-targeted-retrieval.svg" data-light-src="assets/figures/display/fig7c-targeted-retrieval.svg" data-dark-src="assets/figures/display/fig7c-targeted-retrieval.dark.svg?v=2" alt="Layer-wise targeted retrieval during Thinking training" loading="lazy" decoding="async" width="154" height="144"><span class="zoom-hint">Enlarge ↗</span></button>
+<figcaption><strong>Thinking.</strong> Targeted retrieval emerges in the last layer. The dashed line marks the switch to task-output loss. Section 5.</figcaption></figure>
+</div>
+<h3>Implications for data and training</h3>
+<p>These results suggest that enumeration traces can shape the retrieval strategy a model learns, even without explicit numbering. Training on such traces with a standard autoregressive objective produces targeted retrieval and higher counting accuracy in this setting, without specialized RL post-training. This points to the potential of high-quality CoT data to improve reasoning and support the development of broader capabilities.</p>
+
+</div></details>
+</section>
+
+<section id="limits" class="article-section">
+<p class="section-kicker">06 / FUTURE WORK</p>
+<h2>Future directions</h2>
+<p>We still do not know exactly how the model updates its progress or whether the same mechanisms operate in more complex tasks.</p>
+<ol class="future-directions">
+<li class="future-direction"><h3 class="future-heading"><span aria-hidden="true">01</span><strong>Linking geometry to causal control</strong></h3><div><p>Count representations may follow a curved geometry. Geometry-aware interventions could clarify how these representations support count updates.</p></div></li>
+<li class="future-direction"><h3 class="future-heading"><span aria-hidden="true">02</span><strong>Identifying the update circuit</strong></h3><div><p>State transfers support a role for completed-item states in guiding retrieval, but transfer record content and count information together. Identifying the circuit that updates progress when a record is retrieved would provide more direct evidence for the proposed counter mechanism.</p></div></li>
+<li class="future-direction"><h3 class="future-heading"><span aria-hidden="true">03</span><strong>Understanding rethinking</strong></h3><div><p>What makes a model reconsider an earlier step, and when does that improve its answer? We would like to understand how it detects a problem and changes its subsequent reasoning.</p></div></li>
+<li class="future-direction"><h3 class="future-heading"><span aria-hidden="true">04</span><strong>Extending to complex reasoning</strong></h3><div><p>Do similar retrieval and state-tracking mechanisms operate when reasoning involves search, branching, or tracking several changing states?</p></div></li>
+</ol>
+</section>
+
+<section id="references" class="article-section references-section" aria-labelledby="references-heading">
+<p class="section-kicker">07 / REFERENCES</p>
+<h2 id="references-heading">References and related work</h2>
+<ol class="reference-list" role="list">
+<li id="ref-wei2022cot"><span class="reference-number" aria-hidden="true">01</span><p>Wei et al. (2022). <a href="https://proceedings.neurips.cc/paper/2022/hash/9d5609613524ecf4f15af0f7b31abca4-Abstract-Conference.html" target="_blank" rel="noopener noreferrer">Chain-of-Thought Prompting Elicits Reasoning in Large Language Models</a>. Reasoning traces improve performance on arithmetic, symbolic, and commonsense tasks.</p></li>
+<li id="ref-hsieh2024ruler"><span class="reference-number" aria-hidden="true">02</span><p>Hsieh et al. (2024). <a href="https://arxiv.org/abs/2404.06654" target="_blank" rel="noopener noreferrer">RULER: What’s the Real Context Size of Your Long-Context Language Models?</a> Extends needle retrieval to controlled long-context tasks involving multiple records, tracing, and aggregation.</p></li>
+<li id="ref-wu2025retrieval"><span class="reference-number" aria-hidden="true">03</span><p>Wu et al. (2025). <a href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/9b77f07301b1ef1fe810aae96c12cb7b-Abstract-Conference.html" target="_blank" rel="noopener noreferrer">Retrieval Head Mechanistically Explains Long-Context Factuality</a>. Identifies attention heads that retrieve information from context and tests their contribution through ablation.</p></li>
+<li id="ref-behrens2025counting"><span class="reference-number" aria-hidden="true">04</span><p>Behrens, Biggio, and Zdeborová (2025). <a href="https://proceedings.mlr.press/v267/behrens25a.html" target="_blank" rel="noopener noreferrer">Counting in Small Transformers: The Delicate Interplay between Attention and Feed-Forward Layers</a>. Characterizes distinct counting strategies and how attention and feed-forward layers implement them in small transformers.</p></li>
+<li id="ref-engels2025features"><span class="reference-number" aria-hidden="true">05</span><p>Engels et al. (2025). <a href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/d3221cdb27e49d9c1cd35ad254feccfe-Abstract-Conference.html" target="_blank" rel="noopener noreferrer">Not All Language Model Features Are One-Dimensionally Linear</a>. Demonstrates circular, multidimensional features and tests their causal role, motivating analysis beyond a single linear direction.</p></li>
+<li id="ref-gurnee2025manifolds"><span class="reference-number" aria-hidden="true">06</span><p>Gurnee et al. (2025). <a href="https://transformer-circuits.pub/2025/linebreaks/index.html" target="_blank" rel="noopener noreferrer">When Models Manipulate Manifolds: The Geometry of a Counting Task</a>. Studies curved count representations and the attention computations that construct and use them during text linebreaking.</p></li>
+<li id="ref-heimersheim2024patching"><span class="reference-number" aria-hidden="true">07</span><p>Heimersheim and Nanda (2024). <a href="https://arxiv.org/abs/2404.15255" target="_blank" rel="noopener noreferrer">How to Use and Interpret Activation Patching</a>. Clarifies how prompt choice, intervention direction, and evaluation metrics affect the interpretation of patching results.</p></li>
+<li id="ref-mcgrath2023hydra"><span class="reference-number" aria-hidden="true">08</span><p>McGrath et al. (2023). <a href="https://arxiv.org/abs/2307.15771" target="_blank" rel="noopener noreferrer">The Hydra Effect: Emergent Self-repair in Language Model Computations</a>. Documents compensation after ablation, showing why the measured effect of removal can understate a component’s contribution.</p></li>
+<li id="ref-cabannes2024iteration"><span class="reference-number" aria-hidden="true">09</span><p>Cabannes et al. (2024). <a href="https://papers.nips.cc/paper_files/paper/2024/hash/c50f8180ef34060ec59b75d6e1220f7a-Abstract-Conference.html" target="_blank" rel="noopener noreferrer">Iteration Head: A Mechanistic Study of Chain-of-Thought</a>. Tracks how attention mechanisms for iterative computation emerge during controlled training.</p></li>
+<li id="ref-li2025state"><span class="reference-number" aria-hidden="true">10</span><p>Li, Guo, and Andreas (2025). <a href="https://proceedings.mlr.press/v267/li25r.html" target="_blank" rel="noopener noreferrer">(How) Do Language Models Track State?</a> Identifies alternative state-tracking mechanisms in permutation tasks and relates their emergence to training and generalization.</p></li>
+</ol>
+</section>
+
+<section id="how-to-cite" class="article-section citation-section" aria-labelledby="citation-heading">
+<h2 id="citation-heading">How to cite</h2>
+<p>The paper can be cited as follows.</p>
+<h3 class="citation-label">Bibliography</h3>
+<p class="citation-reference">Liang Twist Shan, Tianyu Hu, Hao Yan, and Yiqiao Zhong. “<a href="https://arxiv.org/abs/2609.38958" target="_blank" rel="noopener noreferrer">Targeted Retrieval, Compact Representations: How CoT Reasoning Improves Long-Context Counting</a>.” <em>arXiv preprint arXiv:2609.38958</em>, 2026.</p>
+<h3 class="citation-label">BibTeX</h3>
+<pre class="citation-bibtex" tabindex="0" aria-label="BibTeX citation"><code>@misc{shan2026targetedretrieval,
+  title = {Targeted Retrieval, Compact Representations:
+           How {CoT} Reasoning Improves Long-Context Counting},
+  author = {Shan, Liang Twist and Hu, Tianyu and
+            Yan, Hao and Zhong, Yiqiao},
+  year = {2026},
+  eprint = {2609.38958},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.AI},
+  url = {https://arxiv.org/abs/2609.38958}
+}</code></pre>
+</section>
+
+</article></div>
+</main>
+<footer class="site-footer shell"><p>© 2026 Liang (Twist) Shan.</p>
+<p class="footer-licenses"><span>KaTeX license</span> · <span>KaTeX fonts license</span> · <span>STIX fonts license</span> · <span>Design guidance license</span> · <span>Credits &amp; licenses</span></p></footer>
+<dialog id="figure-dialog" aria-labelledby="figure-dialog-title"><div class="dialog-bar"><p id="figure-dialog-title">Paper figure</p>
+<div><button type="button" id="figure-fit" aria-pressed="false">Zoom in +</button><button type="button" id="figure-close" aria-label="Close enlarged figure">Close ×</button></div>
+</div>
+<div class="dialog-image-wrap"><img id="figure-dialog-image" alt=""></div>
+<p id="figure-dialog-caption"></p>
+</dialog>
+</body></html>
+
+{% endraw %}
+

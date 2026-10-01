@@ -1,0 +1,40 @@
+Create one finished, publication-quality LANDSCAPE research announcement cover for sharing on social media, in 16:9 aspect ratio (ideally 2400 x 1350 pixels or higher at the same ratio).
+
+Use case: scientific-educational / editorial research announcement.
+REFERENCE IMAGE: The provided screenshot is a STYLE AND SCIENTIFIC DIAGRAM REFERENCE, not a screenshot to reproduce. Create a standalone designed poster, without any browser or website UI. Preserve its elegant large Palatino/Georgia-like serif typography, off-white paper background (#fafaf7), charcoal ink (#2d2d32), restrained mint–teal–blue gradient circles, teal italic emphasis, and simple two-pathway retrieval drawings. Crisp, precise, understated, beautiful editorial design, flat vector-like artwork, excellent legibility at social-feed size. No grunge or grain.
+
+Composition:
+- Generous safe margins of at least 5%, but a compact well-balanced composition that fills the canvas.
+- Left approximately 55%: extremely prominent three-line serif headline. Right approximately 40%: two vertically stacked retrieval diagrams in ONE softly rounded ivory panel with a subtle hairline border and minimal shadow. Match the reference's visual language. No clutter.
+- Small all-caps monospaced category in the upper left; small date in upper right.
+- A pale clipped mint/teal/blue gradient circle enters from the left behind the lower part of the headline, and a smaller gradient circle near the upper right. Keep text highly legible.
+- Short subtitle under the headline. Authors and pending-paper status along a clean bottom footer separated by one thin rule. Author names must be legible and spelled exactly.
+
+EXACT TEXT to typeset:
+Category: "LLM INTERPRETABILITY"
+Date: "SEPTEMBER, 2026"
+Headline (use this wording exactly):
+"How do LLMs count
+with “thinking”
+mode on or off?"
+Only the word “thinking” and its curly quotation marks should be teal (#286b69) and italic; the rest of the headline is charcoal roman serif.
+Subtitle: "One counting task. Two retrieval strategies."
+Footer authors: "Liang (Twist) Shan · Tianyu Hu · Hao Yan · Yiqiao Zhong"
+Footer status: "Paper on arXiv · coming soon"
+
+RIGHT PANEL — redraw the scientific schematics clearly, faithfully and beautifully. Labels large enough to read, strokes fine but clearly visible.
+Tiny panel header: "TWO RETRIEVAL STRATEGIES"
+UPPER HALF:
+- small pink/magenta label "Thinking off", serif heading "Broad retrieval".
+- Four equal pale cream rounded record boxes in one horizontal row, labelled EXACTLY "Paris", "Vienna", "Tokyo", "Lima".
+- ONE smaller query box centered below that row, labelled EXACTLY "Answer query".
+- Four separate magenta (#B52F6B) thin curved attention arrows start together at the TOP of the answer-query box and point UPWARD, one arrowhead ending at the BOTTOM of EACH of the four city boxes. All four city boxes must receive an arrow. No arrow points back toward the query.
+LOWER HALF, separated by a quiet horizontal rule:
+- small blue label "Thinking on", serif heading "Targeted retrieval".
+- The same four city boxes in the same order "Paris", "Vienna", "Tokyo", "Lima" in one horizontal row.
+- Four smaller query boxes directly below the four respective city boxes, labelled "q₁", "q₂", "q₃", "q₄".
+- Four blue (#007EAB) vertical arrows, each going UP from its query box to its corresponding city box, arrowheads at the city boxes.
+- Three orange (#D55E00) thin arrows connect the four query boxes horizontally LEFT TO RIGHT: q₁ → q₂ → q₃ → q₄. No further connections.
+The arrows show schematic attention links, not invented experiment results. The relative positions and arrow directions are essential.
+
+Do not include the original website's breadcrumb, navigation, buttons, reading time, word count, long paragraphs, scrollbar, app chrome, logos, QR codes, extra claims, performance numbers, fake citations, or any other text. Avoid 3D effects, glowing neon, technological clip art, robot imagery and oversized shadows. Deliver the actual flat finished shareable poster image, not a photograph of a poster or a mockup.

@@ -1,0 +1,272 @@
+/* Figures share the page surface. Data colors are preserved in separate display SVGs. */
+/* Keep the Pareto template's outer geometry; bound only the diagrams inside the cover. */
+.hero{border-bottom:1px solid var(--line);isolation:isolate}
+.hero-grid{padding-block:var(--hero-padding-block);min-height:var(--hero-min-height)}
+.hero-orb.large{width:clamp(180px,19vw,330px);height:clamp(180px,19vw,330px);top:34%;left:max(-255px,-15vw);opacity:.7}
+.hero-orb.small{width:110px;height:110px;top:72px;right:-30px;opacity:.57}
+.hero-top{margin-bottom:44px;gap:14px;letter-spacing:.09em;line-height:1.6}
+.hero-top time:before{content:"";display:inline-block;vertical-align:middle;width:18px;height:1px;background:var(--line-strong);margin-right:14px}
+.hero-copy .eyebrow{gap:13px;letter-spacing:.12em}
+.hero-copy .eyebrow strong{font-weight:650;color:var(--ink)}
+.hero-authors{margin:22px 0 0;color:var(--muted);font:13px/1.6 var(--sans)}
+.hero-authors strong{font-weight:600;color:var(--ink);white-space:nowrap}
+.hero-authors a{text-decoration-color:color-mix(in srgb,var(--accent-ink) 55%,transparent);text-decoration-thickness:1px;text-underline-offset:.22em}
+.hero-authors a:hover{color:var(--accent-ink)}
+.hero-description{max-width:700px;margin-top:24px}
+.hero-actions{flex-wrap:wrap;gap:14px 26px}
+.hero-actions .button{gap:10px}
+.hero-actions .text-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:47px;padding:11px 2px;border:1px solid transparent;border-bottom-color:var(--line);font-weight:650}
+.hero-actions .text-link:hover{color:var(--accent-ink);border-bottom-color:var(--accent-ink)}
+.hero-actions .paper-pending,.hero-actions .paper-pending:hover{color:var(--faint);border-bottom-color:var(--line);border-bottom-style:dotted;cursor:default}
+.article-facts{display:flex;flex-wrap:wrap;gap:0;margin:48px 0 0;padding:23px 0 0;border-top:1px solid var(--line)}
+.article-facts>div{display:flex;align-items:baseline;gap:8px;padding-right:22px;margin-right:22px;border-right:1px solid var(--line)}
+.article-facts>div:last-child{padding-right:0;margin-right:0;border-right:0}
+.article-facts dt{color:var(--faint);font:9px/1.6 var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.article-facts dd{margin:0;color:var(--ink);font:11px/1.6 var(--mono)}
+.cover-figure{width:100%;max-width:none;justify-self:stretch;padding:var(--cover-padding);border:1px solid rgba(139,111,90,.22);border-radius:var(--radius-large);box-shadow:inset 0 1px 0 #ffffff8c,0 28px 65px -48px #69453680;backdrop-filter:blur(16px)}
+.cover-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px 14px;padding:0;letter-spacing:.06em;line-height:1.6}
+.cover-tag{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.cover-tag i{width:6px;height:6px;border-radius:50%;background:var(--teal)}
+.cover-diagrams{display:grid;grid-template-rows:1fr 1fr;aspect-ratio:1.25;margin:22px 0 16px}
+.cover-diagrams .cover-path{display:flex;flex-direction:column;justify-content:center;padding:12px 0;min-width:0}
+.cover-diagrams .cover-path>p{margin-bottom:13px}
+.cover-diagrams svg{max-width:414px;margin-inline:auto;flex-shrink:0}
+.cover-figure figcaption{padding-top:0;border-top:0;font:12px/1.55 var(--sans)}
+html[data-theme=dark] .cover-figure{border-color:var(--line);box-shadow:inset 0 1px 0 #ffffff0d,0 28px 65px -48px #00000080}
+.article-layout{padding-top:50px;padding-bottom:150px;justify-content:center}.article-section{padding-top:76px}
+.toc-sticky{padding-right:8px}
+.toc-sticky>.eyebrow{color:var(--ink);letter-spacing:.11em}
+#toc a.active,#toc a:hover{color:var(--ink)}
+#toc a span{color:var(--faint);opacity:1}
+article p{max-width:68ch}.section-kicker{letter-spacing:.055em}
+.paper-figure{margin:38px 0 42px}
+.paper-figure .figure-zoom{width:100%;appearance:none;border:0;border-radius:0;background:var(--paper);color:inherit;text-align:left;padding:0;overflow:visible}
+.paper-figure .figure-zoom img{background:var(--paper)}
+.paper-figure figcaption{font-size:12px;line-height:1.65;max-width:68ch;margin:21px 0 0;text-align:left}
+.zoom-hint{color:var(--muted);background:var(--paper);border:0;right:0;bottom:-18px;padding:0;font-size:9px}
+.medium-figure{max-width:none}.medium-figure .figure-zoom{max-width:550px}
+.attention-pair{gap:35px;margin-block:30px 42px}
+.attention-pair .paper-figure{margin:0}.attention-pair .figure-zoom{padding:0}
+.attention-pair figcaption{font-size:12px}
+.pathway-heading{padding-top:46px;margin-top:55px}.pathway-heading h3{font-size:36px}
+.paper-schematic{margin:6px 0 52px;color:var(--muted)}
+.pathway-note{font:11px/1.65 var(--sans);color:var(--muted);max-width:78ch;margin-top:12px!important}
+.paper-schematic>summary{font:11px/1.6 var(--sans);cursor:pointer;text-underline-offset:4px}
+.paper-schematic[open]>summary{margin-bottom:28px}.paper-schematic .paper-figure{margin:10px 0 30px}
+#mechanism,#training{container-name:evidence;container-type:inline-size}
+.evidence-step,.evidence-step.large-panel{--evidence-figure-width:374px;display:block;border:0;padding:0;margin:56px 0 64px}
+/* Source labels differ in native size. These widths give comparable 17px plot
+   ticks/labels; compact plots return their unused space to the prose column. */
+.evidence-step[data-panel="fig4c-head-ablation"]{--evidence-figure-width:242px}
+.evidence-step[data-panel="fig4d-answer-state-patching"]{--evidence-figure-width:384px}
+.evidence-step[data-panel="fig6b-head-ablation"]{--evidence-figure-width:266px}
+.evidence-step[data-panel="fig6c-counter-state-patching"]{--evidence-figure-width:416px}
+.evidence-step[data-panel="fig6d-answer-state-patching"]{--evidence-figure-width:275px}
+.evidence-step[data-panel="fig7a-training-accuracy"]{--evidence-figure-width:300px;margin-block:24px 40px}
+.evidence-copy .step-label{font:10px/1.6 var(--mono);letter-spacing:.08em;margin-bottom:10px;color:var(--muted)}
+.evidence-copy h4{font-size:28px;line-height:1.22;margin-bottom:21px;max-width:30ch;text-wrap:pretty}
+.evidence-copy p,.evidence-result p{font:var(--type-body)/var(--type-body-leading) var(--sans);max-width:68ch;margin-bottom:1.35em}
+.evidence-step .paper-figure{width:100%;max-width:var(--evidence-figure-width);margin:29px auto 25px}
+.evidence-step .figure-zoom{width:100%;max-width:none;padding:0;margin:0}
+.evidence-step figcaption{font-size:12px;max-width:68ch}
+.evidence-result{margin-top:0}
+.evidence-result p:last-child{margin-bottom:0}
+.training-overview .evidence-copy>p:last-child{margin-bottom:0}
+/* Keep each experiment's method and result together beside its evidence. */
+@container evidence (min-width:740px){
+  .evidence-step,.evidence-step.large-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,min(var(--evidence-figure-width),48%));align-items:center;gap:40px}
+  .evidence-copy{min-width:0}
+  .evidence-copy h4{font-size:28px;line-height:1.22;max-width:29ch;text-wrap:pretty}
+  .evidence-step .paper-figure{min-width:0;max-width:var(--evidence-figure-width);margin:0;justify-self:end}
+  .evidence-step .figure-zoom{margin-inline:auto}
+  .evidence-step figcaption{max-width:none;margin-top:20px;line-height:1.65}
+}
+.training-heatmaps{gap:35px;margin-block:30px 36px}
+.training-heatmaps .paper-figure{margin:0}
+.training-heatmaps .figure-zoom{height:360px;padding:0}
+.training-heatmaps .figure-zoom img{width:100%;height:100%;object-fit:contain;object-position:left bottom}
+.training-heatmaps figcaption{font-size:12px;margin-top:22px}
+.geometry-lab{border:0;border-radius:0;padding:26px 0;background:transparent;border-block:1px solid var(--line)}
+.geometry-lab figcaption{font-size:12px;max-width:78ch}.lab-top .badge{display:none}
+.marginal-note{margin-top:28px}.training-example,.passage-example{border-radius:3px;border:0;background:var(--wash);padding:26px}
+.dialog-image-wrap,.dialog-image-wrap img{background:var(--paper)}
+.method-note{margin:30px 0 42px;padding:18px 0;border-block:1px solid var(--line)}
+.method-note>summary{cursor:pointer;color:var(--accent-ink);font:500 14px/1.65 var(--sans);text-wrap:pretty;padding-right:12px}
+.method-note[open]>summary{margin-bottom:22px}
+.method-note>p{font-size:15px;line-height:1.8}
+.method-note>p:last-child{margin-bottom:4px}
+.method-note .paper-figure{margin-bottom:12px}
+#limits>h3{font-size:clamp(24px,2.2vw,29px);max-width:34ch;text-wrap:pretty}
+/* Numbered bibliography follows the shared Pareto article template. */
+.references-section{padding:92px 0 22px;scroll-margin-top:54px}
+.references-section>.section-kicker{margin-bottom:18px;letter-spacing:.12em}
+.references-section h2{max-width:800px;margin-bottom:36px;text-wrap:balance}
+.reference-list{margin:0;padding:0;list-style:none}
+.reference-list li{display:grid;grid-template-columns:38px minmax(0,1fr);gap:14px;max-width:66ch;padding:17px 0;border-top:1px solid var(--line);break-inside:avoid}
+.reference-list li:last-child{border-bottom:1px solid var(--line)}
+.reference-number{padding-top:4px;color:var(--accent-ink);font:9px/1.65 var(--mono)}
+.reference-list p{max-width:none;margin:0;color:var(--muted);font:13px/1.65 var(--sans)}
+.reference-list a{color:var(--ink);font-weight:650;text-decoration-thickness:1px;text-decoration-color:color-mix(in srgb,var(--accent) 50%,transparent);text-underline-offset:.2em;overflow-wrap:anywhere}
+.reference-list a:hover{text-decoration-color:currentColor}
+.reference-list a:focus-visible{outline:2px solid var(--accent-ink);outline-offset:3px}
+.site-footer{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:baseline;padding:52px 0 40px;font-size:12px}
+.site-footer p{max-width:none;margin:0}
+.site-footer a{text-decoration:none}
+.site-footer a:hover{color:var(--accent)}
+.footer-licenses{text-align:right}
+.footer-licenses>span{display:inline-block}
+@media(min-width:1350px){
+  .wide-figure,.geometry-lab,.pathway-visual{width:min(1000px,calc(100vw - 400px));margin-left:-60px}
+  .wide-figure figcaption{margin-left:60px;max-width:68ch}
+  .wide-figure .figure-zoom{padding:0}
+  .geometry-lab{padding-inline:0}
+  .pathway-visual .pv-footer,.pathway-visual .pv-description{margin-left:60px}
+}
+@media(max-width:1180px){.training-heatmaps{gap:24px}.training-heatmaps .figure-zoom{height:310px}.evidence-copy p{font-size:var(--type-body)}}
+@media(max-width:930px){.hero-grid{border-bottom:0}.cover-figure{max-width:680px}.hero-orb.small{right:0}.article-layout{padding-top:20px}}
+@media(max-width:720px){
+  .hero-grid{padding-block:58px 72px;gap:56px}.hero-copy .eyebrow{max-width:95%}
+  .cover-path>p>strong{font-size:21px}.hero-description{margin-top:24px}.hero-top{margin-bottom:34px}
+  .hero-orb.large{top:32%;left:-150px}.hero-orb.small{width:90px;height:90px;top:20px;right:0}
+  .hero-authors{font-size:12px}.hero-actions{gap:14px 20px}
+  .article-facts>div{padding-right:18px;margin-right:18px}
+  .article-section{padding-top:55px}.paper-figure{margin:28px 0 35px}
+  .paper-figure figcaption{font-size:12px}.attention-pair{gap:32px}
+  .attention-pair figcaption{font-size:12px}.attention-pair .figure-zoom{padding:0}
+  .evidence-step,.evidence-step.large-panel{margin:46px 0 58px}
+  .evidence-copy h4{font-size:28px;max-width:30ch;margin-bottom:17px}
+  .evidence-copy p,.evidence-result p{font-size:16px}
+  .evidence-step .figure-zoom{padding:0}.evidence-step figcaption{font-size:12px}
+  .evidence-step[data-panel] .paper-figure{max-width:var(--evidence-figure-width);margin-inline:auto}
+  .pathway-heading h3{font-size:31px}.paper-schematic{margin-bottom:37px}
+  .training-heatmaps{gap:33px}.training-heatmaps .figure-zoom{height:auto}
+  .training-heatmaps .figure-zoom img{height:auto;object-fit:contain}
+  .training-heatmaps .paper-figure{max-width:470px}.geometry-lab{padding:22px 0}
+  .geometry-grid{margin-top:24px}.geometry-pane canvas{height:310px}
+  .figure-zoom .zoom-hint{opacity:1;bottom:-15px}
+  .article-layout{padding-bottom:100px}
+  .references-section{padding-top:70px}
+  .site-footer{grid-template-columns:1fr}
+  .footer-licenses{text-align:left}
+}
+@media print{.article-facts{display:none}.pathway-visual{width:100%;margin-left:0}.wide-figure figcaption{margin-left:0}.paper-schematic{display:none}.paper-figure{break-inside:avoid}.evidence-step{margin-block:30px}}
+
+/* Optional model roster: paper Table 1, transposed for reading. */
+.model-details{max-width:740px;min-width:0}
+.model-details[open]>summary{margin-bottom:14px}
+.model-details>summary span{margin-left:14px;color:var(--muted);font-size:12px;font-weight:400}
+.model-table-scroll{max-width:100%;overflow-x:auto}
+.model-table{width:100%;min-width:620px;border-collapse:collapse;font:400 12px/1.6 var(--sans);font-variant-numeric:tabular-nums;color:var(--ink)}
+.model-table caption{text-align:left;color:var(--muted);padding:0 0 10px;font-size:12px}
+.model-table th,.model-table td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}
+.model-table thead th{font-weight:500;color:var(--accent-ink);white-space:nowrap}
+.model-table th:first-child{text-align:left}
+.model-table thead tr:nth-child(2) th:first-child{text-align:right}
+.model-table tbody th{font-weight:400;max-width:245px}
+.model-details>p.model-table-note{font-size:12px;line-height:1.65;color:var(--muted);margin-top:12px;max-width:none}
+.model-details>summary:focus-visible,.model-table-scroll:focus-visible{outline:2px solid var(--accent-ink);outline-offset:5px}
+@media(max-width:720px){.model-details>summary span{display:block;margin-left:18px;margin-top:4px}}
+
+/* Mathematical display: aligned panels, true fractions, and restrained rules. */
+.law-pair{gap:0;padding:0;margin:32px 0}
+.law-pair>div{min-width:0;padding:25px 24px}
+.law-pair>div+div{border-left:1px solid var(--line)}
+.law-pair .formula{display:flex;align-items:center;justify-content:center;min-height:102px;margin:10px 0 4px;font-size:22px}
+.law-pair .katex-display{margin:0}
+.law-pair p{text-align:center;margin:0}
+@media(max-width:720px){.law-pair>div{padding:22px 10px}.law-pair>div+div{border-left:0;border-top:1px solid var(--line)}.law-pair .formula{font-size:20px;min-height:94px}}
+
+.head-definitions{margin-top:42px}
+.head-definition{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:36px;align-items:center;margin:34px 0 42px}
+.head-definition h4{font:400 28px/1.2 var(--serif);margin:0 0 20px}
+.head-definition-copy p{font-size:16px;line-height:1.8;margin-bottom:18px}
+.head-definition .paper-figure{margin:0;min-width:0}
+.head-definition .figure-zoom{padding:0}
+.head-score{font-size:19px;overflow-x:auto;margin:22px 0}
+.head-score .katex-display{margin:0}
+@media(max-width:1000px){.head-definition{grid-template-columns:1fr;gap:18px}.head-definition .paper-figure{width:100%;max-width:500px;margin-inline:auto}}
+
+.evidence-figure-column{min-width:0;width:100%;max-width:var(--evidence-figure-width);margin-inline:auto}
+.evidence-side-note{margin-top:26px}
+.evidence-side-note p{font-size:var(--type-body);line-height:1.8;margin-bottom:0}
+@media(min-width:1100px){
+ .evidence-step[data-panel="fig6c-counter-state-patching"]{align-items:start}
+ .evidence-figure-column{justify-self:end;padding-top:32px}
+}
+@media(max-width:720px){.evidence-side-note p{font-size:16px}}
+
+@media(max-width:720px){.training-title-break{display:none}}
+
+.training-example .synthetic-prefix{margin:0 0 16px;color:var(--science-on);font:13px/1.8 var(--mono)}
+.token-outputs{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+.token-outputs>p{min-width:0}
+.token-outputs>p>span{text-transform:none}
+.token-outputs code{font:13px/1.9 var(--mono);white-space:normal;overflow-wrap:anywhere;letter-spacing:0}
+.token-outputs .synthetic-trace{display:block;color:var(--science-trace,#d56b22)}
+.token-outputs .synthetic-answer{display:block;color:var(--green,#009f83)}
+@media(max-width:600px){.token-outputs{grid-template-columns:1fr;gap:20px}.token-outputs>p>span{min-height:0}}
+
+@container evidence (min-width:740px){
+ .evidence-step.training-overview{align-items:start;gap:36px}
+ .training-overview .evidence-copy{padding-top:4px}
+ .training-overview figcaption{margin-top:14px}
+}
+
+.training-overview .evidence-copy>h3{margin-top:0;margin-bottom:24px}
+
+.future-directions{list-style:none;margin:42px 0 0;padding:0;border-top:1px solid var(--ink)}
+.future-direction{border-bottom:1px solid var(--line)}
+.future-direction:last-child{border-bottom:0}
+.future-direction .future-heading{display:grid;grid-template-columns:38px 1fr;gap:16px;align-items:center;min-height:84px;margin:0;padding:20px 0}
+.future-heading>span{color:var(--accent-ink);font:10px var(--mono)}
+.future-heading strong{font:400 clamp(20px,2.2vw,27px)/1.2 var(--serif);letter-spacing:-.02em}
+.future-direction>div{max-width:730px;padding:0 0 28px 54px;color:var(--muted)}
+.future-direction>div p{font-size:15px;line-height:1.8;margin:0}
+@media(max-width:720px){.future-direction .future-heading{grid-template-columns:24px 1fr;gap:12px;min-height:74px}.future-direction>div{padding-left:36px}}
+
+/* Keep every figure caption aligned with its figure content at all widths. */
+:is(.paper-figure,.geometry-lab,.cover-figure,.wide-figure) > figcaption{width:100%;max-width:none;margin-inline:0;box-sizing:border-box}
+
+/* Five shared reading sizes; cover title and scientific figure typography are independent. */
+:root{--type-body:18px;--type-body-leading:1.74;--type-h2:48px;--type-h3:28px;--type-small:14px;--type-label:11px}
+article h2{font-size:var(--type-h2)}
+article h3,article h4,.pathway-heading h3,.evidence-copy h4,.head-definition h4,.geometry-header h3,.future-heading strong{font-size:var(--type-h3);line-height:1.22}
+article .lede{font:var(--type-body)/var(--type-body-leading) var(--sans);max-width:68ch}
+.hero-description,.head-definition-copy p,.evidence-copy p,.evidence-result p,.evidence-side-note p,.future-direction>div p,.method-note>p{font-size:var(--type-body);line-height:var(--type-body-leading)}
+:is(.paper-figure,.geometry-lab,.cover-figure,.wide-figure)>figcaption,.evidence-step figcaption,.attention-pair figcaption,.training-heatmaps figcaption,.reference-list p,.hero-authors,.site-footer,.geometry-header p,.geometry-toolbar,.gesture-hint,.panel-footnote,.plot-heading,.quiet-button,.paper-schematic>summary,.pathway-note,.model-table,.model-table caption,.model-details>p.model-table-note,.model-details>summary span,.method-note>summary,.pv-description,.pv-stage,.pv-next,.dialog-bar p,.dialog-bar button,.dialog-bar a{font-size:var(--type-small);line-height:1.65}
+#toc a,.mobile-toc summary,.mobile-toc a,.hero-actions .button,.hero-actions .text-link,.site-header nav,.brand{font-size:var(--type-small)}
+.eyebrow,.section-kicker,.evidence-copy .step-label,.hero-copy .eyebrow,.lab-top>.eyebrow,.hero-top,.cover-heading,.cover-path>p>span,.article-facts dt,.article-facts dd,.panel-label,.panel-label>span,.reference-number,.future-heading>span,.geometry-camera>span,.count-filter>span,.plot-heading>span>small,.plot-heading>strong>small,.zoom-hint,.law-pair>div>span,.output-pair span{font-size:var(--type-label);line-height:1.6}
+#toc a span{font-size:var(--type-label)}
+#count-buttons button{font-size:var(--type-small)}
+.plot-heading>strong,.cover-path>p>strong{font-size:var(--type-h3)}
+.geometry-camera button{font-size:var(--type-small)}
+.needle-example,.passage-example .distractor,.example-query,.training-example .synthetic-prefix,.training-example .synthetic-prefix code,.training-example .character-strip,.token-outputs>p,.token-outputs code,article blockquote,article blockquote p,.marginal-note p{font-size:var(--type-body);line-height:var(--type-body-leading)}
+.needle-example>span,.example-query>span{font-size:var(--type-label)}
+/* Descriptive metadata stays readable; 11px is reserved for short labels. */
+.plot-heading>span>small,.plot-heading>strong>small,.article-facts dd,.training-example .panel-label{font-size:var(--type-small)}
+select{font-size:16px}
+@media(max-width:720px){:root{--type-body:17px;--type-h2:32px;--type-h3:24px}}
+
+/* Optional detail preserves the complete article while shortening the default reading path. */
+.reading-details{margin:26px 0;border-block:1px solid var(--line);padding:15px 0}
+.reading-details>summary,.caption-details>summary{cursor:pointer;color:var(--accent-ink);font:500 var(--type-small)/1.65 var(--sans)}
+.reading-details>summary:focus-visible,.caption-details>summary:focus-visible{outline:2px solid var(--accent-ink);outline-offset:5px}
+.reading-details[open]>.reading-detail-body{padding-top:24px}
+.reading-detail-body>h3:first-child{margin-top:0}
+.caption-details[open]>div{margin-top:14px}
+.pca-guide{max-width:68ch}
+.training-details{margin-top:0}
+
+.citation-bibtex{max-width:100%;box-sizing:border-box;margin:26px 0 0;padding:24px;background:var(--wash,var(--paper-soft));border:1px solid var(--line);border-radius:3px;white-space:pre-wrap;overflow-wrap:anywhere;font:var(--type-small)/1.65 var(--mono);text-align:left}
+.citation-bibtex code{font:inherit}
+.citation-bibtex:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px}
+@media(max-width:720px){.citation-bibtex{padding:18px}}
+
+/* Citation link sits below the numbered contents. */
+.toc-citation{display:block;margin:22px 0 0;padding:18px 0 0 50px;border:0;border-top:1px solid var(--line);border-radius:0;color:var(--muted);font:400 var(--type-small)/1.5 var(--serif);text-decoration:none}
+.toc-citation:hover{color:var(--ink)}
+.toc-citation:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px}
+.mobile-toc .toc-citation{margin-left:0;padding-left:0}
+.citation-section .citation-label{margin:28px 0 12px;font:600 var(--type-small)/1.5 var(--sans);letter-spacing:0}
+.citation-section .citation-reference{max-width:none}
+.citation-section .citation-bibtex{margin-top:0}

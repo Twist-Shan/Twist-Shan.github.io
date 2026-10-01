@@ -1,0 +1,36 @@
+Edit the supplied finished research poster into a polished PORTRAIT 4:5 mobile-readable social-media cover, ideally 1600 x 2000 pixels. This is an edit of the supplied image, preserving its content, scientific meaning and editorial style, with these requested changes:
+1. Remove the ENTIRE bottom-right notice "Paper on arXiv · coming soon", including the words Paper on arXiv, separator and coming soon. Do not replace it with anything or imply the paper is already available.
+2. Replace the long subtitle "One counting task. Two retrieval strategies." with the exact shorter text "One task, two strategies."
+3. Redesign the wide two-column layout into a balanced SINGLE-COLUMN PORTRAIT composition that is comfortable to read on a phone.
+
+Preserve exactly:
+Category: "LLM INTERPRETABILITY"
+Date: "SEPTEMBER, 2026"
+Main headline:
+"How do LLMs count
+with “thinking”
+mode on or off?"
+The headline is very large elegant Palatino/Georgia-style serif, charcoal, with only “thinking” and its quotation marks italic teal.
+Authors: "Liang (Twist) Shan · Tianyu Hu · Hao Yan · Yiqiao Zhong" (may wrap naturally into two well-balanced lines; all four names must be correctly spelled).
+Off-white paper, dark charcoal ink, pale mint/teal/blue gradient circular decorations, subtle warm hairline borders, the existing highly restrained serif editorial design.
+
+Layout:
+- All content fits the complete 4:5 portrait canvas with at least 5% safe margins. No cropping any text.
+- Small category and date at top. A very prominent three-line headline occupies the upper third; immediately below it the short exact subtitle "One task, two strategies." The headline and subtitle are left aligned.
+- Below the subtitle, ONE nearly full-width softly rounded ivory panel contains both retrieval schematics stacked vertically in TWO equally weighted, equal-height halves. The panel occupies approximately the middle/lower half of the composition. Its full width makes labels and arrows readable at phone size.
+- Thin dividing rule between diagram halves. Compact but generous, consistent internal spacing. Use the available panel width; do not shrink the diagrams into a narrow column. Diagram labels must remain visibly large and crisp.
+- Bottom author footer separated by one subtle horizontal rule; four names in two centered balanced lines if needed. No arXiv notice, no extra footer column, no buttons, no new copy. Trim the vacant region left by removal.
+- Keep overall visual weight evenly distributed: no giant blank area, no crowded title or footer, no disproportionate card. Pale gradient circles on the upper right and partially clipped left edge should be quiet accents, never obscure diagram arrows.
+
+SCIENCE SCHEMATICS — preserve these exact structures:
+Panel heading: "TWO RETRIEVAL STRATEGIES"
+Top half labels: "Thinking off" in magenta #B52F6B, "Broad retrieval" in charcoal serif.
+Four equal pale-cream record boxes in one row labelled left to right "Paris", "Vienna", "Tokyo", "Lima".
+ONE box centred below labelled "Answer query". Four MAGENTA curved arrows start at the query box and point UPWARD to each city box. Exactly one arrowhead at the bottom of each city box; four city boxes must receive arrows. No downward arrow toward the query.
+Bottom half labels: "Thinking on" in blue #007EAB, "Targeted retrieval" in charcoal serif.
+The same four city boxes in the same order in one row. Four smaller query boxes directly below them labelled "q₁", "q₂", "q₃", "q₄".
+Four BLUE vertical arrows go UP from each query to its corresponding city.
+Three ORANGE #D55E00 horizontal arrows connect q₁ → q₂ → q₃ → q₄ from left to right.
+No other edges, no extra symbols, no invented results or claims.
+
+Deliver one finished flat portrait poster. No surrounding device, no mockup scene, no photographic frame, no website UI, no watermark, no grunge. Match the reference's typographic quality and the exact labels, but use an intentionally balanced mobile composition.
