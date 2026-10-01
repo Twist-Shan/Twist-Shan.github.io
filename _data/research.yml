@@ -25,16 +25,17 @@ domains:
     title: "Deep Learning"
     mark: dl
     tracks:
-      - label: "DL / Optimizer / Learning Dynamics"
+      - label: "DL / Optimizer / Muon"
         projects:
-          - id: optimizer-dynamics-loop
+          - id: optimizer-muon-comparison
             draft: false
-            title: "Optimizer Learning Dynamics of Recurrent Models"
+            title: "Theoretical comparison between Muon and Muon Hyperball"
             description: >-
-              We want to study how different optimizers affects the learning dynamics of looped transformers, including outer-loop geometry and inter-loop algorithms.
+              We want to compare local finite-horizon loss, curvature penalty between MuonH, an initially step-matched Muon baseline under Gaussian mixture regression.
             resources: 
-              - label: "Code Repo"
-                url: "https://github.com/Twist-Shan/Loop_Optimizer_Dynamics"
+            advisor:
+              name: "Prof. Yuxin Chen"
+              url: "https://yuxinchen2020.github.io/"
 
   - id: reinforcement-learning
     number: "R / 02"
