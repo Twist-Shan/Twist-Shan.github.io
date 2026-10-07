@@ -39,7 +39,7 @@ domains:
 
   - id: reinforcement-learning
     number: "R / 02"
-    title: "Sequential Decision-Making"
+    title: "Reinforcement Learning"
     mark: rl
     tracks:
       - label: "RL / Bandits Theory / Adaptive Sampling"
@@ -48,7 +48,7 @@ domains:
             draft: false
             title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
             description: >-
-              We develop adaptive sampling methods for identifying Pareto-optimal LLMs from multi-objective pairwise preferences with finite-sample guarantees.
+              We studied fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, developed an adaptive elimination algorithm with instance-dependent upper and minimax lower bounds on sample complexity, and evaluated it on synthetic benchmarks and real-world LLM Arena data.
             resources:
               - label: "arXiv"
                 url: ""
@@ -72,7 +72,7 @@ domains:
             draft: false
             title: "Targeted Retrieval, Compact Representations: How CoT Reasoning Improves Long-Context Counting"
             description: >-
-              We show that CoT reasoning shifts long-context counting from broad retrieval to iterative targeted retrieval, coupled with compact internal representations.
+              We study why Chain-of-Thought reasoning improves long-context counting across modern LLMs. Our mechanistic analysis reveals a shift from one-shot broad retrieval to iterative targeted retrieval, together with more compact internal counter representations.
             resources:
               - label: "arXiv"
                 url: "https://arxiv.org/abs/2609.38958"
@@ -96,7 +96,7 @@ domains:
             draft: false
             title: "Mechanistic Interpretability of Latent Reasoning in DLMs"
             description: >-
-              We study how diffusion language models represent and update latent reasoning states, and how these mechanisms change across architectures and decoding orders.              
+              We study how diffusion language models represent and update latent reasoning states, and how these mechanisms change across architectures and decoding algorithms.              
             resources:
               - label: "Code"
                 url: "https://github.com/Twist-Shan/DLM_Reasoning_Interp"
@@ -134,8 +134,7 @@ domains:
             draft: true
             title: "Mechanistic Interpretability of Visual Reasoning"
             description: >-
-              We study whether visual reasoning traces reflect the information VLMs actually use
-              and how intermediate visual states support downstream reasoning.
+              We study whether visual reasoning traces reflect the information VLMs actually use and how intermediate visual states support downstream reasoning.              
             resources:
               - label: "Code"
                 url: "https://github.com/Twist-Shan/understanding_CoVT"
