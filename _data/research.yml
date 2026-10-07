@@ -72,7 +72,7 @@ domains:
             draft: false
             title: "Targeted Retrieval, Compact Representations: How CoT Reasoning Improves Long-Context Counting"
             description: >-
-              We show that chain-of-thought shifts long-context counting from broad retrieval to iterative targeted retrieval, coupled with compact internal counting representations.
+              We show that CoT reasoning shifts long-context counting from broad retrieval to iterative targeted retrieval, coupled with compact internal counting representations.
             resources:
               - label: "arXiv"
                 url: "https://arxiv.org/abs/2609.38958"
