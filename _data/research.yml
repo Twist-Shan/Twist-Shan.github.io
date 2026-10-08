@@ -48,7 +48,7 @@ domains:
             draft: false
             title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
             description: >-
-              We studied fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, developed an adaptive elimination algorithm with instance-dependent upper and minimax lower bounds on sample complexity, and evaluated it on synthetic benchmarks and real-world LLM Arena data.
+              We study fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, develop an adaptive elimination algorithm with instance-dependent upper and minimax lower bounds on sample complexity, and evaluate it on synthetic benchmarks and real-world LLM Arena data.
             resources:
               - label: "arXiv"
                 url: ""
@@ -72,7 +72,7 @@ domains:
             draft: false
             title: "Targeted Retrieval, Compact Representations: How CoT Reasoning Improves Long-Context Counting"
             description: >-
-              We study why Chain-of-Thought reasoning improves long-context counting across modern LLMs. Our mechanistic analysis reveals a shift from one-shot broad retrieval to iterative targeted retrieval, together with more compact internal counter representations.
+              We study why Chain-of-Thought reasoning improves long-context counting across modern LLMs. Our mechanistic analysis reveals a shift from one-shot broad retrieval to iterative targeted retrieval, accompanied by more compact internal counter representations.
             resources:
               - label: "arXiv"
                 url: "https://arxiv.org/abs/2609.38958"
@@ -110,13 +110,25 @@ domains:
     mark: agent
     draft: false
     tracks:
-      - label: "Agents / Interpretability / Safety"
+      - label: "Agent / Safety / Memory Monitoring"
         projects:
-          - id: agent-latent-state-monitoring
+          - id: agent-memory-monitoring
             draft: false
-            title: "Latent State Monitoring for LLM Agents"
+            title: "Memory and Safety Control of LLM Agents"
             description: >-
-              We study whether internal activations can reveal an agent's hidden intent or mistakes when its observable behavior appears successful, using controlled tasks with clear objectives and exploitable shortcuts.                        
+              We investigate how LLM agents maintain safety-critical information in internal activations and external memory, and whether monitoring these states can detect mistakes, overlooked requirements, or inaccurate success reports in controlled tasks.
+            resources: []
+            advisor:
+              name: "Prof. Yiqiao Zhong"
+              url: "https://pages.stat.wisc.edu/~zhong35/"
+
+      - label: "Multi-Agent / Safety / Collusion"
+        projects:
+          - id: multi-agent-collusion
+            draft: false
+            title: "Emergent Collusion through Implicit Communication"
+            description: >-
+              We investigate whether LLM agents with only local information can implicitly transmit complementary facts through ordinary communication, enabling downstream agents to derive potentially unsafe conclusions unknown to any individual sender, without explicit coordination or joint optimization.
             resources: []
             advisor:
               name: "Prof. Yiqiao Zhong"
