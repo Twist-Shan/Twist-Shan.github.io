@@ -247,6 +247,8 @@ a.news-item:hover { color: var(--accent); padding-left: 9px; }
 
 /* Center the title and mark across all projects in a research domain. */
 @media (min-width: 901px) {
+  .research-track { display: flex; flex-direction: column; }
+  .research-track > .research-entry:last-of-type { flex-grow: 1; }
   .research-domain-header { align-self: stretch; position: relative; top: auto; grid-template-rows: 1fr; align-items: center; padding-block: 16px; }
   .research-domain-header .project-number { position: absolute; top: 0; left: 0; margin: 0; }
   .research-domain-header h2, .research-domain-header .heading-mark { grid-row: 1; margin-top: 0; }
