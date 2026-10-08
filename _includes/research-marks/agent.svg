@@ -1,25 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" class="heading-mark-svg" aria-hidden="true" focusable="false"><g fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-<path stroke="var(--ink, #20231f)" opacity=".3" d="M15 37C15 22 22 15 31 15"/>
-<path stroke="var(--accent, #3f9877)" opacity=".8" d="M71 70C55 81 30 79 18 69"/>
-<path stroke="var(--accent, #3f9877)" opacity=".8" d="M19 74L18 69L23 69"/>
-<path stroke="var(--ink, #20231f)" opacity=".55" d="M44 23V29M34 47L23 59M54 47L65 59"/>
-<path stroke="var(--mint, #9986df)" d="M54 39L70.5 23"/>
+<path stroke="var(--ink, #20231f)" opacity=".3" d="M10 43A34 34 0 0 1 31 11.58"/>
+<path stroke="var(--accent, #3f9877)" opacity=".8" d="M70 64.91A34 34 0 0 1 18 64.91"/>
+<path stroke="var(--accent, #3f9877)" opacity=".8" d="M18.44 69.89L18 64.91L22.98 65.35"/>
+<path stroke="var(--ink, #20231f)" opacity=".55" d="M44 23V29M34 48.52L23 54.59M54 48.52L65 54.59"/>
+<path stroke="var(--mint, #9986df)" d="M54 35.41L70.61 22.81"/>
 <path data-packet-route="input" stroke="none" d="M44 23V29"/>
 <circle class="mark-packet" data-packet="input" data-packet-delay="0" r="2.6" opacity="0" fill="var(--accent, #3f9877)" stroke="var(--paper, #f7f7f2)" stroke-width=".7"/>
-<path data-packet-route="tool" stroke="none" d="M34 47L23 59"/>
+<path data-packet-route="tool" stroke="none" d="M34 48.52L23 54.59"/>
 <circle class="mark-packet" data-packet="tool" data-packet-delay="0.22" r="2.6" opacity="0" fill="var(--accent, #3f9877)" stroke="var(--paper, #f7f7f2)" stroke-width=".7"/>
-<path data-packet-route="result" stroke="none" d="M65 59L54 47"/>
+<path data-packet-route="result" stroke="none" d="M65 54.59L54 48.52"/>
 <circle class="mark-packet" data-packet="result" data-packet-delay="0.48" r="2.6" opacity="0" fill="var(--accent, #3f9877)" stroke="var(--paper, #f7f7f2)" stroke-width=".7"/>
-<path data-packet-route="output" stroke="none" d="M54 39L70.5 23"/>
+<path data-packet-route="output" stroke="none" d="M54 35.41L70.61 22.81"/>
 <circle class="mark-packet" data-packet="output" data-packet-delay="0.72" r="2.6" opacity="0" fill="var(--accent, #3f9877)" stroke="var(--paper, #f7f7f2)" stroke-width=".7"/>
-<g class="mark-motion mark-agent-step" style="--node-origin:44px 23px;--motion-delay:0s">
-<rect x="36" y="7" width="16" height="16" stroke="var(--ink, #20231f)" fill="var(--paper, #f7f7f2)"/>
+<g class="mark-agent-step" style="--node-origin:44px 23px;--motion-delay:0s">
+<rect x="36" y="7" width="16" height="16" rx="1.2" stroke="var(--ink, #20231f)" fill="var(--paper, #f7f7f2)"/>
 <path class="mark-motion mark-signal" style="--motion-delay: 0s" stroke="var(--mint, #9986df)" d="M40 15H48M44 11V19"/></g>
-<g class="mark-motion mark-agent-step" style="--node-origin:23px 59px;--motion-delay:-6.2s">
-<rect x="7" y="51" width="16" height="16" stroke="var(--mint, #9986df)" fill="var(--paper, #f7f7f2)"/>
+<g class="mark-agent-step" style="--node-origin:23px 59px;--motion-delay:-6.2s">
+<rect x="7" y="51" width="16" height="16" rx="1.2" stroke="var(--mint, #9986df)" fill="var(--paper, #f7f7f2)"/>
 <path class="mark-motion mark-signal" style="--motion-delay: -1.5s" stroke="var(--ink, #20231f)" opacity=".7" d="M11 56L14 59L11 62M17 62H20"/></g>
-<g class="mark-motion mark-agent-step" style="--node-origin:65px 59px;--motion-delay:-4.2s">
-<rect x="65" y="51" width="16" height="16" stroke="var(--accent, #3f9877)" fill="var(--paper, #f7f7f2)"/>
+<g class="mark-agent-step" style="--node-origin:65px 59px;--motion-delay:-4.2s">
+<rect x="65" y="51" width="16" height="16" rx="1.2" stroke="var(--accent, #3f9877)" fill="var(--paper, #f7f7f2)"/>
 <path class="mark-motion mark-write" pathLength="1" style="--motion-delay:-4.2s" stroke="var(--accent, #3f9877)" d="M69 59L72 62L77 56"/></g>
 <g class="mark-motion mark-agent-core">
 <path stroke="var(--accent, #3f9877)" fill="var(--paper, #f7f7f2)" d="M44 29L58 43L44 57L30 43Z"/>
