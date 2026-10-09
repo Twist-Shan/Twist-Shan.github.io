@@ -93,7 +93,7 @@ domains:
       - label: "DLM / Interpretability / Latent Reasoning"
         projects:
           - id: dlm-latent-reasoning
-            draft: false
+            draft: true
             title: "Mechanistic Interpretability of Latent Reasoning in DLMs"
             description: >-
               We study how diffusion language models represent and update latent reasoning states, and how these mechanisms change across architectures and decoding algorithms.              
