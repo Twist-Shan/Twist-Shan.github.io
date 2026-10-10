@@ -49,7 +49,7 @@ redirect_from:
   </header>
   <div class="timeline">
     <article>
-      <time>2023.08 — 2028.06</time>
+      <time>2023.08 — 2028.07</time>
       <div><h3>Peking University</h3><p>B.S. in Statistics · School of Mathematical Sciences<br>B.A. in Economics · National School of Development</p></div>
       <span class="place">Beijing</span>
     </article>
