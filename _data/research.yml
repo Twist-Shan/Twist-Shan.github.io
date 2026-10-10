@@ -97,9 +97,7 @@ domains:
             title: "Mechanistic Interpretability of Latent Reasoning in DLMs"
             description: >-
               We study how diffusion language models represent and update latent reasoning states, and how these mechanisms change across architectures and decoding algorithms.              
-            resources:
-              - label: "Code"
-                url: "https://github.com/Twist-Shan/DLM_Reasoning_Interp"
+            resources: []
             advisor:
               name: "Prof. Song Mei"
               url: "https://www.stat.berkeley.edu/~songmei/"
