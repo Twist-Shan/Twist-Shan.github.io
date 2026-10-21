@@ -2966,5 +2966,5 @@ code {
 .citation-section .citation-reference{max-width:none}
 .citation-section .citation-bibtex{margin-top:0}
 
-.hero-actions .text-link{font-size:13px;font-weight:600;text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:5px}.hero-actions .text-link:hover{color:var(--accent);border-color:var(--accent)}
+.hero-actions .text-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:47px;padding:11px 2px;border:1px solid transparent;border-bottom-color:var(--line);font-size:14px;font-weight:650;text-decoration:none}.hero-actions .text-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
 .wordmark .wordmark-mark{display:block;width:34px;height:34px;flex:none;background:none;border:0;border-radius:0;box-shadow:none;transform:none;color:#3f9877}html[data-theme="dark"] .wordmark .wordmark-mark{color:#b5a1ff}
