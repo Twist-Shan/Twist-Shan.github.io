@@ -1,7 +1,7 @@
 ---
 layout: studio
 ---
-<article class="article shell">
+<article class="article shell{% if page.blog_category == 'others' %} article--others{% endif %}">
   <header class="article-header reveal">
     <a class="article-back" href="{{ '/blog/' | relative_url }}">← All notes</a>
     <time>{{ page.date | date: '%B %d, %Y' }}</time>
