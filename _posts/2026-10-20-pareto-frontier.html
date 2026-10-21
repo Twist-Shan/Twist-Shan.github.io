@@ -1,0 +1,453 @@
+---
+layout: standalone
+title: 'Can One LLM Win at Everything? Finding the Pareto Frontier'
+date: 2026-10-20 12:00:00 +0800
+permalink: /posts/2026/10/pareto-frontier/
+blog_category: research
+tags:
+  - RL
+excerpt: 'An interactive introduction to Pareto-frontier identification in multi-objective LLM arenas and adaptive sampling with VB-EGE.'
+sitemap: true
+---
+{% raw %}
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive introduction to strict Pareto-frontier identification for multi-objective Arena-based LLM evaluation, the Vector-Borda insight behind VB-EGE, and what the experiments reveal.">
+  <meta name="author" content="Liang (Twist) Shan">
+  <meta name="citation_title" content="Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas">
+  <link rel="canonical" href="https://twist-shan.github.io/posts/2026/10/pareto-frontier/">
+  <link rel="icon" href="/images/favicon.svg?v=ls-serif-1" type="image/svg+xml">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FAFAF7">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Can One LLM Win at Everything? Finding the Pareto Frontier">
+  <meta property="og:description" content="How to find the LLMs that cannot be beaten across math, coding, and instruction following—and identify them efficiently from pairwise votes.">
+  <meta property="article:published_time" content="2026-10-20">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>Can One LLM Win at Everything? Finding the Pareto Frontier — Liang (Twist) Shan</title>
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem('liang-theme');
+        const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      } catch (_) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/vendor/katex/katex.min.css?v=0.17.0">
+  <link rel="stylesheet" href="assets/pareto-blog.css?v=20260929c">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="reading-progress" aria-hidden="true"><span></span></div>
+
+  <header class="site-header">
+    <div class="site-shell header-inner">
+      <a class="wordmark" href="/" aria-label="Liang Shan, home">
+        <svg class="wordmark-mark" viewBox="190 221 390 462" aria-hidden="true" focusable="false"><g fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M520 319 L520 415 L515 415 C497 363 468 333 429 333 C399 333 378 348 378 379 C378 412 412 428 460 451 C510 476 552 500 552 546 C552 609 493 649 434 649 C397 649 380 637 367 637 C356 637 349 644 346 655 L342 655 L332 569 L339 574 C366 615 398 639 432 639 C475 639 500 610 500 575 C500 535 474 516 427 493 C375 467 334 447 334 405 C334 358 375 325 429 325 C461 325 480 336 492 336 C505 336 513 330 517 319 Z"/><path d="M218 249 L367 249 L367 254 C332 258 318 269 318 298 L318 568 L342 568 C386 568 413 553 429 506 L435 506 L429 580 L218 580 L218 575 C252 569 263 561 263 533 L263 298 C263 269 251 257 218 254 Z"/></g></svg>
+        <span class="wordmark-name">Liang Shan</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation">
+        <span>Menu</span><span class="menu-line" aria-hidden="true"></span>
+      </button>
+      <nav class="site-navigation" id="site-navigation" aria-label="Main navigation">
+        <a href="/research/">Research</a>
+        <a href="/blog/" aria-current="page">Blog</a>
+        <a href="/misc/">Misc.</a>
+      </nav>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Toggle color mode">
+        <svg class="sun-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56"/></svg>
+        <svg class="moon-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20.2 15.2A8.8 8.8 0 0 1 8.8 3.8 8.8 8.8 0 1 0 20.2 15.2Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="article-hero site-shell" aria-labelledby="article-title">
+      <span class="hero-orb hero-orb--left" aria-hidden="true"></span>
+      <span class="hero-orb hero-orb--right" aria-hidden="true"></span>
+      <div class="hero-copy" data-reveal>
+        <div class="article-breadcrumbs">
+          <a href="/blog/">← All notes</a>
+          <time datetime="2026-10-20">OCTOBER 20, 2026</time>
+        </div>
+        <p class="hero-eyebrow"><span aria-hidden="true"></span><strong>RL Theory</strong> · Research Blog</p>
+        <h1 id="article-title">Can one LLM win at everything? Finding the <em>Pareto frontier</em></h1>
+        <p class="hero-authors">This work is joint with <strong><a href="https://ajh4869.github.io/" rel="noopener noreferrer" target="_blank">Jiahao Ai</a></strong> and <strong><a href="https://zhimeir.github.io/" rel="noopener noreferrer" target="_blank">Zhimei Ren</a></strong>.</p>
+        <p class="hero-description">Today’s AI Arena leaderboards consider math, coding, and instruction following one column at a time. But if I want a model that is better across all three, where should I look? The answer starts with the Pareto frontier.</p>
+        <div class="hero-actions">
+          <a class="button button--primary" href="#explorer">Explore the frontier <span aria-hidden="true">↓</span></a>
+          <a class="text-link" href="https://arxiv.org/abs/2610.27447" target="_blank" rel="noopener noreferrer">Paper on arXiv ↗</a>
+        </div>
+        <dl class="article-facts" aria-label="Article facts">
+          <div><dt>Reading</dt><dd>8 min</dd></div>
+          <div><dt>Words</dt><dd>1,806</dd></div>
+        </dl>
+      </div>
+
+      <figure class="hero-figure" data-reveal>
+        <div class="hero-figure-head">
+          <span>Arena-35 / three-objective view</span>
+          <span class="live-label"><i aria-hidden="true"></i>Empirical frontier</span>
+        </div>
+        <a class="figure-zoom" href="assets/figures/arena-35-pareto-3d.svg" data-zoom aria-label="Enlarge: Arena-35 three-objective frontier">
+          <img src="assets/figures/arena-35-pareto-3d.svg" alt="Three-dimensional Arena-35 scatter plot for code, math, and instruction following, with strict Pareto-frontier models highlighted as diamonds." decoding="async">
+          <span class="zoom-hint" aria-hidden="true">Enlarge ↗</span>
+        </a>
+        <figcaption>Arena-35 projected onto three objectives (paper, Figure 1). Diamonds mark the projected strict frontier; the full identification target uses all five objectives.</figcaption>
+      </figure>
+    </section>
+
+    <details class="mobile-toc site-shell">
+      <summary>On this page</summary>
+      <nav aria-label="Article contents">
+        <a href="#problem">Motivation &amp; task</a>
+        <a href="#explorer">Try the frontier</a>
+        <a href="#algorithm">Core idea</a>
+        <a href="#experiments">Evidence</a>
+        <a href="#limitations">Future work</a>
+        <a href="#references">References</a>
+      </nav>
+      <a class="toc-citation" href="#how-to-cite">How to cite</a>
+    </details>
+
+    <div class="article-layout site-shell">
+      <aside class="desktop-toc" aria-label="Article contents">
+        <div class="toc-sticky">
+          <p class="toc-title">On this page</p>
+          <nav>
+            <ol class="toc-list">
+              <li data-toc-section="problem"><a href="#problem"><span>01</span>Motivation &amp; task</a></li>
+              <li data-toc-section="explorer"><a href="#explorer"><span>02</span>Try the frontier</a></li>
+              <li data-toc-section="algorithm"><a href="#algorithm"><span>03</span>Core idea</a></li>
+              <li data-toc-section="experiments"><a href="#experiments"><span>04</span>Evidence</a></li>
+              <li data-toc-section="limitations"><a href="#limitations"><span>05</span>Future work</a></li>
+              <li data-toc-section="references"><a href="#references"><span>06</span>References</a></li>
+            </ol>
+          </nav>
+          <a class="toc-citation" href="#how-to-cite">How to cite</a>
+        </div>
+      </aside>
+
+      <article class="article-prose">
+        <section class="article-section" id="problem" data-reveal>
+          <p class="section-label">01 / MOTIVATION &amp; TASK</p>
+          <div class="article-lede opening-lede">
+            <p><a href="https://arena.ai/" rel="noopener noreferrer" target="_blank">Chatbot Arena</a> turns pairwise preferences into model rankings. But a ranking alone does not settle which model to use when we care about several capabilities. A model that leads in math may fall behind in coding, and a single overall score depends on how we weight those capabilities.</p>
+            <p>Before choosing those weights, we can ask a more basic question: <strong>which models can we rule out because another model is better on every objective?</strong> The remaining models form the strict Pareto frontier.</p>
+          </div>
+          <h2>Pareto identification from pairwise feedback</h2>
+          <p>We use <strong>strict dominance</strong>: model <span class="math-inline tex-math">\(j\)</span> dominates model <span class="math-inline tex-math">\(i\)</span> only if its latent score is larger in <em>every</em> objective. The strict Pareto frontier consists of the models with no such dominator. This differs from the common convention of “at least as good everywhere and strictly better somewhere.” Since a user may care only about an objective on which two models perform equally well, neither should be discarded on performance grounds: token cost, availability, or other application-specific considerations may instead determine the final choice.</p>
+
+          <aside class="opening-answer">
+            <p class="micro-label">Illustrative example</p>
+            <p>If A is better than B on every objective, B is excluded. If A is better in math but B is better in coding, neither excludes the other.</p>
+          </aside>
+
+          <p>Human-preference judgments are costly to collect, and evaluating several capabilities requires enough evidence for each objective. We seek to identify this frontier without first estimating all latent scores or pairwise win probabilities. Our approach uses <strong>adaptive sampling</strong> to progressively classify models whose Pareto status can be certified and concentrate comparisons on those that remain difficult to classify. Therefore, we can reduce the sampling cost compared with uniform sampling.</p>
+
+          <blockquote>
+            <p>Our objective is fixed-confidence identification: recover the exact strict frontier with probability at least <span class="math-inline tex-math" aria-label="one minus delta">\(1-\delta\)</span>, while minimizing the number of objective-specific comparisons.</p>
+          </blockquote>
+        </section>
+
+        <section class="article-section explorer-section" id="explorer" data-reveal>
+          <p class="section-label">02 / Try the frontier</p>
+          <h2>Try the frontier in 2D or 3D</h2>
+          <p>Select a dataset and two or three objectives to inspect the empirical frontier. A coral ring marks frontier membership in the <em>selected projection</em>; the full-dimensional target uses all objectives. Coordinates are empirical Vector-Borda scores, not fitted latent scores.</p>
+
+          <aside class="dataset-ledger" aria-labelledby="dataset-ledger-title">
+            <p class="micro-label" id="dataset-ledger-title">Data behind the explorer</p>
+            <p class="dataset-ledger-intro">Fixed subsets with observations for every model pair and objective.</p>
+            <dl>
+              <div class="dataset-ledger-row">
+                <dt><span>Arena-35</span><small>35 models · 5 objectives</small></dt>
+                <dd>
+                  <p><a href="https://huggingface.co/datasets/lmarena-ai/arena-human-preference-140k/tree/6322995ab34d7c2693e3f47dd13fa5caa0789a74" rel="noopener noreferrer" target="_blank">Arena Human Preference 140K</a>: 73,135 text comparisons; five mutually exclusive objective groups defined by our routing rule.</p>
+                  <p class="dataset-ledger-meta"><span><time datetime="2025-04-17">17 Apr</time>–<time datetime="2025-07-24">24 Jul 2025</time></span><span aria-hidden="true">·</span><a href="https://arxiv.org/abs/2403.04132" rel="noopener noreferrer" target="_blank">paper</a><span aria-hidden="true">·</span><code>rev. 6322995</code></p>
+                </dd>
+              </div>
+
+              <div class="dataset-ledger-row">
+                <dt><span>SearchArena-8</span><small>8 models · 9 objectives</small></dt>
+                <dd>
+                  <p><a href="https://huggingface.co/datasets/lmarena-ai/search-arena-24k/tree/fac8dcf86146c8773ef020095c5694c9b2bc98d7" rel="noopener noreferrer" target="_blank">Search Arena 24K</a>: 4,305 comparisons grouped by the nine released primary-intent labels.</p>
+                  <p class="dataset-ledger-meta"><span><time datetime="2025-03-18">18 Mar</time>–<time datetime="2025-05-08">8 May 2025</time></span><span aria-hidden="true">·</span><a href="https://arxiv.org/abs/2506.05334" rel="noopener noreferrer" target="_blank">paper</a><span aria-hidden="true">·</span><code>rev. fac8dcf</code></p>
+                </dd>
+              </div>
+
+              <div class="dataset-ledger-row">
+                <dt><span>VisionArena-12</span><small>12 models · 8 objectives</small></dt>
+                <dd>
+                  <p><a href="https://huggingface.co/datasets/lmarena-ai/VisionArena-Battle/tree/a41d58f15caa3e2d9685774153d2bc815b943d96" rel="noopener noreferrer" target="_blank">VisionArena-Battle</a>: 12,937 comparisons, yielding 23,458 pair–objective records across eight overlapping categories.</p>
+                  <p class="dataset-ledger-meta"><span><time datetime="2024-02">Feb</time>–<time datetime="2024-09">Sep 2024</time> (month-level)</span><span aria-hidden="true">·</span><a href="https://arxiv.org/abs/2412.08687" rel="noopener noreferrer" target="_blank">paper</a><span aria-hidden="true">·</span><code>rev. a41d58f</code></p>
+                </dd>
+              </div>
+            </dl>
+            <p class="dataset-ledger-note">Links pin the exact Hugging Face revisions used here; these are historical snapshots, not live leaderboards.</p>
+          </aside>
+
+          <div class="explorer" data-explorer>
+            <div class="explorer-toolbar">
+              <div class="field field--dataset">
+                <label for="dataset-select">Dataset</label>
+                <select id="dataset-select" data-dataset>
+                  <option value="arena">Arena-35</option>
+                  <option value="search">SearchArena-8</option>
+                  <option value="vision">VisionArena-12</option>
+                </select>
+              </div>
+              <fieldset class="dimension-toggle">
+                <legend>View</legend>
+                <div>
+                  <button type="button" class="is-active" data-dimension="2" aria-pressed="true">2D</button>
+                  <button type="button" data-dimension="3" aria-pressed="false">3D</button>
+                </div>
+              </fieldset>
+              <div class="axis-fields">
+                <div class="field"><label for="axis-x">X axis</label><select id="axis-x" data-axis="x"></select></div>
+                <div class="field"><label for="axis-y">Y axis</label><select id="axis-y" data-axis="y"></select></div>
+                <div class="field field--z" hidden><label for="axis-z">Z axis</label><select id="axis-z" data-axis="z"></select></div>
+              </div>
+            </div>
+
+            <div class="explorer-context" aria-live="polite">
+              <div><span>Projection frontier</span><strong data-projection-count>—</strong></div>
+              <div><span>Full-dimensional frontier</span><strong data-full-count>—</strong></div>
+              <div><span>Roster / objectives</span><strong data-roster>—</strong></div>
+              <p data-routing>—</p>
+            </div>
+
+            <div class="plot-guide">
+              <p><span aria-hidden="true">↔</span> Left-drag to move the view · mouse wheel to zoom</p>
+              <button type="button" data-reset-view>Reset view</button>
+            </div>
+
+            <div class="plot-wrap">
+              <div class="plot-loading" data-plot-loading aria-live="polite">
+                <span></span><span></span><span></span>
+                <p>Preparing the interactive frontier…</p>
+              </div>
+              <div id="pareto-plot" class="pareto-plot" role="img" aria-label="Interactive Pareto scatter plot"></div>
+            </div>
+
+            <div class="explorer-footer">
+              <p><span class="frontier-key" aria-hidden="true"></span><strong data-projection-label>Projected frontier</strong>: <span data-frontier-list>—</span></p>
+              <p class="projection-note">Projection membership can differ from the paper’s full-dimensional target. The full target uses every objective listed for the selected dataset.</p>
+            </div>
+            <noscript><img src="assets/figures/arena-35-pareto-3d.svg" alt="Static Arena-35 three-dimensional Pareto plot."></noscript>
+          </div>
+        </section>
+
+        <section class="article-section" id="algorithm" data-reveal>
+          <p class="section-label">03 / Core idea</p>
+          <h2>Vector-Borda reduction and adaptive elimination</h2>
+          <p>Consider <span class="math-inline tex-math">\(K\)</span> models and <span class="math-inline tex-math">\(d\)</span> objectives. Each query selects a model pair and one objective, and returns a binary preference. Under the Bradley–Terry (BT) model, the win probability is <span class="math-inline tex-math">\(\sigma(\theta_{i,r}-\theta_{j,r})\)</span>, where <span class="math-inline tex-math">\(\theta_{i,r}\)</span> is model <span class="math-inline tex-math">\(i\)</span>’s latent score and <span class="math-inline tex-math">\(\sigma(x)=(1+e^{-x})^{-1}\)</span>.</p>
+          <p>We do not need to estimate every pairwise win probability to identify the strict Pareto frontier. Instead, the <strong>Vector-Borda reduction</strong> lets us estimate each model’s win probability against a uniformly random opponent on each objective—<span class="math-inline tex-math">\(Kd\)</span> scores in total. Under BT, these scores preserve the latent ordering on every objective.</p>
+
+          <div class="reduction-strip" aria-label="Pairwise estimation compared with the Vector-Borda reduction">
+            <div><span>Estimate every pair</span><strong><span class="math-stat tex-math" aria-label="Theta of K squared d">\(\Theta(K^2d)\)</span></strong><p>Pair–objective quantities to reconstruct.</p></div>
+            <div><span>Estimate one score stream</span><strong><span class="math-stat tex-math" aria-label="Theta of K d">\(\Theta(Kd)\)</span></strong><p>Random-opponent means to learn.</p></div>
+          </div>
+
+          <p>For model <span class="math-inline tex-math" aria-label="i">\(i\)</span> and objective <span class="math-inline tex-math" aria-label="r">\(r\)</span>, define its <strong>coordinate-wise Borda score</strong> as the probability that it beats a uniformly random opponent:</p>
+
+          <div class="equation equation--compact">
+            <span class="math-display tex-math" role="math" aria-label="b sub i r equals one over quantity K minus one, times the sum over j not equal to i of sigma of theta sub i r minus theta sub j r">\[b_{i,r}=\frac{1}{K-1}\sum_{j\ne i}\sigma\!\left(\theta_{i,r}-\theta_{j,r}\right)\]</span>
+          </div>
+
+          <p>Choose a focal model and an objective, draw an opponent uniformly from the other models in the original roster, and record the outcome. This produces a Bernoulli observation with mean <span class="math-inline tex-math">\(b_{i,r}\)</span>. Building on random-opponent Borda sampling in dueling bandits, we apply the reduction coordinate-wise to preserve a multi-objective target.</p>
+
+          <div class="insight-panel">
+            <p class="micro-label">Order preservation</p>
+            <div class="equation equation--compact">
+              <span class="math-display tex-math" role="math" aria-label="sign of b sub i r minus b sub j r equals sign of theta sub i r minus theta sub j r">\[\operatorname{sign}\!\left(b_{i,r}-b_{j,r}\right)=\operatorname{sign}\!\left(\theta_{i,r}-\theta_{j,r}\right)\]</span>
+            </div>
+            <p>The intuition is simple: under the BT model, a model with stronger math ability has a higher chance of beating any given opponent at math. Its average win rate is therefore higher too. This holds for every objective, so using average win rates instead of latent abilities leaves the strict Pareto frontier unchanged.</p>
+          </div>
+
+          <h3>How VB-EGE allocates comparisons</h3>
+          <p>We therefore use this reduction to build <strong>Vector-Borda Empirical-Gap Elimination (VB-EGE)</strong>, adapting the empirical-gap approach of <a href="https://proceedings.mlr.press/v238/kone24a.html" rel="noopener noreferrer" target="_blank">Kone et al. (2024)</a>. In each phase, we collect more comparisons for the models still under consideration. As the estimates become more precise, we decide which models belong to the frontier and which can be ruled out.</p>
+
+          <div class="algorithm-walkthrough" data-algorithm>
+            <div class="algorithm-steps" role="tablist" aria-label="VB-EGE stages">
+              <button type="button" class="is-active" role="tab" aria-selected="true" data-algorithm-step="sample"><span>01</span>Sample</button>
+              <button type="button" role="tab" aria-selected="false" data-algorithm-step="estimate"><span>02</span>Estimate</button>
+              <button type="button" role="tab" aria-selected="false" data-algorithm-step="certify"><span>03</span>Certify</button>
+              <button type="button" role="tab" aria-selected="false" data-algorithm-step="eliminate"><span>04</span>Eliminate</button>
+            </div>
+            <div class="algorithm-detail" role="tabpanel" tabindex="0">
+              <p class="micro-label" data-algorithm-kicker>Sampling phase / collect evidence</p>
+              <h4 data-algorithm-title>Collect more comparisons.</h4>
+              <p data-algorithm-copy>Bring every active model–objective pair to the same sample count for this phase. Opponents are drawn from the full original roster, including models already classified.</p>
+              <div class="confidence-glyph" aria-hidden="true"><span></span><i></i><b></b></div>
+            </div>
+          </div>
+
+          <p>For a dominated model, the classification gap measures the strongest evidence that another model exceeds it in every objective. Confirming that a model is on the frontier is not always enough to stop sampling it. We may still need a more accurate estimate of its scores to rule out another model. The classification gap accounts for both tasks.</p>
+          <p>Within a phase, VB-EGE selects the largest empirical gap exceeding <span class="math-inline tex-math">\(4r_m\)</span>, where <span class="math-inline tex-math">\(r_m\)</span> is the current confidence radius. It accepts an empirically non-dominated model or rejects an empirically dominated one, then recomputes the remaining gaps using the same observations. New samples are collected only when no further removal is certified.</p>
+
+          <figure class="paper-figure">
+            <a class="figure-zoom" href="assets/figures/allocation-vs-gap.svg" data-zoom aria-label="Enlarge: adaptive allocation by Borda gap">
+              <img data-allocation-image src="assets/figures/allocation-vs-gap.svg" alt="Two scatter plots showing that models with smaller Borda classification gaps receive more VB-EGE samples." loading="lazy" decoding="async">
+              <span class="zoom-hint" aria-hidden="true">Enlarge ↗</span>
+            </a>
+            <figcaption><strong>Allocation by classification gap.</strong> On representative Arena-4 medium and Two-group-10 instances, smaller-gap models receive more comparisons. The vertical axes are logarithmic (paper, Figure 6).</figcaption>
+          </figure>
+
+          <h3>Fixed-confidence and minimax guarantees</h3>
+          <p>Under the BT model and positive classification gaps, VB-EGE returns the exact strict frontier with probability at least <span class="math-inline tex-math">\(1-\delta\)</span>. Its high-probability comparison bound scales with <span class="math-inline tex-math">\(d\sum_i(\Delta_i^B)^{-2}\)</span>, up to logarithmic factors, where <span class="math-inline tex-math">\(\Delta_i^B\)</span> is model <span class="math-inline tex-math">\(i\)</span>’s Borda classification gap. Small-gap models therefore determine the cost.</p>
+          <p>For a fixed bounded latent-score range and minimum latent classification gap <span class="math-inline tex-math">\(\Delta\)</span>, the worst-case stopping-time quantile scales as <span class="math-inline tex-math">\(\widetilde{\Theta}\!\left(dK\Delta^{-2}\log(1/\delta)\right)\)</span> as <span class="math-inline tex-math">\(\delta\to0\)</span>. The upper and lower bounds match up to logarithmic factors, establishing <strong>minimax optimality in the high-probability stopping-time sense</strong>.</p>
+        </section>
+
+        <section class="article-section" id="experiments" data-reveal>
+          <p class="section-label">04 / Evidence</p>
+          <h2>What the experiments show</h2>
+          <p>We test whether the algorithms recover the exact strict frontier, their mean stopping time, and how this cost scales. Synthetic BT instances let us vary the number of models, objectives, and classification gaps across different settings. We also replay three Arena datasets to evaluate comparison efficiency on logged human preferences.</p>
+          <p>We compare against three uniform-sampling baselines: Focal Borda without elimination, BT-MLE using fitted latent scores, and a Borda plug-in method using estimated pairwise win rates. Detailed experimental settings are provided in the paper.</p>
+
+          <div class="metric-ribbon" aria-label="Experiment highlights">
+            <div><strong>500</strong><span>trials per main synthetic setting</span></div>
+            <div><strong>1.09</strong><span>descriptive log–log slope in both <span class="math-inline tex-math" aria-label="K">\(K\)</span> and <span class="math-inline tex-math" aria-label="d">\(d\)</span></span></div>
+            <div><strong>100/100</strong><span>exact recoveries per method and real dataset</span></div>
+          </div>
+
+          <p class="result-caveat">No set errors were observed in these experiments. Finite-run recovery rates do not establish zero error probability, and not every baseline has a fixed-confidence guarantee.</p>
+
+          <div class="performance-gallery" data-performance-gallery>
+            <div class="gallery-head">
+              <div>
+                <p class="micro-label">Lower is better / logarithmic axis</p>
+                <h3 data-performance-title>Real-data replay cost</h3>
+              </div>
+              <div class="gallery-tabs" role="tablist" aria-label="Performance figure">
+                <button type="button" class="is-active" role="tab" aria-selected="true" data-performance-view="realistic">Real data</button>
+                <button type="button" role="tab" aria-selected="false" data-performance-view="synthetic">Synthetic</button>
+                <button type="button" role="tab" aria-selected="false" data-performance-view="scaling">Scaling</button>
+              </div>
+            </div>
+            <figure>
+              <a class="figure-zoom" href="assets/realistic-benchmarks.png?v=20261013" data-zoom aria-label="Enlarge: real-data replay cost">
+                <img src="assets/realistic-benchmarks.png?v=20261013" data-performance-image alt="Grouped bar chart comparing mean coordinate-specific comparisons on three fixed Arena datasets; VB-EGE is lowest in each group." loading="lazy" decoding="async">
+                <span class="zoom-hint" aria-hidden="true">Enlarge ↗</span>
+              </a>
+              <figcaption data-performance-caption>Mean stopping time over 100 independent replays of each dataset. VB-EGE has the lowest mean stopping time on all three datasets. The vertical axis is logarithmic. Error bars show one standard error.</figcaption>
+            </figure>
+          </div>
+
+          <h3>Scaling and heterogeneous benchmarks</h3>
+          <p>Mean stopping time scales roughly linearly with the number of models and objectives, decreases with larger gaps, and grows with <span class="math-inline tex-math">\(\log(1/\delta)\)</span>, consistent with theory. Across eight heterogeneous benchmarks, VB-EGE has the lowest mean stopping time. Focal Borda requires <strong>1.25–111×</strong> as many comparisons, measured by the ratio of mean stopping times.</p>
+
+          <h3>Replaying fixed Arena logs</h3>
+          <p>All methods recover the empirical frontier in all 100 replays per dataset. VB-EGE has the lowest mean stopping time: Focal Borda’s mean cost is <strong>16.54×</strong>, <strong>3.96×</strong>, and <strong>4.59×</strong> higher on Arena-35, SearchArena-8, and VisionArena-12, respectively.</p>
+
+          <aside class="caution-note">
+            <p>In these replay experiments, our algorithm identifies the empirical Vector-Borda frontier from existing preference data. Each query samples a recorded outcome with replacement, so the stopping time counts sampling draws, including repeated uses of the same record. With complete comparison coverage and positive classification gaps, the same recovery guarantee holds conditional on the fixed log, without assuming that the logged preferences follow a BT model. We do not generate new model responses or collect new preference judgments online.</p>
+          </aside>
+        </section>
+
+        <section class="article-section" id="limitations" data-reveal>
+          <p class="section-label">05 / Future work</p>
+          <h2>Future directions</h2>
+          <p>Several directions remain open, both in modeling Arena feedback and in designing sampling strategies.</p>
+
+          <div class="open-questions">
+            <div class="future-direction">
+              <h3 class="future-heading"><span aria-hidden="true">01</span><strong>Beyond Bradley–Terry comparisons</strong></h3>
+              <div>
+                <p>The Borda reduction preserves order whenever win probability is strictly increasing in the latent-score difference. This suggests extending our guarantees beyond BT to other monotone comparison models.</p>
+              </div>
+            </div>
+            <div class="future-direction">
+              <h3 class="future-heading"><span aria-hidden="true">02</span><strong>Ties and “both bad” feedback</strong></h3>
+              <div>
+                <p>Our appendix studies half-credit treatments of ties and “both bad” votes and shows that the Borda-level recovery guarantee extends to direct half-credit observations under positive classification gaps. A fuller model of these distinct feedback types remains future work.</p>
+              </div>
+            </div>
+            <div class="future-direction">
+              <h3 class="future-heading"><span aria-hidden="true">03</span><strong>Objective labeling</strong></h3>
+              <div>
+                <p>Our datasets group prompts in different ways. How sensitive is the frontier to these labels? Soft or learned assignments could let a comparison contribute to several capabilities rather than a single category.</p>
+              </div>
+            </div>
+            <div class="future-direction">
+              <h3 class="future-heading"><span aria-hidden="true">04</span><strong>Adaptive likelihood-based methods</strong></h3>
+              <div>
+                <p>Another approach is to estimate latent scores with MLE and use those estimates to guide sampling. Our appendix explores a Pareto-specific heuristic inspired by the scalar top-k Track-and-Stop method of <a href="https://arxiv.org/abs/2607.08979" rel="noopener noreferrer" target="_blank">Goldberger and Rudi (2026)</a>. Developing a method with rigorous guarantees remains future work.</p>
+              </div>
+            </div>
+            <div class="future-direction">
+              <h3 class="future-heading"><span aria-hidden="true">05</span><strong>Sparse and evolving comparison graphs</strong></h3>
+              <div>
+                <p>Our algorithm assumes a complete comparison graph: every model pair can be compared on every objective. Real Arena logs often lack some of these comparisons. Designing algorithms that identify the frontier reliably with missing comparison data remains an open problem, especially as new models enter the arena.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="article-section references-section" id="references" data-reveal>
+          <p class="section-label">06 / References</p>
+          <h2>References and related work</h2>
+          <ol class="reference-list">
+            <li><span>01</span><p>Chiang et al. (2024). <a href="https://arxiv.org/abs/2403.04132" rel="noopener noreferrer" target="_blank">Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference</a>. Pairwise human-preference data and Arena evaluation.</p></li>
+            <li><span>02</span><p>Liang et al. (2023). <a href="https://arxiv.org/abs/2211.09110" rel="noopener noreferrer" target="_blank">Holistic Evaluation of Language Models</a>. Multi-metric, multi-scenario evaluation.</p></li>
+            <li><span>03</span><p>Jamieson et al. (2015). <a href="https://proceedings.mlr.press/v38/jamieson15.html" rel="noopener noreferrer" target="_blank">Sparse Dueling Bandits</a>. Random-opponent Borda sampling for pairwise comparisons.</p></li>
+            <li><span>04</span><p>Auer et al. (2016). <a href="https://proceedings.mlr.press/v51/auer16.html" rel="noopener noreferrer" target="_blank">Pareto Front Identification from Stochastic Bandit Feedback</a>. Early confidence-based Pareto identification.</p></li>
+            <li><span>05</span><p>Kone, Kaufmann, and Richert (2024). <a href="https://proceedings.mlr.press/v238/kone24a.html" rel="noopener noreferrer" target="_blank">Bandit Pareto Set Identification: the Fixed Budget Setting</a>. Empirical-Gap Elimination for vector observations.</p></li>
+            <li><span>06</span><p>Crépon, Garivier, and Koolen (2024). <a href="https://proceedings.mlr.press/v238/crepon24a.html" rel="noopener noreferrer" target="_blank">Sequential Learning of the Pareto Front for Multi-objective Bandits</a>. Exact fixed-confidence Pareto learning with asymptotically optimal allocation.</p></li>
+            <li><span>07</span><p>Goldberger and Rudi (2026). <a href="https://arxiv.org/abs/2607.08979" rel="noopener noreferrer" target="_blank">Optimal Top-k Identification from Pairwise Comparisons</a>. Adaptive MLE and Track-and-Stop for the scalar top-k target.</p></li>
+            <li><span>08</span><p>Miroyan et al. (2026). <a href="https://arxiv.org/abs/2506.05334" rel="noopener noreferrer" target="_blank">Search Arena: Analyzing Search-Augmented LLMs</a>. Source and documentation for Search Arena 24K.</p></li>
+            <li><span>09</span><p>Chou et al. (2025). <a href="https://arxiv.org/abs/2412.08687" rel="noopener noreferrer" target="_blank">VisionArena: 230K Real World User-VLM Conversations with Preference Labels</a>. Source and documentation for VisionArena-Battle.</p></li>
+          </ol>
+        </section>
+<section id="how-to-cite" class="article-section citation-section" aria-labelledby="citation-heading">
+<h2 id="citation-heading">How to cite</h2>
+<p>The paper can be cited as follows.</p>
+<h3 class="citation-label">Bibliography</h3>
+<p class="citation-reference">Liang Twist Shan, Jiahao Ai, and Zhimei Ren. “<a href="https://arxiv.org/abs/2610.27447" target="_blank" rel="noopener noreferrer">Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas</a>.” <em>arXiv preprint arXiv:2610.27447</em>, 2026.</p>
+<h3 class="citation-label">BibTeX</h3>
+<pre class="citation-bibtex" tabindex="0" aria-label="BibTeX citation"><code>@misc{shan2026beyondscalarleaderboards,
+  title = {Beyond Scalar Leaderboards: Adaptive Sampling for
+           Pareto Frontier Identification in Multi-Objective {LLM} Arenas},
+  author = {Shan, Liang Twist and Ai, Jiahao and Ren, Zhimei},
+  year = {2026},
+  eprint = {2610.27447},
+  archivePrefix = {arXiv},
+  primaryClass = {stat.ML},
+  url = {https://arxiv.org/abs/2610.27447}
+}</code></pre>
+</section>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer site-shell">
+    <p>© 2026 Liang (Twist) Shan.</p>
+    <p>Plotly.js license · KaTeX license · KaTeX fonts license</p>
+  </footer>
+
+  <dialog id="figure-dialog" aria-labelledby="figure-dialog-title" aria-describedby="figure-dialog-caption">
+    <div class="dialog-bar">
+      <p id="figure-dialog-title">Paper figure</p>
+      <div class="dialog-controls">
+        <button type="button" id="figure-fit" aria-pressed="false">Zoom in +</button>
+        <button type="button" id="figure-close" aria-label="Close enlarged figure">Close ×</button>
+      </div>
+    </div>
+    <div class="dialog-image-wrap"><img id="figure-dialog-image" alt=""></div>
+    <p id="figure-dialog-caption"></p>
+  </dialog>
+
+  <div class="sr-only" aria-live="polite" data-announcer></div>
+  <script src="assets/vendor/katex/katex.min.js?v=0.17.0" defer></script>
+  <script src="assets/vendor/katex/contrib/auto-render.min.js?v=0.17.0" defer></script>
+  <script src="assets/plotly-2.35.2.min.js" defer></script>
+  <script src="assets/pareto-data.js" defer></script>
+  <script src="assets/pareto-blog.js?v=20261020" defer></script>
+</body>
+</html>
+
+{% endraw %}

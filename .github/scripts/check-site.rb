@@ -5,6 +5,9 @@ required = %w[
   posts/2026/07/tokenization/index.html posts/2026/08/optimizer/index.html
   posts/2026/10/llm-counting/index.html
   posts/2026/10/llm-counting/app.js posts/2026/10/llm-counting/assets/geometry-data.js
+  posts/2026/10/pareto-frontier/index.html
+  posts/2026/10/pareto-frontier/assets/pareto-blog.js
+  posts/2026/10/pareto-frontier/assets/pareto-data.js
   files/cv.pdf assets/css/studio.css assets/js/studio.js
   assets/css/studio-motion.css assets/js/studio-motion.js
 ]

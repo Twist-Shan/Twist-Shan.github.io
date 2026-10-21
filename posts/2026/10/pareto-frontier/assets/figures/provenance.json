@@ -1,0 +1,129 @@
+{
+  "source": "Beyond_Scalar_Leaderboards_ICLR2027.pdf",
+  "sha256": "0dec261fc584799796f2cde66d2c37c47bc5f521b8f8ce18146ec5b29bd32465",
+  "figures": [
+    {
+      "file": "arena-35-pareto-3d.svg",
+      "pdf_page": 2,
+      "figure": "1",
+      "panels": null
+    },
+    {
+      "file": "allocation-vs-gap.svg",
+      "pdf_page": 34,
+      "figure": "7",
+      "panels": null
+    },
+    {
+      "file": "experiment-overview.svg",
+      "pdf_page": 9,
+      "figure": "2",
+      "panels": null
+    },
+    {
+      "file": "realistic-benchmarks.svg",
+      "pdf_page": 9,
+      "figure": "2(c)",
+      "panels": [
+        [
+          [
+            216,
+            87,
+            181,
+            73
+          ],
+          [
+            0,
+            0,
+            400,
+            161.33
+          ]
+        ],
+        [
+          [
+            83,
+            163,
+            232,
+            13
+          ],
+          [
+            0,
+            172,
+            400,
+            22.42
+          ]
+        ]
+      ]
+    },
+    {
+      "file": "synthetic-benchmarks.svg",
+      "pdf_page": 9,
+      "figure": "2(b)",
+      "panels": [
+        [
+          [
+            216,
+            0,
+            181,
+            85
+          ],
+          [
+            0,
+            0,
+            400,
+            187.85
+          ]
+        ],
+        [
+          [
+            83,
+            163,
+            232,
+            13
+          ],
+          [
+            0,
+            198,
+            400,
+            22.42
+          ]
+        ]
+      ]
+    },
+    {
+      "file": "scaling-laws.svg",
+      "pdf_page": 9,
+      "figure": "2(a)",
+      "panels": [
+        [
+          [
+            0,
+            0,
+            214,
+            163
+          ],
+          [
+            15,
+            0,
+            370,
+            281.82
+          ]
+        ],
+        [
+          [
+            83,
+            163,
+            232,
+            13
+          ],
+          [
+            0,
+            290,
+            400,
+            22.42
+          ]
+        ]
+      ]
+    }
+  ]
+}

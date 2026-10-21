@@ -51,10 +51,10 @@ domains:
               We study fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, develop an adaptive elimination algorithm with instance-dependent upper and minimax lower bounds on sample complexity, and evaluate it on synthetic benchmarks and real-world LLM Arena data.
             resources:
               - label: "arXiv"
-                url: ""
+                url: "https://arxiv.org/abs/2610.27447"
                 kind: arxiv
               - label: "Blog"
-                url: ""
+                url: "/posts/2026/10/pareto-frontier/"
               - label: "Code"
                 url: "https://github.com/Twist-Shan/Beyond_Scalar_Leaderboards"
             advisor:
