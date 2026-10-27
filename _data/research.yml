@@ -69,7 +69,7 @@ domains:
               name: "Prof. Yiqiao Zhong"
               url: "https://pages.stat.wisc.edu/~zhong35/"
 
-      - label: "LLM / Evaluation / Pairwise Preferences"
+      - label: "LLM / Evaluation / Pairwise Preference"
         projects:
           - id: chatbot-arena-ranking
             draft: false
