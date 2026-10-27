@@ -29,9 +29,9 @@ domains:
         projects:
           - id: optimizer-muon-comparison
             draft: false
-            title: "Theoretical Analysis of Muon for Diffusion Model"
+            title: "Theoretical Analysis of Muon and MuonH"
             description: >-
-              We study what's the optimization geometry of Muon in the context of diffusion models, focusing on finite-horizon dynamics, curvature, and stability.
+              We study how hyperball-constraints affect the optimization geometry of Muon, focusing on finite-horizon dynamics, curvature, and stability.
             resources: []
             advisor:
               name: "Prof. Yuxin Chen"
@@ -126,7 +126,7 @@ domains:
       - label: "Multi-Agent / Safety / Collusion"
         projects:
           - id: multi-agent-collusion
-            draft: false
+            draft: true
             title: "Emergent Collusion through Implicit Communication"
             description: >-
               We investigate whether LLM agents with only local information can implicitly transmit complementary facts through ordinary communication, enabling downstream agents to derive potentially unsafe conclusions unknown to any individual sender, without explicit coordination or joint optimization.
