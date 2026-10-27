@@ -29,9 +29,9 @@ domains:
         projects:
           - id: optimizer-muon-comparison
             draft: false
-            title: "Theoretical Analysis of Muon and Muon Hyperball"
+            title: "Theoretical Analysis of Muon for Diffusion Model"
             description: >-
-              We study how Hyperball-constrained updates change the optimization geometry of Muon, focusing on finite-horizon dynamics, curvature, and stability.
+              We study what's the optimization geometry of Muon in the context of diffusion models, focusing on finite-horizon dynamics, curvature, and stability.
             resources: []
             advisor:
               name: "Prof. Yuxin Chen"
@@ -41,28 +41,12 @@ domains:
     number: "R / 02"
     title: "Reinforcement Learning"
     mark: rl
+    draft: true
     tracks:
-      - label: "RL / Bandits Theory / Adaptive Sampling"
-        projects:
-          - id: chatbot-arena-ranking
-            draft: false
-            title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
-            description: >-
-              We study fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, develop an adaptive elimination algorithm with instance-dependent upper and minimax lower bounds on sample complexity, and evaluate it on synthetic benchmarks and real-world LLM Arena data.
-            resources:
-              - label: "arXiv"
-                url: "https://arxiv.org/abs/2610.27447"
-                kind: arxiv
-              - label: "Blog"
-                url: "/posts/2026/10/pareto-frontier/"
-              - label: "Code"
-                url: "https://github.com/Twist-Shan/Beyond_Scalar_Leaderboards"
-            advisor:
-              name: "Prof. Zhimei Ren"
-              url: "https://zhimeir.github.io/"
+
 
   - id: large-language-model
-    number: "R / 03"
+    number: "R / 02"
     title: "Large Language Models"
     mark: llm
     tracks:
@@ -85,8 +69,27 @@ domains:
               name: "Prof. Yiqiao Zhong"
               url: "https://pages.stat.wisc.edu/~zhong35/"
 
+      - label: "LLM / Evaluation / Pairwise Preferences"
+        projects:
+          - id: chatbot-arena-ranking
+            draft: false
+            title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
+            description: >-
+              We study fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, develop an adaptive elimination algorithm with instance-dependent upper and minimax lower bounds on sample complexity, and evaluate it on synthetic benchmarks and real-world LLM Arena data.
+            resources:
+              - label: "arXiv"
+                url: "https://arxiv.org/abs/2610.27447"
+                kind: arxiv
+              - label: "Blog"
+                url: "/posts/2026/10/pareto-frontier/"
+              - label: "Code"
+                url: "https://github.com/Twist-Shan/Beyond_Scalar_Leaderboards"
+            advisor:
+              name: "Prof. Zhimei Ren"
+              url: "https://zhimeir.github.io/"
+
   - id: diffusion-language-model
-    number: "R / 04"
+    number: "R / 03"
     title: "Diffusion Language Models"
     mark: dlm
     tracks:
@@ -103,7 +106,7 @@ domains:
               url: "https://www.stat.berkeley.edu/~songmei/"
 
   - id: agent
-    number: "R / 05"
+    number: "R / 04"
     title: "Agents"
     mark: agent
     draft: false
@@ -123,7 +126,7 @@ domains:
       - label: "Multi-Agent / Safety / Collusion"
         projects:
           - id: multi-agent-collusion
-            draft: false
+            draft: true
             title: "Emergent Collusion through Implicit Communication"
             description: >-
               We investigate whether LLM agents with only local information can implicitly transmit complementary facts through ordinary communication, enabling downstream agents to derive potentially unsafe conclusions unknown to any individual sender, without explicit coordination or joint optimization.
