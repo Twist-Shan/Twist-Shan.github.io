@@ -123,18 +123,6 @@ domains:
               name: "Prof. Yiqiao Zhong"
               url: "https://pages.stat.wisc.edu/~zhong35/"
 
-      - label: "Multi-Agent / Safety / Collusion"
-        projects:
-          - id: multi-agent-collusion
-            draft: true
-            title: "Emergent Collusion through Implicit Communication"
-            description: >-
-              We investigate whether LLM agents with only local information can implicitly transmit complementary facts through ordinary communication, enabling downstream agents to derive potentially unsafe conclusions unknown to any individual sender, without explicit coordination or joint optimization.
-            resources: []
-            advisor:
-              name: "Prof. Yiqiao Zhong"
-              url: "https://pages.stat.wisc.edu/~zhong35/"
-
   - id: vision-language-model
     number: "R / 06"
     title: "Vision–Language Models"
