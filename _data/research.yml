@@ -25,13 +25,13 @@ domains:
     title: "Deep Learning"
     mark: dl
     tracks:
-      - label: "DL / Optimization / Muon"
+      - label: "DL / Optimizer / Muon"
         projects:
           - id: optimizer-muon-comparison
             draft: false
-            title: "Theoretical Analysis of Muon and MuonH"
+            title: "Muon for Diffusion: Theory and Denoising Dynamics"
             description: >-
-              We study how hyperball-constraints affect the optimization geometry of Muon, focusing on finite-horizon dynamics, curvature, and stability.
+              We study the convergence and spectral learning dynamics of Simplified Muon in diffusion denoising, combining theoretical analysis of linear models with controlled experiments on nonlinear denoising networks.
             resources: []
             advisor:
               name: "Prof. Yuxin Chen"
@@ -84,6 +84,18 @@ domains:
                 url: "/posts/2026/10/pareto-frontier/"
               - label: "Code"
                 url: "https://github.com/Twist-Shan/Beyond_Scalar_Leaderboards"
+            advisor:
+              name: "Prof. Zhimei Ren"
+              url: "https://zhimeir.github.io/"
+
+      - label: "LLM / Application / Router"
+        projects:
+          - id: llm-prompt-dependent-routing
+            draft: false
+            title: "Statistical Modeling for Prompt-Dependent LLM Routing"
+            description: >-
+              We develop statistical models for prompt-dependent LLM routing from pairwise preferences, exploring prompt and model representations and trade-offs among response quality, cost, and latency.
+            resources: []
             advisor:
               name: "Prof. Zhimei Ren"
               url: "https://zhimeir.github.io/"
