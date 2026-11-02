@@ -1,73 +1,48 @@
 # Liang (Twist) Shan — Personal Homepage
 
-Source code for my personal academic website: **[twist-shan.github.io](https://twist-shan.github.io/)**.
+Jekyll website with separate Home, Research, Blog and Misc pages. The academic redesign is the default theme, with responsive layouts, light/dark themes and pointer-following headings.
 
-The site introduces my background, education, research interests, writing, course notes, and personal interests. It is built with Jekyll and GitHub Pages, with a custom responsive layout, light/dark color modes, and a mint–taro visual palette.
+## Editing content
 
-![Homepage preview](images/themes/homepage-light.png)
-
-## Site sections
-
-- **About** — biography, education, CV, social links, and short updates
-- **Research** — current work in reinforcement learning and large language models
-- **Blog** — notes from research and the learning process
-- **Misc.** — course notes and personal interests
-
-## Updating content
-
-The most frequently edited files are:
-
-| Content | File |
+| Content | Source |
 | --- | --- |
-| Homepage and education | `_pages/about.md` |
-| Short Notes | `_data/news.yml` |
-| Research projects | `_pages/research.md` |
-| Blog landing page | `_pages/blog.md` |
-| Blog posts | `_posts/` |
-| Course notes and interests | `_pages/misc.md` |
-| Navigation | `_data/navigation.yml` |
-| CV | `files/cv.pdf` |
-| Site-wide settings | `_config.yml` |
-| Custom visual styles | `assets/css/studio.css` |
+| Biography, Education, profile links, Contact | `_pages/about.md` |
+| News | `_data/news.yml` |
+| Research projects, authors and advisors | `_data/research.yml` |
+| Research presentation | `_pages/research.md` |
+| Blog listing (automatically lists all posts) | `_pages/blog.md` |
+| Article metadata and personal essays | `_posts/` |
+| Tokenization and optimizer article bodies | `_layouts/tokenization.html`, `_layouts/optimizer.html` |
+| Interests and notes | `_pages/misc.md` |
+| CV | `files/cv_Liang_Shan.pdf` |
+| Main styles and behavior | `assets/css/studio.css`, `assets/js/studio.js` |
+| Shared article styling | `assets/css/article.css` |
+| Research icons | `_includes/research-marks/` |
 
-Short Notes are stored in reverse chronological order in `_data/news.yml`:
+Add `authors` (name, optional url, optional self: true) to a paper in research.yml. Entries without authors show their advisor instead. `draft: true` hides a project or domain. Resources stay in their configured order.
 
-```yml
-- date: "2026.03"
-  text: "This personal website went live."
-  link: ""
+Blog front matter uses `blog_category: research`, `notes` or `others`, and optional `reading_minutes`. Only research articles with an existing citation section show Cite. The four interactive technical articles retain their original scripts and assets under `posts/`.
+
+## Local preview
+
+Install dependencies with `bundle install`. On Windows run:
+
+```powershell
+./scripts/jekyll-local.ps1 build --safe --trace
+./scripts/jekyll-local.ps1 serve
 ```
 
-Only the latest three notes are shown on the homepage. Leave `link` empty for a plain update, or add a URL to make the note clickable.
-
-## Running locally
-
-Install Ruby and Bundler, then run:
-
-```bash
-bundle install
-bundle exec jekyll serve --livereload
-```
-
-Open [http://localhost:4000](http://localhost:4000) in a browser. Changes to `_config.yml` require restarting the server.
-
-Docker is also supported:
-
-```bash
-docker compose up
-```
+On other systems: `bundle exec jekyll serve`. Open http://localhost:4000.
 
 ## Publishing
 
-Changes pushed to the default branch are deployed automatically by GitHub Pages.
+The maintained branch is `master`. GitHub Pages deploys changes pushed to it. CI builds with Jekyll safe mode and checks published entry points.
 
-```bash
+```sh
 git status
 git add .
-git commit -m "Update personal homepage"
+git commit -m "Update homepage"
 git push origin master
 ```
 
-## Credits
-
-This website began with the [Academic Pages](https://academicpages.github.io/) template and has since been extensively customized. The project remains subject to the terms in [LICENSE](LICENSE).
+The site originated from Academic Pages; see LICENSE. Legacy collection templates remain available for existing URLs. Design preview files are not part of the published source.

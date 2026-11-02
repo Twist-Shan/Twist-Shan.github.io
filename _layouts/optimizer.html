@@ -1,20 +1,24 @@
-<!doctype html>
-<html lang="en" data-theme="light">
+{% raw %}
+<!DOCTYPE html>
+
+<html data-theme="light" lang="en">
 <head>
-    {% include site-icons.html %}
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Implementation-first notes on how LLM optimizers work, why AdamW remains the baseline, how memory and distributed systems change the choice, and where matrix-aware optimization may go next.">
-  <meta name="author" content="Liang (Twist) Shan">
-  <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f7f7f2">
-  <meta property="og:type" content="article">
-  <meta property="og:title" content="LLM Optimizers: From SGD and AdamW to SOAP, Muon, and Scalable Training">
-  <meta property="og:description" content="Implementation-first notes on how LLM optimizers work, why AdamW remains the baseline, how memory and distributed systems change the choice, and where matrix-aware optimization may go next.">
-  <meta property="article:published_time" content="2026-08-13">
-  <meta name="twitter:card" content="summary">
-  <title>LLM Optimizers: From SGD and AdamW to SOAP, Muon, and Scalable Training — Liang (Twist) Shan</title>
-  <style>
+<link href="/favicon.ico?v=ls-serif-1" rel="icon" sizes="16x16 32x32 48x48 64x64"/>
+<link href="/images/favicon.svg?v=ls-serif-1" rel="icon" sizes="any" type="image/svg+xml"/>
+<link href="/images/apple-touch-icon-180x180.png?v=ls-serif-1" rel="apple-touch-icon" sizes="180x180"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="Implementation-first notes on how LLM optimizers work, why AdamW remains the baseline, how memory and distributed systems change the choice, and where matrix-aware optimization may go next." name="description"/>
+<meta content="Liang (Twist) Shan" name="author"/>
+<meta content="light dark" name="color-scheme"/>
+<meta content="#f7f7f2" name="theme-color"/>
+<meta content="article" property="og:type"/>
+<meta content="LLM Optimizers: From SGD and AdamW to SOAP, Muon, and Scalable Training" property="og:title"/>
+<meta content="Implementation-first notes on how LLM optimizers work, why AdamW remains the baseline, how memory and distributed systems change the choice, and where matrix-aware optimization may go next." property="og:description"/>
+<meta content="2026-08-13" property="article:published_time"/>
+<meta content="summary" name="twitter:card"/>
+<title>LLM Optimizers: From SGD and AdamW to SOAP, Muon, and Scalable Training — Liang (Twist) Shan</title>
+<style>
 /*
  * Shared visual contract for every long-form note.
  * Topic-specific styles may add components, but must not redefine this scale.
@@ -2975,115 +2979,80 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 }
 
   </style>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "LLM Optimizers: From SGD and AdamW to SOAP, Muon, and Scalable Training", "description": "Implementation-first notes on how LLM optimizers work, why AdamW remains the baseline, how memory and distributed systems change the choice, and where matrix-aware optimization may go next.", "datePublished": "2026-08-13", "dateModified": "2026-08-13", "author": {"@type": "Person", "name": "Liang (Twist) Shan", "url": "https://twist-shan.github.io/"}, "inLanguage": "en"}</script>
-</head>
-<body>
-  <a class="skip-link" href="#article">Skip to the article</a>
-  <div class="reading-progress" role="progressbar" aria-label="Article reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-    <span data-progress-bar></span>
-  </div>
-
-  <header class="site-header" data-site-header>
-    <div class="site-shell header-inner">
-      <a class="wordmark" href="https://twist-shan.github.io/" aria-label="Liang Shan, home">
-        <svg class="wordmark-mark" viewBox="190 221 390 462" aria-hidden="true" focusable="false"><g fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M520 319 L520 415 L515 415 C497 363 468 333 429 333 C399 333 378 348 378 379 C378 412 412 428 460 451 C510 476 552 500 552 546 C552 609 493 649 434 649 C397 649 380 637 367 637 C356 637 349 644 346 655 L342 655 L332 569 L339 574 C366 615 398 639 432 639 C475 639 500 610 500 575 C500 535 474 516 427 493 C375 467 334 447 334 405 C334 358 375 325 429 325 C461 325 480 336 492 336 C505 336 513 330 517 319 Z"/><path d="M218 249 L367 249 L367 254 C332 258 318 269 318 298 L318 568 L342 568 C386 568 413 553 429 506 L435 506 L429 580 L218 580 L218 575 C252 569 263 561 263 533 L263 298 C263 269 251 257 218 254 Z"/></g></svg>
-        <span>Liang Shan</span>
-      </a>
-
-      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-navigation" data-menu-toggle>
-        <span>Menu</span>
-        <span class="menu-lines" aria-hidden="true"><i></i><i></i></span>
-      </button>
-
-      <nav class="site-navigation" id="site-navigation" aria-label="Main navigation" data-navigation>
-        <a href="https://twist-shan.github.io/research/">Research</a>
-        <a href="https://twist-shan.github.io/blog/" aria-current="page">Blog</a>
-        <a href="https://twist-shan.github.io/misc/">Misc.</a>
-      </nav>
-
-      <button class="theme-toggle" type="button" aria-label="Switch to dark mode" data-theme-toggle>
-        <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56"></path></svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.2A8.4 8.4 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path></svg>
-      </button>
-    </div>
-  </header>
-
-  <main id="main">
-    <header class="article-hero site-shell">
-      <div class="hero-orb hero-orb--left" aria-hidden="true"></div>
-      <div class="hero-orb hero-orb--right" aria-hidden="true"></div>
-
-      <div class="hero-copy">
-        <div class="article-breadcrumbs">
-          <a href="https://twist-shan.github.io/blog/">← All notes</a>
-          <time datetime="2026-08-13">August 13, 2026</time>
-        </div>
-        <p class="hero-eyebrow"><span></span> Language-model training · implementation notes</p>
-        <h1 id="article-title"><em>LLM Optimizers</em>: From SGD and AdamW to SOAP, Muon, and Scalable Training</h1>
-        <p class="hero-description">Implementation-first notes on how LLM optimizers work, why AdamW remains the baseline, how memory and distributed systems change the choice, and where matrix-aware optimization may go next.</p>
-        <div class="hero-actions">
-          <a class="button button--primary" href="#optimizer-lab">Open optimizer lab <span aria-hidden="true">↓</span></a>
-          <a class="button button--quiet" href="./llm_optimizers_from_scratch.py">Companion Python <span aria-hidden="true">↓</span></a>
-        </div>
-        <dl class="article-facts" aria-label="Article facts">
-          <div><dt>Reading</dt><dd>45 min</dd></div>
-          <div><dt>Chapters</dt><dd>14</dd></div>
-          <div><dt>Sources</dt><dd>51</dd></div>
-          <div><dt>Words</dt><dd>10,100</dd></div>
-        </dl>
-      </div>
-
-      <aside class="optimizer-anatomy" aria-label="Optimizer concept preview">
-        <div class="optimizer-anatomy-head">
-          <span>One gradient, several geometries</span>
-          <span class="status-dot"><i></i> step t</span>
-        </div>
-        <div class="optimizer-flow">
-          <div class="flow-node flow-node--gradient"><small>minibatch</small><strong>g<sub>t</sub></strong></div>
-          <span class="flow-arrow" aria-hidden="true">→</span>
-          <div class="flow-stack" role="img" aria-label="First moment m sub t and second moment v sub t optimizer state">
-            <span class="flow-state-symbol">m<sub>t</sub></span>
-            <span class="flow-state-symbol">v<sub>t</sub></span>
-            <small class="flow-state-label">state</small>
-          </div>
-          <span class="flow-arrow" aria-hidden="true">→</span>
-          <div class="flow-matrix" aria-label="Preconditioned update">
-            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-          </div>
-        </div>
-        <div class="optimizer-equation-preview" aria-label="A generic preconditioned gradient update">
-          <span>θ<sub>t+1</sub></span><span>=</span><span>θ<sub>t</sub></span><span>−</span><span>η<sub>t</sub> P<sub>t</sub> g<sub>t</sub></span>
-        </div>
-        <div class="optimizer-legend">
-          <span><i style="--swatch: var(--peach)"></i>direction</span>
-          <span><i style="--swatch: var(--apricot)"></i>scale</span>
-          <span><i style="--swatch: var(--mint)"></i>geometry</span>
-        </div>
-        <p class="anatomy-note">The update rule, schedule, precision, clipping, decay, and distributed state form one training algorithm.</p>
-      </aside>
-
-      <details class="mobile-toc">
-        <summary>On this page <span aria-hidden="true">+</span></summary>
-        <nav aria-label="Mobile table of contents"><ol class="toc-list"><li data-toc-section="four-ideas-to-remember"><a href="#four-ideas-to-remember">Four ideas to remember</a></li><li data-toc-section="1-what-problem-is-an-llm-optimizer-solving"><a href="#1-what-problem-is-an-llm-optimizer-solving">What problem is an LLM optimizer solving?</a><ol class="toc-sublist"><li><a href="#optimization-is-not-the-same-as-learning">Optimization is not the same as learning</a></li></ol></li><li data-toc-section="2-geometry-first-curvature-conditioning-and-preconditioning"><a href="#2-geometry-first-curvature-conditioning-and-preconditioning">Geometry first: curvature, conditioning, and preconditioning</a><ol class="toc-sublist"><li><a href="#21-conditioning-gives-a-quantitative-prediction">Conditioning gives a quantitative prediction</a></li><li><a href="#why-transformers-often-favor-adaptivity">Why Transformers often favor adaptivity</a></li></ol></li><li data-toc-section="3-sgd-momentum-and-the-role-of-minibatch-noise"><a href="#3-sgd-momentum-and-the-role-of-minibatch-noise">SGD, momentum, and the role of minibatch noise</a><ol class="toc-sublist"><li><a href="#31-what-the-noise-is-doing">What the noise is doing</a></li><li><a href="#32-heavy-ball-momentum">Heavy-ball momentum</a></li></ol></li><li data-toc-section="4-from-adagrad-and-rmsprop-to-coordinate-wise-adaptivity"><a href="#4-from-adagrad-and-rmsprop-to-coordinate-wise-adaptivity">From AdaGrad and RMSProp to coordinate-wise adaptivity</a><ol class="toc-sublist"><li><a href="#41-adagrad-accumulate-squared-gradients-forever">AdaGrad: accumulate squared gradients forever</a></li><li><a href="#42-rmsprop-remember-recent-scale">RMSProp: remember recent scale</a></li><li><a href="#43-what-epsilon-really-does">What epsilon really does</a></li></ol></li><li data-toc-section="5-adam-line-by-line"><a href="#5-adam-line-by-line">Adam, line by line</a><ol class="toc-sublist"><li><a href="#51-a-compact-reference-implementation">A compact reference implementation</a></li><li><a href="#52-the-convergence-caveat">The convergence caveat</a></li></ol></li><li data-toc-section="6-adamw-weight-decay-is-not-l2-regularization-under-adam"><a href="#6-adamw-weight-decay-is-not-l2-regularization-under-adam">AdamW: weight decay is not L2 regularization under Adam</a><ol class="toc-sublist"><li><a href="#61-a-pedagogical-pytorch-optimizer">A pedagogical PyTorch optimizer</a></li><li><a href="#62-grad-is-none-is-different-from-a-zero-gradient">grad is None is different from a zero gradient</a></li><li><a href="#63-parameter-groups-are-part-of-the-recipe">Parameter groups are part of the recipe</a></li><li><a href="#64-verification-before-speed">Verification before speed</a></li></ol></li><li data-toc-section="7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm"><a href="#7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm">The schedule, clipping, and precision are part of the training algorithm</a><ol class="toc-sublist"><li><a href="#71-warmup">Warmup</a></li><li><a href="#72-inverse-square-root-cosine-and-wsd">Inverse square root, cosine, and WSD</a></li><li><a href="#73-gradient-accumulation-and-the-optimizer-clock">Gradient accumulation and the optimizer clock</a></li><li><a href="#74-global-norm-clipping">Global-norm clipping</a></li><li><a href="#75-mixed-precision-ordering">Mixed precision ordering</a></li></ol></li><li data-toc-section="8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore"><a href="#8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore">Memory-first optimizers: Adafactor, quantized state, Adam-mini, and GaLore</a><ol class="toc-sublist"><li><a href="#81-adafactor">Adafactor</a></li><li><a href="#82-eight-bit-optimizer-states">Eight-bit optimizer states</a></li><li><a href="#83-adam-mini">Adam-mini</a></li><li><a href="#84-galore-is-a-strategy-around-an-optimizer">GaLore is a strategy around an optimizer</a></li><li><a href="#85-these-methods-solve-different-bottlenecks">These methods solve different bottlenecks</a></li></ol></li><li data-toc-section="9-the-memory-ledger-and-distributed-state"><a href="#9-the-memory-ledger-and-distributed-state">The memory ledger and distributed state</a><ol class="toc-sublist"><li><a href="#91-zero-and-fsdp-change-placement-not-the-recurrence">ZeRO and FSDP change placement, not the recurrence</a></li><li><a href="#92-optimizer-state-becomes-communication">Optimizer state becomes communication</a></li></ol></li><li data-toc-section="10-beyond-diagonal-adam-lion-lamb-sophia-and-shampoo"><a href="#10-beyond-diagonal-adam-lion-lamb-sophia-and-shampoo">Beyond diagonal Adam: Lion, LAMB, Sophia, and Shampoo</a><ol class="toc-sublist"><li><a href="#101-lion-one-state-and-a-sign-update">Lion: one state and a sign update</a></li><li><a href="#102-lamb-match-update-norm-to-parameter-norm">LAMB: match update norm to parameter norm</a></li><li><a href="#103-sophia-diagonal-curvature-with-clipping">Sophia: diagonal curvature with clipping</a></li><li><a href="#104-shampoo-use-the-tensors-own-axes">Shampoo: use the tensor's own axes</a></li></ol></li><li data-toc-section="11-soap-and-muon-two-matrix-aware-paths"><a href="#11-soap-and-muon-two-matrix-aware-paths">SOAP and Muon: two matrix-aware paths</a><ol class="toc-sublist"><li><a href="#111-soap-adam-in-shampoos-eigenbasis">SOAP: Adam in Shampoo's eigenbasis</a></li><li><a href="#112-what-the-shampoo-connection-doesand-does-notsay">What the Shampoo connection does—and does not—say</a></li><li><a href="#113-muon-the-polar-factor-as-a-steepest-descent-direction">Muon: the polar factor as a steepest-descent direction</a></li><li><a href="#114-newtonschulz-svd-behavior-without-an-svd">Newton–Schulz: SVD behavior without an SVD</a></li><li><a href="#115-shape-scaling-and-routing-are-part-of-muon">Shape scaling and routing are part of Muon</a></li><li><a href="#116-scale-distribution-and-stability">Scale, distribution, and stability</a></li></ol></li><li data-toc-section="12-what-the-current-evidence-actually-says"><a href="#12-what-the-current-evidence-actually-says">What the current evidence actually says</a><ol class="toc-sublist"><li><a href="#121-practice">Practice</a></li><li><a href="#122-strong-emerging-evidence">Strong emerging evidence</a></li><li><a href="#123-paper-reported-frontier">Paper-reported frontier</a></li><li><a href="#124-the-iclr-2026-reality-check">The ICLR 2026 reality check</a></li><li><a href="#125-why-adamw-has-not-disappeared">Why AdamW has not disappeared</a></li></ol></li><li data-toc-section="13-current-problems-and-future-directions"><a href="#13-current-problems-and-future-directions">Current problems and future directions</a><ol class="toc-sublist"><li><a href="#131-hyperparameter-transfer-across-scale">Hyperparameter transfer across scale</a></li><li><a href="#132-optimizer-aware-scaling-laws">Optimizer-aware scaling laws</a></li><li><a href="#133-allocate-geometry-where-it-is-worth-the-cost">Allocate geometry where it is worth the cost</a></li><li><a href="#134-low-precision-state-without-stale-dynamics">Low-precision state without stale dynamics</a></li><li><a href="#135-hardware-aware-matrix-operations">Hardware-aware matrix operations</a></li><li><a href="#136-stability-is-architecture-coupled">Stability is architecture-coupled</a></li><li><a href="#137-better-optimizer-benchmarks">Better optimizer benchmarks</a></li><li><a href="#138-learned-and-self-tuning-optimizers">Learned and self-tuning optimizers</a></li></ol></li><li data-toc-section="14-an-annotated-reading-path"><a href="#14-an-annotated-reading-path">An annotated reading path</a><ol class="toc-sublist"><li><a href="#stage-1-foundations-and-intuition">Stage 1: foundations and intuition</a></li><li><a href="#stage-2-implementation-and-llm-practice">Stage 2: implementation and LLM practice</a></li><li><a href="#stage-3-memory-and-distributed-systems">Stage 3: memory and distributed systems</a></li><li><a href="#stage-4-frontier-methods-and-evaluation">Stage 4: frontier methods and evaluation</a></li></ol></li><li data-toc-section="conclusion"><a href="#conclusion">Conclusion</a></li></ol></nav>
-      </details>
-    </header>
-
-    <div class="article-layout site-shell">
-      <aside class="desktop-toc">
-        <div class="toc-sticky">
-          <p class="toc-title">On this page</p>
-          <nav aria-label="Table of contents"><ol class="toc-list"><li data-toc-section="four-ideas-to-remember"><a href="#four-ideas-to-remember">Four ideas to remember</a></li><li data-toc-section="1-what-problem-is-an-llm-optimizer-solving"><a href="#1-what-problem-is-an-llm-optimizer-solving">What problem is an LLM optimizer solving?</a><ol class="toc-sublist"><li><a href="#optimization-is-not-the-same-as-learning">Optimization is not the same as learning</a></li></ol></li><li data-toc-section="2-geometry-first-curvature-conditioning-and-preconditioning"><a href="#2-geometry-first-curvature-conditioning-and-preconditioning">Geometry first: curvature, conditioning, and preconditioning</a><ol class="toc-sublist"><li><a href="#21-conditioning-gives-a-quantitative-prediction">Conditioning gives a quantitative prediction</a></li><li><a href="#why-transformers-often-favor-adaptivity">Why Transformers often favor adaptivity</a></li></ol></li><li data-toc-section="3-sgd-momentum-and-the-role-of-minibatch-noise"><a href="#3-sgd-momentum-and-the-role-of-minibatch-noise">SGD, momentum, and the role of minibatch noise</a><ol class="toc-sublist"><li><a href="#31-what-the-noise-is-doing">What the noise is doing</a></li><li><a href="#32-heavy-ball-momentum">Heavy-ball momentum</a></li></ol></li><li data-toc-section="4-from-adagrad-and-rmsprop-to-coordinate-wise-adaptivity"><a href="#4-from-adagrad-and-rmsprop-to-coordinate-wise-adaptivity">From AdaGrad and RMSProp to coordinate-wise adaptivity</a><ol class="toc-sublist"><li><a href="#41-adagrad-accumulate-squared-gradients-forever">AdaGrad: accumulate squared gradients forever</a></li><li><a href="#42-rmsprop-remember-recent-scale">RMSProp: remember recent scale</a></li><li><a href="#43-what-epsilon-really-does">What epsilon really does</a></li></ol></li><li data-toc-section="5-adam-line-by-line"><a href="#5-adam-line-by-line">Adam, line by line</a><ol class="toc-sublist"><li><a href="#51-a-compact-reference-implementation">A compact reference implementation</a></li><li><a href="#52-the-convergence-caveat">The convergence caveat</a></li></ol></li><li data-toc-section="6-adamw-weight-decay-is-not-l2-regularization-under-adam"><a href="#6-adamw-weight-decay-is-not-l2-regularization-under-adam">AdamW: weight decay is not L2 regularization under Adam</a><ol class="toc-sublist"><li><a href="#61-a-pedagogical-pytorch-optimizer">A pedagogical PyTorch optimizer</a></li><li><a href="#62-grad-is-none-is-different-from-a-zero-gradient">grad is None is different from a zero gradient</a></li><li><a href="#63-parameter-groups-are-part-of-the-recipe">Parameter groups are part of the recipe</a></li><li><a href="#64-verification-before-speed">Verification before speed</a></li></ol></li><li data-toc-section="7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm"><a href="#7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm">The schedule, clipping, and precision are part of the training algorithm</a><ol class="toc-sublist"><li><a href="#71-warmup">Warmup</a></li><li><a href="#72-inverse-square-root-cosine-and-wsd">Inverse square root, cosine, and WSD</a></li><li><a href="#73-gradient-accumulation-and-the-optimizer-clock">Gradient accumulation and the optimizer clock</a></li><li><a href="#74-global-norm-clipping">Global-norm clipping</a></li><li><a href="#75-mixed-precision-ordering">Mixed precision ordering</a></li></ol></li><li data-toc-section="8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore"><a href="#8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore">Memory-first optimizers: Adafactor, quantized state, Adam-mini, and GaLore</a><ol class="toc-sublist"><li><a href="#81-adafactor">Adafactor</a></li><li><a href="#82-eight-bit-optimizer-states">Eight-bit optimizer states</a></li><li><a href="#83-adam-mini">Adam-mini</a></li><li><a href="#84-galore-is-a-strategy-around-an-optimizer">GaLore is a strategy around an optimizer</a></li><li><a href="#85-these-methods-solve-different-bottlenecks">These methods solve different bottlenecks</a></li></ol></li><li data-toc-section="9-the-memory-ledger-and-distributed-state"><a href="#9-the-memory-ledger-and-distributed-state">The memory ledger and distributed state</a><ol class="toc-sublist"><li><a href="#91-zero-and-fsdp-change-placement-not-the-recurrence">ZeRO and FSDP change placement, not the recurrence</a></li><li><a href="#92-optimizer-state-becomes-communication">Optimizer state becomes communication</a></li></ol></li><li data-toc-section="10-beyond-diagonal-adam-lion-lamb-sophia-and-shampoo"><a href="#10-beyond-diagonal-adam-lion-lamb-sophia-and-shampoo">Beyond diagonal Adam: Lion, LAMB, Sophia, and Shampoo</a><ol class="toc-sublist"><li><a href="#101-lion-one-state-and-a-sign-update">Lion: one state and a sign update</a></li><li><a href="#102-lamb-match-update-norm-to-parameter-norm">LAMB: match update norm to parameter norm</a></li><li><a href="#103-sophia-diagonal-curvature-with-clipping">Sophia: diagonal curvature with clipping</a></li><li><a href="#104-shampoo-use-the-tensors-own-axes">Shampoo: use the tensor's own axes</a></li></ol></li><li data-toc-section="11-soap-and-muon-two-matrix-aware-paths"><a href="#11-soap-and-muon-two-matrix-aware-paths">SOAP and Muon: two matrix-aware paths</a><ol class="toc-sublist"><li><a href="#111-soap-adam-in-shampoos-eigenbasis">SOAP: Adam in Shampoo's eigenbasis</a></li><li><a href="#112-what-the-shampoo-connection-doesand-does-notsay">What the Shampoo connection does—and does not—say</a></li><li><a href="#113-muon-the-polar-factor-as-a-steepest-descent-direction">Muon: the polar factor as a steepest-descent direction</a></li><li><a href="#114-newtonschulz-svd-behavior-without-an-svd">Newton–Schulz: SVD behavior without an SVD</a></li><li><a href="#115-shape-scaling-and-routing-are-part-of-muon">Shape scaling and routing are part of Muon</a></li><li><a href="#116-scale-distribution-and-stability">Scale, distribution, and stability</a></li></ol></li><li data-toc-section="12-what-the-current-evidence-actually-says"><a href="#12-what-the-current-evidence-actually-says">What the current evidence actually says</a><ol class="toc-sublist"><li><a href="#121-practice">Practice</a></li><li><a href="#122-strong-emerging-evidence">Strong emerging evidence</a></li><li><a href="#123-paper-reported-frontier">Paper-reported frontier</a></li><li><a href="#124-the-iclr-2026-reality-check">The ICLR 2026 reality check</a></li><li><a href="#125-why-adamw-has-not-disappeared">Why AdamW has not disappeared</a></li></ol></li><li data-toc-section="13-current-problems-and-future-directions"><a href="#13-current-problems-and-future-directions">Current problems and future directions</a><ol class="toc-sublist"><li><a href="#131-hyperparameter-transfer-across-scale">Hyperparameter transfer across scale</a></li><li><a href="#132-optimizer-aware-scaling-laws">Optimizer-aware scaling laws</a></li><li><a href="#133-allocate-geometry-where-it-is-worth-the-cost">Allocate geometry where it is worth the cost</a></li><li><a href="#134-low-precision-state-without-stale-dynamics">Low-precision state without stale dynamics</a></li><li><a href="#135-hardware-aware-matrix-operations">Hardware-aware matrix operations</a></li><li><a href="#136-stability-is-architecture-coupled">Stability is architecture-coupled</a></li><li><a href="#137-better-optimizer-benchmarks">Better optimizer benchmarks</a></li><li><a href="#138-learned-and-self-tuning-optimizers">Learned and self-tuning optimizers</a></li></ol></li><li data-toc-section="14-an-annotated-reading-path"><a href="#14-an-annotated-reading-path">An annotated reading path</a><ol class="toc-sublist"><li><a href="#stage-1-foundations-and-intuition">Stage 1: foundations and intuition</a></li><li><a href="#stage-2-implementation-and-llm-practice">Stage 2: implementation and LLM practice</a></li><li><a href="#stage-3-memory-and-distributed-systems">Stage 3: memory and distributed systems</a></li><li><a href="#stage-4-frontier-methods-and-evaluation">Stage 4: frontier methods and evaluation</a></li></ol></li><li data-toc-section="conclusion"><a href="#conclusion">Conclusion</a></li></ol></nav>
-          <div class="toc-footer">
-            <a href="./llm_optimizer_notes_en.md.txt">Markdown source <span aria-hidden="true">↗</span></a>
-            <a href="#14-an-annotated-reading-path">Reading path <span aria-hidden="true">↗</span></a>
-          </div>
-        </div>
-      </aside>
-
-      <article id="article" class="article" aria-labelledby="article-title" tabindex="-1" data-article>
-        <div class="article-prose"><blockquote class="article-lede">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "LLM Optimizers: From SGD and AdamW to SOAP, Muon, and Scalable Training", "description": "Implementation-first notes on how LLM optimizers work, why AdamW remains the baseline, how memory and distributed systems change the choice, and where matrix-aware optimization may go next.", "datePublished": "2026-08-13", "dateModified": "2026-08-13", "author": {"@type": "Person", "name": "Liang (Twist) Shan", "url": "https://twist-shan.github.io/"}, "inLanguage": "en"}</script>
+<link href="/assets/css/article.css" rel="stylesheet"/></head>
+<body data-article="optimizer"><div class="preview-article-nav"><a href="/blog/">← All posts</a><div><a href="/">Liang Shan</a><button aria-label="Switch to dark theme" class="article-theme-toggle">☼</button></div></div><nav aria-label="Article contents" class="preview-toc"><strong>ON THIS PAGE</strong><a href="#four-ideas-to-remember">Four ideas to remember</a><a href="#1-what-problem-is-an-llm-optimizer-solving">1. What problem is an LLM optimizer solving?</a><a href="#2-geometry-first-curvature-conditioning-and-preconditioning">2. Geometry first: curvature, conditioning, and preconditioning</a><a href="#3-sgd-momentum-and-the-role-of-minibatch-noise">3. SGD, momentum, and the role of minibatch noise</a><a href="#4-from-adagrad-and-rmsprop-to-coordinate-wise-adaptivity">4. From AdaGrad and RMSProp to coordinate-wise adaptivity</a><a href="#5-adam-line-by-line">5. Adam, line by line</a><a href="#6-adamw-weight-decay-is-not-l2-regularization-under-adam">6. AdamW: weight decay is not L2 regularization under Adam</a><a href="#7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm">7. The schedule, clipping, and precision are part of the training algorithm</a><a href="#8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore">8. Memory-first optimizers: Adafactor, quantized state, Adam-mini, and GaLore</a><a href="#9-the-memory-ledger-and-distributed-state">9. The memory ledger and distributed state</a><a href="#10-beyond-diagonal-adam-lion-lamb-sophia-and-shampoo">10. Beyond diagonal Adam: Lion, LAMB, Sophia, and Shampoo</a><a href="#11-soap-and-muon-two-matrix-aware-paths">11. SOAP and Muon: two matrix-aware paths</a><a href="#12-what-the-current-evidence-actually-says">12. What the current evidence actually says</a><a href="#13-current-problems-and-future-directions">13. Current problems and future directions</a><a href="#14-an-annotated-reading-path">14. An annotated reading path</a><a href="#conclusion">Conclusion</a></nav>
+<a class="skip-link" href="#article">Skip to the article</a>
+<div aria-label="Article reading progress" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="reading-progress" role="progressbar">
+<span data-progress-bar=""></span>
+</div>
+<header class="site-header" data-site-header="">
+<div class="site-shell header-inner">
+<a aria-label="Liang Shan, home" class="wordmark" href="https://twist-shan.github.io/">
+<svg aria-hidden="true" class="wordmark-mark" focusable="false" viewbox="190 221 390 462"><g fill="currentColor" stroke="currentColor" stroke-linejoin="round" stroke-width="3"><path d="M520 319 L520 415 L515 415 C497 363 468 333 429 333 C399 333 378 348 378 379 C378 412 412 428 460 451 C510 476 552 500 552 546 C552 609 493 649 434 649 C397 649 380 637 367 637 C356 637 349 644 346 655 L342 655 L332 569 L339 574 C366 615 398 639 432 639 C475 639 500 610 500 575 C500 535 474 516 427 493 C375 467 334 447 334 405 C334 358 375 325 429 325 C461 325 480 336 492 336 C505 336 513 330 517 319 Z"></path><path d="M218 249 L367 249 L367 254 C332 258 318 269 318 298 L318 568 L342 568 C386 568 413 553 429 506 L435 506 L429 580 L218 580 L218 575 C252 569 263 561 263 533 L263 298 C263 269 251 257 218 254 Z"></path></g></svg>
+<span>Liang Shan</span>
+</a>
+<button aria-controls="site-navigation" aria-expanded="false" aria-label="Open menu" class="menu-toggle" data-menu-toggle="" type="button">
+<span>Menu</span>
+<span aria-hidden="true" class="menu-lines"><i></i><i></i></span>
+</button>
+<nav aria-label="Main navigation" class="site-navigation" data-navigation="" id="site-navigation">
+<a href="https://twist-shan.github.io/research/">Research</a>
+<a aria-current="page" href="https://twist-shan.github.io/blog/">Blog</a>
+<a href="https://twist-shan.github.io/misc/">Misc.</a>
+</nav>
+<button aria-label="Switch to dark mode" class="theme-toggle" data-theme-toggle="" type="button">
+<svg aria-hidden="true" class="sun-icon" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56"></path></svg>
+<svg aria-hidden="true" class="moon-icon" viewbox="0 0 24 24"><path d="M20 15.2A8.4 8.4 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path></svg>
+</button>
+</div>
+</header>
+<main id="main">
+<header class="unified-hero"><p class="hero-eyebrow"><span></span> Language-model training · implementation notes</p><h1 id="article-title"><em>LLM Optimizers</em>: From SGD and AdamW to SOAP, Muon, and Scalable Training</h1><div class="preview-reading">2026-08-13 · Estimated reading time: 45 min</div><p class="hero-description">Implementation-first notes on how LLM optimizers work, why AdamW remains the baseline, how memory and distributed systems change the choice, and where matrix-aware optimization may go next.</p><div class="hero-actions">
+<a class="button button--primary" href="#optimizer-lab">Open optimizer lab <span aria-hidden="true">↓</span></a>
+<a class="button button--quiet" href="./llm_optimizers_from_scratch.py">Companion Python <span aria-hidden="true">↓</span></a>
+</div></header><aside aria-label="Optimizer concept preview" class="optimizer-anatomy unified-media">
+<div class="optimizer-anatomy-head">
+<span>One gradient, several geometries</span>
+<span class="status-dot"><i></i> step t</span>
+</div>
+<div class="optimizer-flow">
+<div class="flow-node flow-node--gradient"><small>minibatch</small><strong>g<sub>t</sub></strong></div>
+<span aria-hidden="true" class="flow-arrow">→</span>
+<div aria-label="First moment m sub t and second moment v sub t optimizer state" class="flow-stack" role="img">
+<span class="flow-state-symbol">m<sub>t</sub></span>
+<span class="flow-state-symbol">v<sub>t</sub></span>
+<small class="flow-state-label">state</small>
+</div>
+<span aria-hidden="true" class="flow-arrow">→</span>
+<div aria-label="Preconditioned update" class="flow-matrix">
+<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+</div>
+</div>
+<div aria-label="A generic preconditioned gradient update" class="optimizer-equation-preview">
+<span>θ<sub>t+1</sub></span><span>=</span><span>θ<sub>t</sub></span><span>−</span><span>η<sub>t</sub> P<sub>t</sub> g<sub>t</sub></span>
+</div>
+<div class="optimizer-legend">
+<span><i style="--swatch: var(--peach)"></i>direction</span>
+<span><i style="--swatch: var(--apricot)"></i>scale</span>
+<span><i style="--swatch: var(--mint)"></i>geometry</span>
+</div>
+<p class="anatomy-note">The update rule, schedule, precision, clipping, decay, and distributed state form one training algorithm.</p>
+</aside>
+<div class="article-layout site-shell">
+<aside class="desktop-toc">
+<div class="toc-sticky">
+<p class="toc-title">On this page</p>
+<nav aria-label="Table of contents"><ol class="toc-list"><li data-toc-section="four-ideas-to-remember"><a href="#four-ideas-to-remember">Four ideas to remember</a></li><li data-toc-section="1-what-problem-is-an-llm-optimizer-solving"><a href="#1-what-problem-is-an-llm-optimizer-solving">What problem is an LLM optimizer solving?</a><ol class="toc-sublist"><li><a href="#optimization-is-not-the-same-as-learning">Optimization is not the same as learning</a></li></ol></li><li data-toc-section="2-geometry-first-curvature-conditioning-and-preconditioning"><a href="#2-geometry-first-curvature-conditioning-and-preconditioning">Geometry first: curvature, conditioning, and preconditioning</a><ol class="toc-sublist"><li><a href="#21-conditioning-gives-a-quantitative-prediction">Conditioning gives a quantitative prediction</a></li><li><a href="#why-transformers-often-favor-adaptivity">Why Transformers often favor adaptivity</a></li></ol></li><li data-toc-section="3-sgd-momentum-and-the-role-of-minibatch-noise"><a href="#3-sgd-momentum-and-the-role-of-minibatch-noise">SGD, momentum, and the role of minibatch noise</a><ol class="toc-sublist"><li><a href="#31-what-the-noise-is-doing">What the noise is doing</a></li><li><a href="#32-heavy-ball-momentum">Heavy-ball momentum</a></li></ol></li><li data-toc-section="4-from-adagrad-and-rmsprop-to-coordinate-wise-adaptivity"><a href="#4-from-adagrad-and-rmsprop-to-coordinate-wise-adaptivity">From AdaGrad and RMSProp to coordinate-wise adaptivity</a><ol class="toc-sublist"><li><a href="#41-adagrad-accumulate-squared-gradients-forever">AdaGrad: accumulate squared gradients forever</a></li><li><a href="#42-rmsprop-remember-recent-scale">RMSProp: remember recent scale</a></li><li><a href="#43-what-epsilon-really-does">What epsilon really does</a></li></ol></li><li data-toc-section="5-adam-line-by-line"><a href="#5-adam-line-by-line">Adam, line by line</a><ol class="toc-sublist"><li><a href="#51-a-compact-reference-implementation">A compact reference implementation</a></li><li><a href="#52-the-convergence-caveat">The convergence caveat</a></li></ol></li><li data-toc-section="6-adamw-weight-decay-is-not-l2-regularization-under-adam"><a href="#6-adamw-weight-decay-is-not-l2-regularization-under-adam">AdamW: weight decay is not L2 regularization under Adam</a><ol class="toc-sublist"><li><a href="#61-a-pedagogical-pytorch-optimizer">A pedagogical PyTorch optimizer</a></li><li><a href="#62-grad-is-none-is-different-from-a-zero-gradient">grad is None is different from a zero gradient</a></li><li><a href="#63-parameter-groups-are-part-of-the-recipe">Parameter groups are part of the recipe</a></li><li><a href="#64-verification-before-speed">Verification before speed</a></li></ol></li><li data-toc-section="7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm"><a href="#7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm">The schedule, clipping, and precision are part of the training algorithm</a><ol class="toc-sublist"><li><a href="#71-warmup">Warmup</a></li><li><a href="#72-inverse-square-root-cosine-and-wsd">Inverse square root, cosine, and WSD</a></li><li><a href="#73-gradient-accumulation-and-the-optimizer-clock">Gradient accumulation and the optimizer clock</a></li><li><a href="#74-global-norm-clipping">Global-norm clipping</a></li><li><a href="#75-mixed-precision-ordering">Mixed precision ordering</a></li></ol></li><li data-toc-section="8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore"><a href="#8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore">Memory-first optimizers: Adafactor, quantized state, Adam-mini, and GaLore</a><ol class="toc-sublist"><li><a href="#81-adafactor">Adafactor</a></li><li><a href="#82-eight-bit-optimizer-states">Eight-bit optimizer states</a></li><li><a href="#83-adam-mini">Adam-mini</a></li><li><a href="#84-galore-is-a-strategy-around-an-optimizer">GaLore is a strategy around an optimizer</a></li><li><a href="#85-these-methods-solve-different-bottlenecks">These methods solve different bottlenecks</a></li></ol></li><li data-toc-section="9-the-memory-ledger-and-distributed-state"><a href="#9-the-memory-ledger-and-distributed-state">The memory ledger and distributed state</a><ol class="toc-sublist"><li><a href="#91-zero-and-fsdp-change-placement-not-the-recurrence">ZeRO and FSDP change placement, not the recurrence</a></li><li><a href="#92-optimizer-state-becomes-communication">Optimizer state becomes communication</a></li></ol></li><li data-toc-section="10-beyond-diagonal-adam-lion-lamb-sophia-and-shampoo"><a href="#10-beyond-diagonal-adam-lion-lamb-sophia-and-shampoo">Beyond diagonal Adam: Lion, LAMB, Sophia, and Shampoo</a><ol class="toc-sublist"><li><a href="#101-lion-one-state-and-a-sign-update">Lion: one state and a sign update</a></li><li><a href="#102-lamb-match-update-norm-to-parameter-norm">LAMB: match update norm to parameter norm</a></li><li><a href="#103-sophia-diagonal-curvature-with-clipping">Sophia: diagonal curvature with clipping</a></li><li><a href="#104-shampoo-use-the-tensors-own-axes">Shampoo: use the tensor's own axes</a></li></ol></li><li data-toc-section="11-soap-and-muon-two-matrix-aware-paths"><a href="#11-soap-and-muon-two-matrix-aware-paths">SOAP and Muon: two matrix-aware paths</a><ol class="toc-sublist"><li><a href="#111-soap-adam-in-shampoos-eigenbasis">SOAP: Adam in Shampoo's eigenbasis</a></li><li><a href="#112-what-the-shampoo-connection-doesand-does-notsay">What the Shampoo connection does—and does not—say</a></li><li><a href="#113-muon-the-polar-factor-as-a-steepest-descent-direction">Muon: the polar factor as a steepest-descent direction</a></li><li><a href="#114-newtonschulz-svd-behavior-without-an-svd">Newton–Schulz: SVD behavior without an SVD</a></li><li><a href="#115-shape-scaling-and-routing-are-part-of-muon">Shape scaling and routing are part of Muon</a></li><li><a href="#116-scale-distribution-and-stability">Scale, distribution, and stability</a></li></ol></li><li data-toc-section="12-what-the-current-evidence-actually-says"><a href="#12-what-the-current-evidence-actually-says">What the current evidence actually says</a><ol class="toc-sublist"><li><a href="#121-practice">Practice</a></li><li><a href="#122-strong-emerging-evidence">Strong emerging evidence</a></li><li><a href="#123-paper-reported-frontier">Paper-reported frontier</a></li><li><a href="#124-the-iclr-2026-reality-check">The ICLR 2026 reality check</a></li><li><a href="#125-why-adamw-has-not-disappeared">Why AdamW has not disappeared</a></li></ol></li><li data-toc-section="13-current-problems-and-future-directions"><a href="#13-current-problems-and-future-directions">Current problems and future directions</a><ol class="toc-sublist"><li><a href="#131-hyperparameter-transfer-across-scale">Hyperparameter transfer across scale</a></li><li><a href="#132-optimizer-aware-scaling-laws">Optimizer-aware scaling laws</a></li><li><a href="#133-allocate-geometry-where-it-is-worth-the-cost">Allocate geometry where it is worth the cost</a></li><li><a href="#134-low-precision-state-without-stale-dynamics">Low-precision state without stale dynamics</a></li><li><a href="#135-hardware-aware-matrix-operations">Hardware-aware matrix operations</a></li><li><a href="#136-stability-is-architecture-coupled">Stability is architecture-coupled</a></li><li><a href="#137-better-optimizer-benchmarks">Better optimizer benchmarks</a></li><li><a href="#138-learned-and-self-tuning-optimizers">Learned and self-tuning optimizers</a></li></ol></li><li data-toc-section="14-an-annotated-reading-path"><a href="#14-an-annotated-reading-path">An annotated reading path</a><ol class="toc-sublist"><li><a href="#stage-1-foundations-and-intuition">Stage 1: foundations and intuition</a></li><li><a href="#stage-2-implementation-and-llm-practice">Stage 2: implementation and LLM practice</a></li><li><a href="#stage-3-memory-and-distributed-systems">Stage 3: memory and distributed systems</a></li><li><a href="#stage-4-frontier-methods-and-evaluation">Stage 4: frontier methods and evaluation</a></li></ol></li><li data-toc-section="conclusion"><a href="#conclusion">Conclusion</a></li></ol></nav>
+<div class="toc-footer">
+<a href="./llm_optimizer_notes_en.md.txt">Markdown source <span aria-hidden="true">↗</span></a>
+<a href="#14-an-annotated-reading-path">Reading path <span aria-hidden="true">↗</span></a>
+</div>
+</div>
+</aside>
+<article aria-labelledby="article-title" class="article" data-article="" id="article" tabindex="-1">
+<div class="article-prose"><blockquote class="article-lede">
 <p>An implementation-first guide to optimizer mathematics, code, and systems trade-offs. Read Sections 1–7 for the core path from gradients to AdamW, Sections 8–11 for memory- and matrix-aware alternatives, and Sections 12–14 for evidence, open problems, and further study. The guide follows <a class="external-link" href="https://cs336.stanford.edu/" rel="noopener noreferrer" target="_blank">Stanford CS336</a>, <a class="external-link" href="https://cs231n.github.io/neural-networks-3/" rel="noopener noreferrer" target="_blank">CS231n</a>, <a class="external-link" href="https://d2l.ai/chapter_optimization/index.html" rel="noopener noreferrer" target="_blank">Dive into Deep Learning</a>, and Andrej Karpathy's compact <a class="external-link" href="https://github.com/karpathy/nanoGPT/blob/master/model.py" rel="noopener noreferrer" target="_blank">nanoGPT</a> and <a class="external-link" href="https://github.com/karpathy/nanochat" rel="noopener noreferrer" target="_blank">nanochat</a> training code. The research survey is current through <strong>August 13, 2026</strong>.</p>
-
 </blockquote><aside aria-label="Evidence and source-status note" class="evidence-note" role="note"><p><strong>A note on evidence:</strong> the article distinguishes peer-reviewed papers, technical reports, and preprints. Reported scale, speedups, and downstream results are the authors' findings; they have not necessarily been independently reproduced across hardware, model families, data regimes, and training recipes. “Recent” marks the research frontier—it does not mean every conclusion is settled.</p></aside>
 <section aria-labelledby="four-ideas-to-remember" class="article-section key-ideas" data-section-number="00" id="section-four-ideas-to-remember"><p aria-hidden="true" class="section-label">00</p><h2 id="four-ideas-to-remember">Four ideas to remember</h2>
 <ol>
@@ -3092,7 +3061,6 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <li><strong>AdamW remains the baseline because it is robust and operationally mature, not because it is universally optimal.</strong> It has known tuning behavior, fused kernels, checkpoint support, and well-tested sharding. New methods must beat that whole system, not an under-tuned equation.</li>
 <li><strong>The frontier is matrix-aware, memory-aware, and hardware-aware.</strong> The most credible challengers capture interactions within weight matrices. The most deployable ones must also control state memory, communication, numerical precision, and the cost of inverse roots or orthogonalization.</li>
 </ol>
-
 </section><section aria-labelledby="1-what-problem-is-an-llm-optimizer-solving" class="article-section" data-chapter="foundations" data-section-number="01" id="section-1-what-problem-is-an-llm-optimizer-solving"><p aria-hidden="true" class="section-label">01</p><h2 id="1-what-problem-is-an-llm-optimizer-solving">1. What problem is an LLM optimizer solving?</h2>
 <p>Let <span aria-label="θ" class="inline-math" role="math">θ</span> denote all trainable parameters, <span aria-label="x" class="inline-math" role="math">x</span> a sampled training item or token block from distribution <span aria-label="𝒟" class="inline-math" role="math">𝒟</span>, and <span aria-label="ℓ(θ;x)" class="inline-math" role="math">ℓ(θ;x)</span> its loss. Training seeks parameters with low expected loss:</p>
 <div aria-label="L of theta equals the expectation over x from D of ell of theta semicolon x" class="formula-note" role="img">
@@ -3176,7 +3144,6 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <li><strong>resource efficiency:</strong> fitting or training a useful model within a memory, power, or communication budget.</li>
 </ul>
 <p>These objectives can rank methods differently. An optimizer can need fewer updates yet take longer because every update performs matrix inverse roots or extra communication. A memory-saving method may improve throughput only because it enables a larger batch. A late-decay schedule may look worse at intermediate checkpoints and better at the final budget. Every comparison should therefore name both the target metric and the resource held fixed.</p>
-
 </section><section aria-labelledby="2-geometry-first-curvature-conditioning-and-preconditioning" class="article-section" data-chapter="foundations" data-section-number="02" id="section-2-geometry-first-curvature-conditioning-and-preconditioning"><p aria-hidden="true" class="section-label">02</p><h2 id="2-geometry-first-curvature-conditioning-and-preconditioning">2. Geometry first: curvature, conditioning, and preconditioning</h2>
 <p>The cleanest way to see optimizer geometry is a two-dimensional quadratic, where the Hessian is constant and every direction can be analyzed exactly:</p>
 <div aria-label="f of theta equals one half theta transpose H theta and its gradient equals H theta" class="formula-note" role="img">
@@ -3228,7 +3195,6 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <h3 id="why-transformers-often-favor-adaptivity">Why Transformers often favor adaptivity</h3>
 <p>Transformer parameter blocks are heterogeneous: embedding tables, normalization scales, attention projections, MLP matrices, biases, and the output head can have very different gradient scales and curvature. A single SGD learning rate must accommodate all of them, whereas Adam supplies coordinate-wise normalization. The empirical study <a class="external-link" href="https://arxiv.org/abs/2402.16788" rel="noopener noreferrer" target="_blank">Why Transformers Need Adam: A Hessian Perspective</a> examines block heterogeneity as one explanation for Adam's advantage over SGD; <a class="external-link" href="https://arxiv.org/abs/2306.00204" rel="noopener noreferrer" target="_blank">Toward Understanding Why Adam Converges Faster Than SGD for Transformers</a> offers a complementary directional-sharpness view.</p>
 <p>These are explanatory lenses, not settled causal laws. A later controlled study, <a class="external-link" href="https://openreview.net/forum?id=zfeso8ceqr" rel="noopener noreferrer" target="_blank">Deconstructing What Makes a Good Optimizer for Autoregressive Language Models</a>, found that several adaptive methods became broadly comparable after tuning, while adaptivity remained especially important for LayerNorm and the output layer. That observation motivates hybrid routing: richer optimization for matrices or fragile blocks, simpler treatment elsewhere.</p>
-
 </section><section aria-labelledby="3-sgd-momentum-and-the-role-of-minibatch-noise" class="article-section" data-chapter="foundations" data-section-number="03" id="section-3-sgd-momentum-and-the-role-of-minibatch-noise"><p aria-hidden="true" class="section-label">03</p><h2 id="3-sgd-momentum-and-the-role-of-minibatch-noise">3. SGD, momentum, and the role of minibatch noise</h2>
 <p>Minibatch stochastic gradient descent is the reference update:</p>
 <div aria-label="theta t equals theta t minus one minus eta t times g t" class="formula-note" role="img">
@@ -3253,8 +3219,6 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <p>Momentum is a low-pass filter over update steps. Components that repeatedly point in the same direction survive the average, while rapidly alternating components cancel. The factor <span aria-label="β" class="inline-math" role="math">β</span> controls the trade-off between responsiveness and smoothing: an EMA has an approximate memory length of <span aria-label="1/(1-β)" class="inline-math" role="math">1/(1-β)</span>, so <span aria-label="β=0.9" class="inline-math" role="math">β=0.9</span> remembers roughly ten updates and <span aria-label="β=0.99" class="inline-math" role="math">β=0.99</span> roughly one hundred.</p>
 <p>Some libraries define the buffer without the factor <span aria-label="1-β" class="inline-math" role="math">1-β</span>, so the same numerical learning rate is not transferable between formulas. Nesterov momentum adds a look-ahead correction, but library conventions differ. When reproducing an optimizer, copy the exact recurrence and learning-rate convention—not merely its name.</p>
 <p>The interactive lab below optimizes an anisotropic quadratic with identical starting coordinates. Vary the condition number and learning rate, then compare SGD, momentum, RMSProp, and Adam.</p>
-
-
 <aside aria-labelledby="optimizer-lab-title" class="optimizer-lab" data-optimizer-lab="" id="optimizer-lab">
 <div class="lab-heading">
 <div>
@@ -3354,7 +3318,6 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 </math>
 </div>
 <p>Adam and current <a class="external-link" href="https://docs.pytorch.org/docs/main/generated/torch.optim.AdamW.html" rel="noopener noreferrer" target="_blank">PyTorch AdamW</a> place epsilon outside the square root. Algebraic rewrites that absorb bias correction into a scalar step must rescale epsilon consistently or they silently change the early update.</p>
-
 </section><section aria-labelledby="5-adam-line-by-line" class="article-section" data-chapter="implementation" data-section-number="05" id="section-5-adam-line-by-line"><p aria-hidden="true" class="section-label">05</p><h2 id="5-adam-line-by-line">5. Adam, line by line</h2>
 <p><a class="external-link" href="https://arxiv.org/abs/1412.6980" rel="noopener noreferrer" target="_blank">Adam</a> combines the two ideas just developed: momentum supplies a smoothed direction, while RMSProp-style statistics supply a recent scale for each coordinate. Starting from zero state, it updates:</p>
 <div aria-label="Adam first moment and second raw moment recurrences" class="formula-note" role="img">
@@ -3450,7 +3413,6 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 </math>
 </div>
 <p>The counterexample establishes that Adam's success is not covered by a universal convergence guarantee; it does <strong>not</strong> predict that a normal Transformer run will fail. PyTorch therefore exposes AMSGrad but keeps <code>amsgrad=False</code> by default. When an LLM run becomes unstable, first inspect the learning rate, warmup, loss normalization, data, precision, clipping, model normalization, and implementation before blaming this theoretical edge case.</p>
-
 </section><section aria-labelledby="6-adamw-weight-decay-is-not-l2-regularization-under-adam" class="article-section" data-chapter="implementation" data-section-number="06" id="section-6-adamw-weight-decay-is-not-l2-regularization-under-adam"><p aria-hidden="true" class="section-label">06</p><h2 id="6-adamw-weight-decay-is-not-l2-regularization-under-adam">6. AdamW: weight decay is not L2 regularization under Adam</h2>
 <p>The AdamW distinction is easiest to see by following where shrinkage enters the computation. If an L2 penalty <span aria-label="λ‖θ‖²/2" class="inline-math" role="math">λ‖θ‖<sup>2</sup>/2</span> is added to the loss, its gradient <span aria-label="λθ" class="inline-math" role="math">λθ</span> enters Adam's moments and is divided by the adaptive denominator together with the data gradient:</p>
 <div aria-label="the gradient is replaced by the gradient plus lambda theta before Adam preconditioning" class="formula-note" role="img">
@@ -3539,7 +3501,6 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <li>CPU and accelerator behavior if both are supported.</li>
 </ul>
 <p>Only after step-by-step numerical agreement should you add fusion, sharding, or lower-precision state. Those optimizations combine operations and introduce rounding or communication effects, making a wrong recurrence much harder to localize.</p>
-
 </section><section aria-labelledby="7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm" class="article-section" data-chapter="implementation" data-section-number="07" id="section-7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm"><p aria-hidden="true" class="section-label">07</p><h2 id="7-the-schedule-clipping-and-precision-are-part-of-the-training-algorithm">7. The schedule, clipping, and precision are part of the training algorithm</h2>
 <h3 id="71-warmup">7.1 Warmup</h3>
 <p>An optimizer begins with empty moments and a model begins with unadapted representations, so the earliest updates are unusually sensitive. Linear warmup limits their size by increasing the rate gradually to <span aria-label="η_{max}" class="inline-math" role="math">η<sub>max</sub></span>:</p>
@@ -3620,7 +3581,6 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <li>clear gradients, often with <code>set_to_none=True</code>.</li>
 </ol>
 <p>BF16 usually has enough exponent range that dynamic loss scaling is unnecessary, but verify this for the framework and workload rather than treating it as a law. Also separate parameter precision, gradient precision, accumulation precision, and state precision: low-precision parameters do not imply that low-precision moments are safe.</p>
-
 </section><section aria-labelledby="8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore" class="article-section" data-chapter="implementation" data-section-number="08" id="section-8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore"><p aria-hidden="true" class="section-label">08</p><h2 id="8-memory-first-optimizers-adafactor-quantized-state-adam-mini-and-galore">8. Memory-first optimizers: Adafactor, quantized state, Adam-mini, and GaLore</h2>
 <p>AdamW stores a first and second moment for every parameter. At billions of parameters, those two simple recurrences become a major memory allocation and checkpoint burden. The methods in this section retain some form of adaptivity while answering different compression questions: fewer statistics, fewer bits, fewer distinct rates, or a smaller subspace.</p>
 <h3 id="81-adafactor">8.1 Adafactor</h3>
@@ -3694,7 +3654,6 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 </tr>
 </tbody>
 </table></div>
-
 </section><section aria-labelledby="9-the-memory-ledger-and-distributed-state" class="article-section" data-chapter="systems" data-section-number="09" id="section-9-the-memory-ledger-and-distributed-state"><p aria-hidden="true" class="section-label">09</p><h2 id="9-the-memory-ledger-and-distributed-state">9. The memory ledger and distributed state</h2>
 <p>A memory claim is incomplete until it names the dtype, replication, and sharding of every tensor. One common <strong>unsharded</strong> mixed-precision ledger is:</p>
 <div aria-label="Optimizer memory assumptions" class="table-scroll" role="region" tabindex="0"><table><caption class="sr-only">Optimizer memory assumptions</caption>
@@ -3746,8 +3705,6 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 <p>At scale, an optimizer's shape determines collective communication. AdamW's elementwise moments shard naturally. Shampoo must distribute preconditioner blocks or search directions. Muon may orthogonalize matrices on selected ranks and then gather or reduce results. Adam-mini reduces both memory and the state that a sharded optimizer must communicate.</p>
 <p>This is why the symbolic update and distributed implementation form one algorithm in practice. A mathematically richer direction can reduce total time if its token savings exceed its per-step overhead. Conversely, a lean recurrence can lose if it creates many small kernels, awkward collectives, or expensive state movement.</p>
 <p>Use the calculator below as a persistent-state estimate, then leave headroom for runtime peaks.</p>
-
-
 <aside aria-labelledby="memory-calculator-title" class="memory-calculator" data-memory-calculator="" id="optimizer-memory-calculator">
 <div class="lab-heading">
 <div>
@@ -3848,7 +3805,6 @@ def adam_step(param, grad, state, *, lr, beta1, beta2, eps, step):
 </div>
 <p>The two statistics summarize different interactions: <span aria-label="L_t" class="inline-math" role="math">L<sub>t</sub></span> couples rows, while <span aria-label="R_t" class="inline-math" role="math">R<sub>t</sub></span> couples columns. Shampoo therefore captures structure that a diagonal scale cannot, while storing <span aria-label="O(m²+n²)" class="inline-math" role="math">O(m<sup>2</sup>+n<sup>2</sup>)</span> matrix state instead of an impossible <span aria-label="O(m²n²)" class="inline-math" role="math">O(m<sup>2</sup>n<sup>2</sup>)</span> full preconditioner over all entries. Practical implementations block large tensors, refresh inverse roots less often, graft the update magnitude to a familiar first-order method, and distribute the preconditioner work.</p>
 <p>The benefit is richer geometry; the price is matrix state and matrix algebra. Inverse roots can require high precision, infrequent refreshes make preconditioners stale, and block layouts must map efficiently to accelerators and collectives. <a class="external-link" href="https://arxiv.org/abs/2002.09018" rel="noopener noreferrer" target="_blank">Practical Scalable Shampoo</a> and <a class="external-link" href="https://arxiv.org/abs/2309.06497" rel="noopener noreferrer" target="_blank">Distributed Shampoo</a> are therefore as important operationally as the original equation.</p>
-
 </section><section aria-labelledby="11-soap-and-muon-two-matrix-aware-paths" class="article-section" data-chapter="systems" data-section-number="11" id="section-11-soap-and-muon-two-matrix-aware-paths"><p aria-hidden="true" class="section-label">11</p><h2 id="11-soap-and-muon-two-matrix-aware-paths">11. SOAP and Muon: two matrix-aware paths</h2>
 <h3 id="111-soap-adam-in-shampoos-eigenbasis">11.1 SOAP: Adam in Shampoo's eigenbasis</h3>
 <p>SOAP is easiest to understand as a two-stage procedure: use Shampoo-style statistics to discover a coordinate system, then run Adam inside that rotated system. For a matrix parameter <span aria-label="W_t∈ℝ^{m×n}" class="inline-math" role="math">W<sub>t</sub>∈ℝ<sup>m×n</sup></span> with gradient <span aria-label="G_t" class="inline-math" role="math">G<sub>t</sub></span>, <a class="external-link" href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/e988664070e9591f93fdcf605f7dc623-Abstract-Conference.html" rel="noopener noreferrer" target="_blank">SOAP (ICLR 2025)</a> first maintains row and column statistics:</p>
@@ -3967,7 +3923,6 @@ def approximate_polar(x, steps=5, eps=1e-7):
 <p>Distribution can change the mathematical update, not merely its speed. Orthogonalizing tensor-parallel or data-parallel shards separately is generally different from orthogonalizing the full matrix. Moonlight gathers the matrix needed for Newton–Schulz, computes a full direction, retains local slices, and communicates updated parameters. Because the overall recipe still uses AdamW for routed tensors, “one momentum tensor” describes eligible Muon matrices—not the complete optimizer-state budget.</p>
 <p><a class="external-link" href="https://arxiv.org/abs/2607.20548" rel="noopener noreferrer" target="_blank">SOAP, Muon, and Beyond</a>, an NVIDIA preprint released on July 13, 2026, adds a distinct large-scale data point. The authors compare AdamW, Muon, and SOAP on an 8B dense model and MoE models up to 72B total parameters using 1T- and 3T-token training subsets. They report that Muon and SOAP outperform AdamW in the tested regimes and remain stable at global batches up to 100M tokens, where AdamW quality degrades. Their layer-wise distributed implementation preserves full matrix operations and is released through <a class="external-link" href="https://github.com/NVIDIA-NeMo/Emerging-Optimizers" rel="noopener noreferrer" target="_blank">Emerging-Optimizers</a>. These are substantial paper-reported results, but the extreme-batch regime, model recipes, and NVIDIA software stack still limit how broadly the ranking can be generalized.</p>
 <p><a class="external-link" href="https://arxiv.org/abs/2507.20534" rel="noopener noreferrer" target="_blank">Kimi K2</a> demonstrates feasibility at enormous scale: a 1T-total/32B-active MoE trained on 15.5T tokens. Its MuonClip variant monitors attention logits and applies QK-specific clipping to address instability. This does not isolate Muon as the cause of K2's capabilities or establish a universal 2× law. It shows that matrix optimization, normalization, clipping, routing, and architecture become one coupled training design at scale.</p>
-
 </section><section aria-labelledby="12-what-the-current-evidence-actually-says" class="article-section" data-chapter="frontier" data-section-number="12" id="section-12-what-the-current-evidence-actually-says"><p aria-hidden="true" class="section-label">12</p><h2 id="12-what-the-current-evidence-actually-says">12. What the current evidence actually says</h2>
 <p>Optimizer comparisons are unusually sensitive to tuning budget, schedule, model scale, data regime, hardware, and the checkpoint chosen for evaluation. A strong abstract may be accurate for its experiment and still fail to transfer. The following three tiers separate an operational default from promising replicated directions and paper-specific frontier claims.</p>
 <h3 id="121-practice">12.1 Practice</h3>
@@ -4069,7 +4024,6 @@ def approximate_polar(x, steps=5, eps=1e-7):
 <li>predictable interaction with tensor parallelism and compiler fusion.</li>
 </ul>
 <p>This operational maturity sets the real break-even point. A replacement must save enough tokens or memory to pay for extra compute, communication, tuning, checkpoint complexity, and engineering risk. Even a 10% data-efficiency gain can be enormously valuable at frontier scale, but only if it persists at the intended scale and does not depend on instability-prone routing or a fragile custom kernel.</p>
-
 </section><section aria-labelledby="13-current-problems-and-future-directions" class="article-section" data-chapter="frontier" data-section-number="13" id="section-13-current-problems-and-future-directions"><p aria-hidden="true" class="section-label">13</p><h2 id="13-current-problems-and-future-directions">13. Current problems and future directions</h2>
 <h3 id="131-hyperparameter-transfer-across-scale">13.1 Hyperparameter transfer across scale</h3>
 <p>The learning rate, weight decay, momentum time constants, update scaling, and clipping threshold should ideally retain meaning across width, depth, batch size, and duration. <a class="external-link" href="https://arxiv.org/abs/2203.03466" rel="noopener noreferrer" target="_blank">μTransfer</a> attacks this problem through parameterization; 2026 work is extending scaling rules across AdamW, LAMB, Sophia, Shampoo, and Muon. The practical goal is not zero tuning, but a scale-aware parameterization that turns small-model sweeps into informative priors rather than restarting the search at every size.</p>
@@ -4113,7 +4067,6 @@ def approximate_polar(x, steps=5, eps=1e-7):
 <h3 id="138-learned-and-self-tuning-optimizers">13.8 Learned and self-tuning optimizers</h3>
 <p>Lion demonstrates that search can discover a compact symbolic update that humans can still inspect. Learned optimizers go further by mapping gradient history and tensor metadata directly to an update. Their recurring obstacles are scale transfer, meta-training cost, interpretability, and failure outside the meta-training distribution.</p>
 <p>An attractive middle ground is a constrained controller that selects among validated geometric primitives, schedules, or block allocations while respecting explicit memory and stability limits. The future optimizer may be partly learned, but its invariances, resource budget, fallback behavior, and checkpoint state should remain inspectable.</p>
-
 </section><section aria-labelledby="14-an-annotated-reading-path" class="article-section" data-chapter="practice" data-section-number="14" id="section-14-an-annotated-reading-path"><p aria-hidden="true" class="section-label">14</p><h2 id="14-an-annotated-reading-path">14. An annotated reading path</h2>
 <div class="reading-filter" data-reading-filter="">
 <div class="reading-filter-head">
@@ -4134,7 +4087,6 @@ def approximate_polar(x, steps=5, eps=1e-7):
 </div>
 <p class="reading-empty" data-reading-empty="" hidden="">No reading matches that combination. Try a broader search.</p>
 </div>
-
 <h3 data-reading-heading="foundations" id="stage-1-foundations-and-intuition">Stage 1: foundations and intuition</h3>
 <ul>
 <li data-reading-item="" data-stage="foundations"><a class="external-link" href="https://cs231n.github.io/neural-networks-3/" rel="noopener noreferrer" target="_blank">Stanford CS231n optimization notes</a>: visual intuition for SGD, conditioning, momentum, AdaGrad, RMSProp, and Adam.</li>
@@ -4184,7 +4136,6 @@ def approximate_polar(x, steps=5, eps=1e-7):
 <li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://arxiv.org/abs/2602.07712" rel="noopener noreferrer" target="_blank">Towards Robust Scaling Laws for Optimizers</a>: how optimizer effects may scale with model and data.</li>
 <li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://arxiv.org/abs/2605.10468" rel="noopener noreferrer" target="_blank">Can Muon Fine-tune Adam-Pretrained Models?</a>: recent evidence that optimizer choice can create training-stage mismatch.</li>
 </ul>
-
 </section><section aria-labelledby="conclusion" class="article-section conclusion-section" data-section-number="END" id="section-conclusion"><p aria-hidden="true" class="section-label">END</p><h2 id="conclusion">Conclusion</h2>
 <p>An optimizer is a policy for converting noisy gradient information into parameter changes under limits on time, memory, precision, and communication. SGD stores almost nothing and trusts one global scale. AdamW spends two state values per parameter to obtain robust coordinate-wise normalization. Shampoo and SOAP spend matrix state and computation to learn a better basis. Muon spends matrix multiplications to normalize the singular structure of hidden-weight momentum.</p>
 <p>The practical conclusion in 2026 is not “replace AdamW everywhere.” It is more precise:</p>
@@ -4192,28 +4143,25 @@ def approximate_polar(x, steps=5, eps=1e-7):
 <p><strong>Use AdamW as the measured baseline; treat schedules, grouping, precision, and sharding as part of it; then test whether matrix-aware geometry buys enough token efficiency to pay for its systems cost at your actual scale.</strong></p>
 </blockquote>
 <p>That decision rule is also the most promising research direction. Future optimizers will probably be heterogeneous rather than monolithic, low precision without stale state, transferable across scale rather than retuned from scratch, and co-designed with the distributed system that executes them.</p></section></div>
-      </article>
-    </div>
-  </main>
-
-  <button class="back-to-top" type="button" aria-label="Back to top" data-back-to-top>
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"></path></svg>
-  </button>
-
-  <footer class="site-footer">
-    <div class="site-shell footer-inner">
-      <p>Liang (Twist) Shan · Beijing, China</p>
-      <div class="footer-links">
-        <a href="https://twist-shan.github.io/">Home</a>
-        <a href="https://twist-shan.github.io/blog/">More notes</a>
-        <a href="https://docs.pytorch.org/docs/main/optim.html" target="_blank" rel="noopener noreferrer">PyTorch optimizers ↗</a>
-      </div>
-      <p>Built with curiosity · 2026</p>
-    </div>
-  </footer>
-
-  <div class="sr-only" aria-live="polite" aria-atomic="true" data-live-status></div>
-  <script>
+</article>
+</div>
+</main>
+<button aria-label="Back to top" class="back-to-top" data-back-to-top="" type="button">
+<svg aria-hidden="true" viewbox="0 0 24 24"><path d="m6 14 6-6 6 6"></path></svg>
+</button>
+<footer class="site-footer">
+<div class="site-shell footer-inner">
+<p>Liang (Twist) Shan · Beijing, China</p>
+<div class="footer-links">
+<a href="https://twist-shan.github.io/">Home</a>
+<a href="https://twist-shan.github.io/blog/">More notes</a>
+<a href="https://docs.pytorch.org/docs/main/optim.html" rel="noopener noreferrer" target="_blank">PyTorch optimizers ↗</a>
+</div>
+<p>Built with curiosity · 2026</p>
+</div>
+</footer>
+<div aria-atomic="true" aria-live="polite" class="sr-only" data-live-status=""></div>
+<script>
 (function () {
   "use strict";
 
@@ -5145,5 +5093,7 @@ def approximate_polar(x, steps=5, eps=1e-7):
 }());
 
   </script>
-</body>
+<script>(()=>{const root=document.documentElement,button=document.querySelector('.article-theme-toggle'),legacy=document.querySelector('#theme-toggle,button.theme-toggle');const sync=()=>{const dark=root.dataset.theme==='dark';button.textContent=dark?'☾':'☼';button.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme');try{localStorage.setItem('quiet-theme',root.dataset.theme)}catch(e){}};const apply=theme=>{if(root.dataset.theme!==theme){if(legacy)legacy.click();else root.dataset.theme=theme}sync()};const init=()=>{let theme='light';try{theme=localStorage.getItem('quiet-theme')||'light'}catch(e){}apply(theme)};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();button.addEventListener('click',()=>apply(root.dataset.theme==='dark'?'light':'dark'))})();</script></body>
 </html>
+
+{% endraw %}

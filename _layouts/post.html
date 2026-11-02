@@ -1,12 +1,80 @@
----
-layout: studio
----
-<article class="article shell{% if page.blog_category == 'others' %} article--others{% endif %}">
-  <header class="article-header reveal">
-    <a class="article-back" href="{{ '/blog/' | relative_url }}">← All notes</a>
-    <time>{{ page.date | date: '%B %d, %Y' }}</time>
-    <h1>{{ page.title }}</h1>
-    {% if page.tags %}<p>{{ page.tags | join: ' · ' }}</p>{% endif %}
-  </header>
-  <div class="article-body reveal">{{ content }}</div>
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<link href="/favicon.ico?v=ls-serif-1" rel="icon" sizes="16x16 32x32 48x48 64x64"/>
+<link href="/images/favicon.svg?v=ls-serif-1" rel="icon" sizes="any" type="image/svg+xml"/>
+<link href="/images/apple-touch-icon-180x180.png?v=ls-serif-1" rel="apple-touch-icon" sizes="180x180"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#f2efe7" name="theme-color"/>
+<title>{{ page.title | escape }} — Liang Shan</title>
+<meta content="{{ page.excerpt | strip_html | escape }}" name="description"/>
+<meta content="Liang (Twist) Shan" name="author"/>
+<meta content="index, follow, max-image-preview:large" name="robots"/>
+<link href="{{ page.url | absolute_url }}" rel="canonical"/>
+<meta content="MPwOE6Ceb1Otm_lOg70207ykP_jhNt57cQYwyI8ky9c" name="google-site-verification"/>
+<meta content="en_US" property="og:locale"/>
+<meta content="website" property="og:type"/>
+<meta content="Liang (Twist) Shan" property="og:site_name"/>
+<meta content="{{ page.title | escape }}" property="og:title"/>
+<meta content="{{ page.excerpt | strip_html | escape }}" property="og:description"/>
+<meta content="{{ page.url | absolute_url }}" property="og:url"/>
+<meta content="https://twist-shan.github.io/images/profile.jpg" property="og:image"/>
+<meta content="Portrait of Liang (Twist) Shan" property="og:image:alt"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="{{ page.title | escape }}" name="twitter:title"/>
+<meta content="{{ page.excerpt | strip_html | escape }}" name="twitter:description"/>
+<meta content="https://twist-shan.github.io/images/profile.jpg" name="twitter:image"/>
+<meta content="@LiangTwistShan" name="twitter:creator"/>
+<script>
+      (() => {
+        try {
+          const saved = localStorage.getItem('liang-theme');
+          const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.dataset.theme = theme;
+        } catch (_) {}
+      })();
+    </script>
+<link href="/assets/css/studio.css?v=others-title-1" rel="stylesheet"/>
+<link href="/assets/css/studio-motion.css" rel="stylesheet"/>
+<link href="/assets/css/article.css" rel="stylesheet"/></head>
+<body class="studio-body page-my-new-website" data-article="my-new-website"><div class="preview-article-nav"><a href="/blog/">← All posts</a><div><a href="/">Liang Shan</a><button aria-label="Switch to dark theme" class="article-theme-toggle">☼</button></div></div><nav aria-label="Article contents" class="preview-toc"><strong>ON THIS PAGE</strong><a href="#section-1">Welcome to my personal website!</a></nav>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" data-header="">
+<a aria-label="Liang Shan, home" class="wordmark" href="/">
+<svg aria-hidden="true" class="wordmark-mark" focusable="false" viewbox="190 221 390 462"><g fill="currentColor" stroke="currentColor" stroke-linejoin="round" stroke-width="3"><path d="M520 319 L520 415 L515 415 C497 363 468 333 429 333 C399 333 378 348 378 379 C378 412 412 428 460 451 C510 476 552 500 552 546 C552 609 493 649 434 649 C397 649 380 637 367 637 C356 637 349 644 346 655 L342 655 L332 569 L339 574 C366 615 398 639 432 639 C475 639 500 610 500 575 C500 535 474 516 427 493 C375 467 334 447 334 405 C334 358 375 325 429 325 C461 325 480 336 492 336 C505 336 513 330 517 319 Z"></path><path d="M218 249 L367 249 L367 254 C332 258 318 269 318 298 L318 568 L342 568 C386 568 413 553 429 506 L435 506 L429 580 L218 580 L218 575 C252 569 263 561 263 533 L263 298 C263 269 251 257 218 254 Z"></path></g></svg>
+<span class="wordmark-name">Liang Shan</span>
+</a>
+<button aria-controls="site-nav" aria-expanded="false" class="menu-toggle" type="button">
+<span>Menu</span><span aria-hidden="true" class="menu-line"></span>
+</button>
+<nav aria-label="Main navigation" class="site-nav" id="site-nav">
+<a href="/research/">Research</a>
+<a href="/blog/">Blog</a>
+<a href="/misc/">Misc.</a>
+</nav>
+<div class="header-actions">
+<button aria-label="Pause animations" class="motion-toggle" hidden="" title="Pause animations" type="button">
+<svg aria-hidden="true" class="motion-pause" viewbox="0 0 24 24"><path d="M9 6V18M15 6V18"></path></svg>
+<svg aria-hidden="true" class="motion-play" viewbox="0 0 24 24"><path d="M8 5L18 12L8 19Z"></path></svg>
+</button>
+<button aria-label="Switch to dark mode" class="theme-toggle" title="Toggle color mode" type="button">
+<svg aria-hidden="true" class="sun-icon" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56"></path></svg>
+<svg aria-hidden="true" class="moon-icon" viewbox="0 0 24 24"><path d="M20.2 15.2A8.8 8.8 0 0 1 8.8 3.8 8.8 8.8 0 1 0 20.2 15.2Z"></path></svg>
+</button>
+</div>
+</header>
+<main id="main"><article class="article shell article--others">
+<header class="unified-hero"><p class="hero-eyebrow">OTHERS · PERSONAL NOTES</p><h1 id="section-1">{{ page.title }}</h1><div class="preview-reading">{{ page.date | date: '%B %d, %Y' }} · {{ page.reading_minutes | default: 1 }} min read</div></header>
+<div class="article-body reveal">{{ content }}</div>
 </article>
+</main>
+<footer class="site-footer">
+<p>Liang (Twist) Shan <span>·</span> Beijing, China</p>
+<p class="footer-note">Built with curiosity and Jekyll · 2026</p>
+</footer>
+<script defer="" src="/assets/js/studio.js"></script>
+<script defer="" src="/assets/js/studio-motion.js"></script>
+<script>(()=>{const root=document.documentElement,button=document.querySelector('.article-theme-toggle'),legacy=document.querySelector('#theme-toggle,button.theme-toggle');const sync=()=>{const dark=root.dataset.theme==='dark';button.textContent=dark?'☾':'☼';button.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme');try{localStorage.setItem('quiet-theme',root.dataset.theme)}catch(e){}};const apply=theme=>{if(root.dataset.theme!==theme){if(legacy)legacy.click();else root.dataset.theme=theme}sync()};const init=()=>{let theme='light';try{theme=localStorage.getItem('quiet-theme')||'light'}catch(e){}apply(theme)};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();button.addEventListener('click',()=>apply(root.dataset.theme==='dark'?'light':'dark'))})();</script></body>
+</html>

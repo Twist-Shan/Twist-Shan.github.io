@@ -53,6 +53,15 @@ domains:
       - label: "LLM / Interpretability / Chain-of-Thought Reasoning"
         projects:
           - id: cot-counting-mechanism
+            authors:
+              - name: "Liang Twist Shan"
+                self: true
+              - name: "Tianyu Hu"
+                url: "https://thewaylost.github.io/"
+              - name: "Hao Yan"
+                url: "https://ezyhdxm.github.io/academic-site/"
+              - name: "Yiqiao Zhong"
+                url: "https://pages.stat.wisc.edu/~zhong35/"
             draft: false
             title: "Targeted Retrieval, Compact Representations: How CoT Reasoning Improves Long-Context Counting"
             description: >-
@@ -72,6 +81,13 @@ domains:
       - label: "LLM / Evaluation / Pairwise Preference"
         projects:
           - id: chatbot-arena-ranking
+            authors:
+              - name: "Liang Twist Shan"
+                self: true
+              - name: "Jiahao Ai"
+                url: "https://ajh4869.github.io/"
+              - name: "Zhimei Ren"
+                url: "https://zhimeir.github.io/"
             draft: false
             title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
             description: >-

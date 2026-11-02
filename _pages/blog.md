@@ -4,34 +4,5 @@ title: Blog
 permalink: /blog/
 slug: blog
 ---
-
-<header class="page-hero shell reveal">
-  <p class="eyebrow">02 — Blog</p>
-  <h1 class="motion-title">Notes from the <em>learning process.</em></h1>
-  <p>Writings about research, people, places, and things I want to remember.</p>
-</header>
-
-<section class="post-list shell reveal">
-  <div class="blog-filters" role="group" aria-label="Filter posts" hidden>
-    <button type="button" data-blog-filter="all" aria-pressed="true">All</button>
-    <span aria-hidden="true">/</span>
-    <button type="button" data-blog-filter="research" aria-pressed="false">Research</button>
-    <span aria-hidden="true">/</span>
-    <button type="button" data-blog-filter="notes" aria-pressed="false">Notes</button>
-    <span aria-hidden="true">/</span>
-    <button type="button" data-blog-filter="others" aria-pressed="false">Others</button>
-  </div>
-  <p class="blog-filter-empty empty-note" role="status" hidden>No posts in this category yet.</p>
-  {% if site.posts.size > 0 %}
-    {% for post in site.posts %}
-    {% assign blog_category = post.blog_category | default: 'others' | downcase %}
-    <a data-blog-category="{{ blog_category | escape }}" class="post-row" href="{{ post.url | relative_url }}">
-      <time>{{ post.date | date: '%Y.%m.%d' }}</time>
-      <h2>{{ post.title }}</h2>
-      <span>{{ post.tags | first | default: 'Note' }} ↗</span>
-    </a>
-    {% endfor %}
-  {% else %}
-    <div class="empty-note"><p>The notebook is open. The first entry is on its way.</p></div>
-  {% endif %}
-</section>
+<section class="page" id="blog"><header class="page-title"><p class="kicker">02 / Blog</p><h1 class="motion-title">Notes from the <em>learning process.</em></h1><p>Writings about research, people, places, and things I want to remember.</p></header><nav aria-label="Filter posts" class="filters"><button aria-pressed="true" data-filter="all">All</button><button aria-pressed="false" data-filter="research">Research</button><button aria-pressed="false" data-filter="notes">Notes</button><button aria-pressed="false" data-filter="others">Others</button></nav><div>{% for post in site.posts %}{% assign category = post.blog_category | default: 'others' | downcase %}{% assign minutes = post.reading_minutes %}{% unless minutes %}{% assign minutes = post.content | strip_html | number_of_words | divided_by: 220 | plus: 1 %}{% endunless %}
+<a class="post-row" data-category="{{ category }}" href="{{ post.url | relative_url }}"><h3>{{ post.title }}</h3><p class="post-excerpt">{{ post.excerpt | strip_html | truncate: 260 }}</p><div class="post-meta"><time>{{ post.date | date: '%Y.%m.%d' }}</time><span> · {{ category | capitalize }} · {{ minutes }} min read</span></div></a>{% endfor %}</div></section>

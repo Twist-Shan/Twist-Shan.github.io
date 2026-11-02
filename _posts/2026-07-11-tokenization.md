@@ -12,4 +12,5 @@ comments: false
 share: false
 related: false
 sitemap: true
+reading_minutes: 27
 ---

@@ -5,6 +5,7 @@ permalink: /posts/2026/03/my-new-website/
 blog_category: others
 tags:
   - Life
+reading_minutes: 1
 ---
 
 Today is 2026.3.23, I finally have my personal homepage with the help of Codex!

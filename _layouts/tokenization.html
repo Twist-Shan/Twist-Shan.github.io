@@ -1,22 +1,24 @@
----
----
-<!doctype html>
-<html lang="en" data-theme="light">
+{% raw %}
+<!DOCTYPE html>
+
+<html data-theme="light" lang="en">
 <head>
-    {% include site-icons.html %}
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.">
-  <meta name="author" content="Liang (Twist) Shan">
-  <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f7f7f2">
-  <meta property="og:type" content="article">
-  <meta property="og:title" content="Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer">
-  <meta property="og:description" content="Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.">
-  <meta property="article:published_time" content="2026-07-11">
-  <meta name="twitter:card" content="summary">
-  <title>Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer — Liang (Twist) Shan</title>
-  <style>
+<link href="/favicon.ico?v=ls-serif-1" rel="icon" sizes="16x16 32x32 48x48 64x64"/>
+<link href="/images/favicon.svg?v=ls-serif-1" rel="icon" sizes="any" type="image/svg+xml"/>
+<link href="/images/apple-touch-icon-180x180.png?v=ls-serif-1" rel="apple-touch-icon" sizes="180x180"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next." name="description"/>
+<meta content="Liang (Twist) Shan" name="author"/>
+<meta content="light dark" name="color-scheme"/>
+<meta content="#f7f7f2" name="theme-color"/>
+<meta content="article" property="og:type"/>
+<meta content="Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer" property="og:title"/>
+<meta content="Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next." property="og:description"/>
+<meta content="2026-07-11" property="article:published_time"/>
+<meta content="summary" name="twitter:card"/>
+<title>Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer — Liang (Twist) Shan</title>
+<style>
 /*
  * Shared visual contract for every long-form note.
  * Topic-specific styles may add components, but must not redefine this scale.
@@ -2191,103 +2193,68 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 }
 
   </style>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer", "description": "Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.", "datePublished": "2026-07-11", "dateModified": "2026-07-11", "author": {"@type": "Person", "name": "Liang (Twist) Shan", "url": "https://twist-shan.github.io/"}, "inLanguage": "en"}</script>
-</head>
-<body>
-  <a class="skip-link" href="#article">Skip to the article</a>
-  <div class="reading-progress" role="progressbar" aria-label="Article reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-    <span data-progress-bar></span>
-  </div>
-
-  <header class="site-header" data-site-header>
-    <div class="site-shell header-inner">
-      <a class="wordmark" href="https://twist-shan.github.io/" aria-label="Liang Shan, home">
-        <svg class="wordmark-mark" viewBox="190 221 390 462" aria-hidden="true" focusable="false"><g fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M520 319 L520 415 L515 415 C497 363 468 333 429 333 C399 333 378 348 378 379 C378 412 412 428 460 451 C510 476 552 500 552 546 C552 609 493 649 434 649 C397 649 380 637 367 637 C356 637 349 644 346 655 L342 655 L332 569 L339 574 C366 615 398 639 432 639 C475 639 500 610 500 575 C500 535 474 516 427 493 C375 467 334 447 334 405 C334 358 375 325 429 325 C461 325 480 336 492 336 C505 336 513 330 517 319 Z"/><path d="M218 249 L367 249 L367 254 C332 258 318 269 318 298 L318 568 L342 568 C386 568 413 553 429 506 L435 506 L429 580 L218 580 L218 575 C252 569 263 561 263 533 L263 298 C263 269 251 257 218 254 Z"/></g></svg>
-        <span>Liang Shan</span>
-      </a>
-
-      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-navigation" data-menu-toggle>
-        <span>Menu</span>
-        <span class="menu-lines" aria-hidden="true"><i></i><i></i></span>
-      </button>
-
-      <nav class="site-navigation" id="site-navigation" aria-label="Main navigation" data-navigation>
-        <a href="https://twist-shan.github.io/research/">Research</a>
-        <a href="https://twist-shan.github.io/blog/" aria-current="page">Blog</a>
-        <a href="https://twist-shan.github.io/misc/">Misc.</a>
-      </nav>
-
-      <button class="theme-toggle" type="button" aria-label="Switch to dark mode" data-theme-toggle>
-        <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56"></path></svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.2A8.4 8.4 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path></svg>
-      </button>
-    </div>
-  </header>
-
-  <main id="main">
-    <header class="article-hero site-shell">
-      <div class="hero-orb hero-orb--left" aria-hidden="true"></div>
-      <div class="hero-orb hero-orb--right" aria-hidden="true"></div>
-
-      <div class="hero-copy">
-        <div class="article-breadcrumbs">
-          <a href="https://twist-shan.github.io/blog/">← All notes</a>
-          <time datetime="2026-07-11">July 11, 2026</time>
-        </div>
-        <p class="hero-eyebrow"><span></span> Language modeling · implementation notes</p>
-        <h1 id="article-title"><em>Tokenization</em>: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer</h1>
-        <p class="hero-description">Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.</p>
-        <div class="hero-actions">
-          <a class="button button--primary" href="https://tiktokenizer.vercel.app/?encoder=gpt2" target="_blank" rel="noopener noreferrer">Explore the GPT-2 tokenizer <span aria-hidden="true">↗</span></a>
-          <a class="button button--quiet" href="./tokenization_bpe_from_scratch.py">Companion Python <span aria-hidden="true">↓</span></a>
-        </div>
-        <dl class="article-facts" aria-label="Article facts">
-          <div><dt>Reading</dt><dd>28 min</dd></div>
-          <div><dt>Chapters</dt><dd>13</dd></div>
-          <div><dt>Sources</dt><dd>43</dd></div>
-          <div><dt>Words</dt><dd>6,257</dd></div>
-        </dl>
-      </div>
-
-      <aside class="token-anatomy" aria-label="Tokenization concept preview">
-        <div class="token-anatomy-head">
-          <span>One string, several interfaces</span>
-          <span class="status-dot"><i></i> UTF-8</span>
-        </div>
-        <p class="anatomy-source">tokenization</p>
-        <div class="anatomy-arrow" aria-hidden="true"><span></span><small>segment</small></div>
-        <div class="anatomy-tokens" aria-label="Illustrative token segmentation">
-          <span style="--delay: 0">token<small>18493</small></span>
-          <span style="--delay: 1">ization<small>1634</small></span>
-        </div>
-        <div class="anatomy-arrow anatomy-arrow--reverse" aria-hidden="true"><span></span><small>decode bytes</small></div>
-        <div class="anatomy-bytes" aria-label="UTF-8 bytes for token">
-          <span>74</span><span>6f</span><span>6b</span><span>65</span><span>6e</span><span>…</span>
-        </div>
-        <p class="anatomy-note">The boundary is a modeling decision—not a fact about the word.</p>
-      </aside>
-
-      <details class="mobile-toc">
-        <summary>On this page <span aria-hidden="true">+</span></summary>
-        <nav aria-label="Mobile table of contents"><ol class="toc-list"><li data-toc-section="four-ideas-to-remember"><a href="#four-ideas-to-remember">Four ideas to remember</a></li><li data-toc-section="1-what-does-a-tokenizer-actually-do"><a href="#1-what-does-a-tokenizer-actually-do">What does a tokenizer actually do?</a><ol class="toc-sublist"><li><a href="#a-tokenizer-acts-as-a-static-compute-allocation-mechanism">A tokenizer acts as a static compute-allocation mechanism</a></li></ol></li><li data-toc-section="2-why-not-use-characters-bytes-or-words-directly"><a href="#2-why-not-use-characters-bytes-or-words-directly">Why not use characters, bytes, or words directly?</a></li><li data-toc-section="3-the-full-pipeline-of-a-modern-tokenizer"><a href="#3-the-full-pipeline-of-a-modern-tokenizer">The full pipeline of a modern tokenizer</a></li><li data-toc-section="4-bpe-fundamentals-training-and-encoding-are-different-operations"><a href="#4-bpe-fundamentals-training-and-encoding-are-different-operations">BPE fundamentals: training and encoding are different operations</a><ol class="toc-sublist"><li><a href="#41-training-repeatedly-merge-the-most-frequent-adjacent-pair">Training: repeatedly merge the most frequent adjacent pair</a></li><li><a href="#42-a-hand-worked-example-aaabdaaabac">A hand-worked example: aaabdaaabac</a></li><li><a href="#43-encoding-replay-learned-rules-by-rank">Encoding: replay learned rules by rank</a></li><li><a href="#44-decoding-concatenate-bytes-before-decoding-utf-8">Decoding: concatenate bytes before decoding UTF-8</a></li></ol></li><li data-toc-section="5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch"><a href="#5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch">Implementing a working byte-level BPE tokenizer from scratch</a><ol class="toc-sublist"><li><a href="#from-basic-self-checks-to-a-complete-test-suite">From basic self-checks to a complete test suite</a></li><li><a href="#special-tokens-are-control-plane-data-not-ordinary-vocabulary">Special tokens are control-plane data, not ordinary vocabulary</a></li></ol></li><li data-toc-section="6-from-teaching-code-to-a-cs336-grade-implementation"><a href="#6-from-teaching-code-to-a-cs336-grade-implementation">From teaching code to a CS336-grade implementation</a><ol class="toc-sublist"><li><a href="#do-not-cargo-cult-a-frontier-models-regex">Do not cargo-cult a frontier model's regex</a></li></ol></li><li data-toc-section="7-bpe-wordpiece-and-unigram"><a href="#7-bpe-wordpiece-and-unigram">BPE, WordPiece, and Unigram</a></li><li data-toc-section="8-the-central-problems-with-fixed-tokenization"><a href="#8-the-central-problems-with-fixed-tokenization">The central problems with fixed tokenization</a><ol class="toc-sublist"><li><a href="#81-characters-inside-a-token-are-not-directly-visible-to-the-main-model">Characters inside a token are not directly visible to the main model</a></li><li><a href="#82-digit-grouping-imposes-an-arbitrary-coordinate-system-on-arithmetic">Digit grouping imposes an arbitrary coordinate system on arithmetic</a></li><li><a href="#83-a-one-character-typo-can-trigger-a-discontinuous-retokenization">A one-character typo can trigger a discontinuous retokenization</a></li><li><a href="#84-cross-lingual-inequity-the-same-content-can-carry-very-different-token-costs">Cross-lingual inequity: the same content can carry very different token costs</a></li><li><a href="#85-data-and-domain-shifts-make-a-vocabulary-stale">Data and domain shifts make a vocabulary stale</a></li><li><a href="#86-a-single-canonical-encoding-is-brittleand-can-become-a-safety-blind-spot">A single canonical encoding is brittle—and can become a safety blind spot</a></li><li><a href="#87-prompt-boundaries-can-make-token-level-sampling-differ-from-string-level-conditioning">Prompt boundaries can make token-level sampling differ from string-level conditioning</a></li><li><a href="#88-the-tokenizer-is-not-learned-end-to-end">The tokenizer is not learned end to end</a></li></ol></li><li data-toc-section="9-is-stronger-compression-always-better"><a href="#9-is-stronger-compression-always-better">Is stronger compression always better?</a><ol class="toc-sublist"><li><a href="#why-per-token-perplexity-is-not-comparable-across-tokenizers">Why per-token perplexity is not comparable across tokenizers</a></li><li><a href="#a-practical-evaluation-matrix">A practical evaluation matrix</a></li></ol></li><li data-toc-section="10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation"><a href="#10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation">Future directions: from fixed tokens to dynamic, hierarchical computation</a><ol class="toc-sublist"><li><a href="#101-near-term-design-better-static-tokenizers">Near term: design better static tokenizers</a></li><li><a href="#102-medium-term-keep-a-byte-interface-and-compress-inside-the-model">Medium term: keep a byte interface and compress inside the model</a></li><li><a href="#103-the-key-architectural-contrast-blt-versus-h-net">The key architectural contrast: BLT versus H-Net</a></li><li><a href="#104-open-questions">Open questions</a></li></ol></li><li data-toc-section="11-if-you-were-training-a-tokenizer-today"><a href="#11-if-you-were-training-a-tokenizer-today">If you were training a tokenizer today</a><ol class="toc-sublist"><li><a href="#111-before-training">Before training</a></li><li><a href="#112-run-small-controlled-sweeps">Run small controlled sweeps</a></li><li><a href="#113-audit-before-freezing-the-artifact">Audit before freezing the artifact</a></li></ol></li><li data-toc-section="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions"><a href="#12-exercises-from-karpathy-to-cs336-and-then-to-research-questions">Exercises: from Karpathy to CS336 and then to research questions</a></li><li data-toc-section="13-an-annotated-reading-path"><a href="#13-an-annotated-reading-path">An annotated reading path</a><ol class="toc-sublist"><li><a href="#stage-1-learn-by-implementing">Stage 1: learn by implementing</a></li><li><a href="#stage-2-understand-the-classic-algorithms">Stage 2: understand the classic algorithms</a></li><li><a href="#stage-3-understand-where-tokenizers-fail">Stage 3: understand where tokenizers fail</a></li><li><a href="#stage-4-follow-the-tokenizer-free-and-latent-tokenization-frontier">Stage 4: follow the tokenizer-free and latent-tokenization frontier</a></li></ol></li><li data-toc-section="conclusion"><a href="#conclusion">Conclusion</a></li></ol></nav>
-      </details>
-    </header>
-
-    <div class="article-layout site-shell">
-      <aside class="desktop-toc">
-        <div class="toc-sticky">
-          <p class="toc-title">On this page</p>
-          <nav aria-label="Table of contents"><ol class="toc-list"><li data-toc-section="four-ideas-to-remember"><a href="#four-ideas-to-remember">Four ideas to remember</a></li><li data-toc-section="1-what-does-a-tokenizer-actually-do"><a href="#1-what-does-a-tokenizer-actually-do">What does a tokenizer actually do?</a><ol class="toc-sublist"><li><a href="#a-tokenizer-acts-as-a-static-compute-allocation-mechanism">A tokenizer acts as a static compute-allocation mechanism</a></li></ol></li><li data-toc-section="2-why-not-use-characters-bytes-or-words-directly"><a href="#2-why-not-use-characters-bytes-or-words-directly">Why not use characters, bytes, or words directly?</a></li><li data-toc-section="3-the-full-pipeline-of-a-modern-tokenizer"><a href="#3-the-full-pipeline-of-a-modern-tokenizer">The full pipeline of a modern tokenizer</a></li><li data-toc-section="4-bpe-fundamentals-training-and-encoding-are-different-operations"><a href="#4-bpe-fundamentals-training-and-encoding-are-different-operations">BPE fundamentals: training and encoding are different operations</a><ol class="toc-sublist"><li><a href="#41-training-repeatedly-merge-the-most-frequent-adjacent-pair">Training: repeatedly merge the most frequent adjacent pair</a></li><li><a href="#42-a-hand-worked-example-aaabdaaabac">A hand-worked example: aaabdaaabac</a></li><li><a href="#43-encoding-replay-learned-rules-by-rank">Encoding: replay learned rules by rank</a></li><li><a href="#44-decoding-concatenate-bytes-before-decoding-utf-8">Decoding: concatenate bytes before decoding UTF-8</a></li></ol></li><li data-toc-section="5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch"><a href="#5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch">Implementing a working byte-level BPE tokenizer from scratch</a><ol class="toc-sublist"><li><a href="#from-basic-self-checks-to-a-complete-test-suite">From basic self-checks to a complete test suite</a></li><li><a href="#special-tokens-are-control-plane-data-not-ordinary-vocabulary">Special tokens are control-plane data, not ordinary vocabulary</a></li></ol></li><li data-toc-section="6-from-teaching-code-to-a-cs336-grade-implementation"><a href="#6-from-teaching-code-to-a-cs336-grade-implementation">From teaching code to a CS336-grade implementation</a><ol class="toc-sublist"><li><a href="#do-not-cargo-cult-a-frontier-models-regex">Do not cargo-cult a frontier model's regex</a></li></ol></li><li data-toc-section="7-bpe-wordpiece-and-unigram"><a href="#7-bpe-wordpiece-and-unigram">BPE, WordPiece, and Unigram</a></li><li data-toc-section="8-the-central-problems-with-fixed-tokenization"><a href="#8-the-central-problems-with-fixed-tokenization">The central problems with fixed tokenization</a><ol class="toc-sublist"><li><a href="#81-characters-inside-a-token-are-not-directly-visible-to-the-main-model">Characters inside a token are not directly visible to the main model</a></li><li><a href="#82-digit-grouping-imposes-an-arbitrary-coordinate-system-on-arithmetic">Digit grouping imposes an arbitrary coordinate system on arithmetic</a></li><li><a href="#83-a-one-character-typo-can-trigger-a-discontinuous-retokenization">A one-character typo can trigger a discontinuous retokenization</a></li><li><a href="#84-cross-lingual-inequity-the-same-content-can-carry-very-different-token-costs">Cross-lingual inequity: the same content can carry very different token costs</a></li><li><a href="#85-data-and-domain-shifts-make-a-vocabulary-stale">Data and domain shifts make a vocabulary stale</a></li><li><a href="#86-a-single-canonical-encoding-is-brittleand-can-become-a-safety-blind-spot">A single canonical encoding is brittle—and can become a safety blind spot</a></li><li><a href="#87-prompt-boundaries-can-make-token-level-sampling-differ-from-string-level-conditioning">Prompt boundaries can make token-level sampling differ from string-level conditioning</a></li><li><a href="#88-the-tokenizer-is-not-learned-end-to-end">The tokenizer is not learned end to end</a></li></ol></li><li data-toc-section="9-is-stronger-compression-always-better"><a href="#9-is-stronger-compression-always-better">Is stronger compression always better?</a><ol class="toc-sublist"><li><a href="#why-per-token-perplexity-is-not-comparable-across-tokenizers">Why per-token perplexity is not comparable across tokenizers</a></li><li><a href="#a-practical-evaluation-matrix">A practical evaluation matrix</a></li></ol></li><li data-toc-section="10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation"><a href="#10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation">Future directions: from fixed tokens to dynamic, hierarchical computation</a><ol class="toc-sublist"><li><a href="#101-near-term-design-better-static-tokenizers">Near term: design better static tokenizers</a></li><li><a href="#102-medium-term-keep-a-byte-interface-and-compress-inside-the-model">Medium term: keep a byte interface and compress inside the model</a></li><li><a href="#103-the-key-architectural-contrast-blt-versus-h-net">The key architectural contrast: BLT versus H-Net</a></li><li><a href="#104-open-questions">Open questions</a></li></ol></li><li data-toc-section="11-if-you-were-training-a-tokenizer-today"><a href="#11-if-you-were-training-a-tokenizer-today">If you were training a tokenizer today</a><ol class="toc-sublist"><li><a href="#111-before-training">Before training</a></li><li><a href="#112-run-small-controlled-sweeps">Run small controlled sweeps</a></li><li><a href="#113-audit-before-freezing-the-artifact">Audit before freezing the artifact</a></li></ol></li><li data-toc-section="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions"><a href="#12-exercises-from-karpathy-to-cs336-and-then-to-research-questions">Exercises: from Karpathy to CS336 and then to research questions</a></li><li data-toc-section="13-an-annotated-reading-path"><a href="#13-an-annotated-reading-path">An annotated reading path</a><ol class="toc-sublist"><li><a href="#stage-1-learn-by-implementing">Stage 1: learn by implementing</a></li><li><a href="#stage-2-understand-the-classic-algorithms">Stage 2: understand the classic algorithms</a></li><li><a href="#stage-3-understand-where-tokenizers-fail">Stage 3: understand where tokenizers fail</a></li><li><a href="#stage-4-follow-the-tokenizer-free-and-latent-tokenization-frontier">Stage 4: follow the tokenizer-free and latent-tokenization frontier</a></li></ol></li><li data-toc-section="conclusion"><a href="#conclusion">Conclusion</a></li></ol></nav>
-          <div class="toc-footer">
-            <a href="#13-an-annotated-reading-path">Reading path <span aria-hidden="true">↓</span></a>
-          </div>
-        </div>
-      </aside>
-
-      <article id="article" class="article" aria-labelledby="article-title" tabindex="-1" data-article>
-        <div class="article-prose"><blockquote class="article-lede">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Tokenization: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer", "description": "Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.", "datePublished": "2026-07-11", "dateModified": "2026-07-11", "author": {"@type": "Person", "name": "Liang (Twist) Shan", "url": "https://twist-shan.github.io/"}, "inLanguage": "en"}</script>
+<link href="/assets/css/article.css" rel="stylesheet"/></head>
+<body data-article="tokenization"><div class="preview-article-nav"><a href="/blog/">← All posts</a><div><a href="/">Liang Shan</a><button aria-label="Switch to dark theme" class="article-theme-toggle">☼</button></div></div><nav aria-label="Article contents" class="preview-toc"><strong>ON THIS PAGE</strong><a href="#four-ideas-to-remember">Four ideas to remember</a><a href="#1-what-does-a-tokenizer-actually-do">1. What does a tokenizer actually do?</a><a href="#2-why-not-use-characters-bytes-or-words-directly">2. Why not use characters, bytes, or words directly?</a><a href="#3-the-full-pipeline-of-a-modern-tokenizer">3. The full pipeline of a modern tokenizer</a><a href="#4-bpe-fundamentals-training-and-encoding-are-different-operations">4. BPE fundamentals: training and encoding are different operations</a><a href="#5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch">5. Implementing a working byte-level BPE tokenizer from scratch</a><a href="#6-from-teaching-code-to-a-cs336-grade-implementation">6. From teaching code to a CS336-grade implementation</a><a href="#7-bpe-wordpiece-and-unigram">7. BPE, WordPiece, and Unigram</a><a href="#8-the-central-problems-with-fixed-tokenization">8. The central problems with fixed tokenization</a><a href="#9-is-stronger-compression-always-better">9. Is stronger compression always better?</a><a href="#10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation">10. Future directions: from fixed tokens to dynamic, hierarchical computation</a><a href="#11-if-you-were-training-a-tokenizer-today">11. If you were training a tokenizer today</a><a href="#12-an-annotated-reading-path">12. An annotated reading path</a><a href="#conclusion">Conclusion</a></nav>
+<a class="skip-link" href="#article">Skip to the article</a>
+<div aria-label="Article reading progress" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="reading-progress" role="progressbar">
+<span data-progress-bar=""></span>
+</div>
+<header class="site-header" data-site-header="">
+<div class="site-shell header-inner">
+<a aria-label="Liang Shan, home" class="wordmark" href="https://twist-shan.github.io/">
+<svg aria-hidden="true" class="wordmark-mark" focusable="false" viewbox="190 221 390 462"><g fill="currentColor" stroke="currentColor" stroke-linejoin="round" stroke-width="3"><path d="M520 319 L520 415 L515 415 C497 363 468 333 429 333 C399 333 378 348 378 379 C378 412 412 428 460 451 C510 476 552 500 552 546 C552 609 493 649 434 649 C397 649 380 637 367 637 C356 637 349 644 346 655 L342 655 L332 569 L339 574 C366 615 398 639 432 639 C475 639 500 610 500 575 C500 535 474 516 427 493 C375 467 334 447 334 405 C334 358 375 325 429 325 C461 325 480 336 492 336 C505 336 513 330 517 319 Z"></path><path d="M218 249 L367 249 L367 254 C332 258 318 269 318 298 L318 568 L342 568 C386 568 413 553 429 506 L435 506 L429 580 L218 580 L218 575 C252 569 263 561 263 533 L263 298 C263 269 251 257 218 254 Z"></path></g></svg>
+<span>Liang Shan</span>
+</a>
+<button aria-controls="site-navigation" aria-expanded="false" aria-label="Open menu" class="menu-toggle" data-menu-toggle="" type="button">
+<span>Menu</span>
+<span aria-hidden="true" class="menu-lines"><i></i><i></i></span>
+</button>
+<nav aria-label="Main navigation" class="site-navigation" data-navigation="" id="site-navigation">
+<a href="https://twist-shan.github.io/research/">Research</a>
+<a aria-current="page" href="https://twist-shan.github.io/blog/">Blog</a>
+<a href="https://twist-shan.github.io/misc/">Misc.</a>
+</nav>
+<button aria-label="Switch to dark mode" class="theme-toggle" data-theme-toggle="" type="button">
+<svg aria-hidden="true" class="sun-icon" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2.2M12 19.8V22M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2 12h2.2M19.8 12H22M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56"></path></svg>
+<svg aria-hidden="true" class="moon-icon" viewbox="0 0 24 24"><path d="M20 15.2A8.4 8.4 0 0 1 8.8 4a8.4 8.4 0 1 0 11.2 11.2Z"></path></svg>
+</button>
+</div>
+</header>
+<main id="main">
+<header class="unified-hero"><p class="hero-eyebrow"><span></span> Language modeling · implementation notes</p><h1 id="article-title"><em>Tokenization</em>: From Building BPE from Scratch to Language Models Without a Fixed Tokenizer</h1><div class="preview-reading">2026-07-11 · Estimated reading time: 27 min</div><p class="hero-description">Notes on how tokenization works, how to implement byte-level BPE, where fixed subword tokenization fails, and where byte-level and dynamically chunked models may go next.</p><div class="hero-actions">
+<a class="button button--primary" href="https://tiktokenizer.vercel.app/?encoder=gpt2" rel="noopener noreferrer" target="_blank">Explore the GPT-2 tokenizer <span aria-hidden="true">↗</span></a>
+<a class="button button--quiet" href="./tokenization_bpe_from_scratch.py">Companion Python <span aria-hidden="true">↓</span></a>
+</div></header><aside aria-label="Tokenization concept preview" class="token-anatomy unified-media">
+<div class="token-anatomy-head">
+<span>One string, several interfaces</span>
+<span class="status-dot"><i></i> UTF-8</span>
+</div>
+<p class="anatomy-source">tokenization</p>
+<div aria-hidden="true" class="anatomy-arrow"><span></span><small>segment</small></div>
+<div aria-label="Illustrative token segmentation" class="anatomy-tokens">
+<span style="--delay: 0">token<small>18493</small></span>
+<span style="--delay: 1">ization<small>1634</small></span>
+</div>
+<div aria-hidden="true" class="anatomy-arrow anatomy-arrow--reverse"><span></span><small>decode bytes</small></div>
+<div aria-label="UTF-8 bytes for token" class="anatomy-bytes">
+<span>74</span><span>6f</span><span>6b</span><span>65</span><span>6e</span><span>…</span>
+</div>
+<p class="anatomy-note">The boundary is a modeling decision—not a fact about the word.</p>
+</aside>
+<div class="article-layout site-shell">
+<aside class="desktop-toc">
+<div class="toc-sticky">
+<p class="toc-title">On this page</p>
+<nav aria-label="Table of contents"><ol class="toc-list"><li data-toc-section="four-ideas-to-remember"><a href="#four-ideas-to-remember">Four ideas to remember</a></li><li data-toc-section="1-what-does-a-tokenizer-actually-do"><a href="#1-what-does-a-tokenizer-actually-do">What does a tokenizer actually do?</a><ol class="toc-sublist"><li><a href="#a-tokenizer-acts-as-a-static-compute-allocation-mechanism">A tokenizer acts as a static compute-allocation mechanism</a></li></ol></li><li data-toc-section="2-why-not-use-characters-bytes-or-words-directly"><a href="#2-why-not-use-characters-bytes-or-words-directly">Why not use characters, bytes, or words directly?</a></li><li data-toc-section="3-the-full-pipeline-of-a-modern-tokenizer"><a href="#3-the-full-pipeline-of-a-modern-tokenizer">The full pipeline of a modern tokenizer</a></li><li data-toc-section="4-bpe-fundamentals-training-and-encoding-are-different-operations"><a href="#4-bpe-fundamentals-training-and-encoding-are-different-operations">BPE fundamentals: training and encoding are different operations</a><ol class="toc-sublist"><li><a href="#41-training-repeatedly-merge-the-most-frequent-adjacent-pair">Training: repeatedly merge the most frequent adjacent pair</a></li><li><a href="#42-a-hand-worked-example-aaabdaaabac">A hand-worked example: aaabdaaabac</a></li><li><a href="#43-encoding-replay-learned-rules-by-rank">Encoding: replay learned rules by rank</a></li><li><a href="#44-decoding-concatenate-bytes-before-decoding-utf-8">Decoding: concatenate bytes before decoding UTF-8</a></li></ol></li><li data-toc-section="5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch"><a href="#5-implementing-a-working-byte-level-bpe-tokenizer-from-scratch">Implementing a working byte-level BPE tokenizer from scratch</a><ol class="toc-sublist"><li><a href="#from-basic-self-checks-to-a-complete-test-suite">From basic self-checks to a complete test suite</a></li><li><a href="#special-tokens-are-control-plane-data-not-ordinary-vocabulary">Special tokens are control-plane data, not ordinary vocabulary</a></li></ol></li><li data-toc-section="6-from-teaching-code-to-a-cs336-grade-implementation"><a href="#6-from-teaching-code-to-a-cs336-grade-implementation">From teaching code to a CS336-grade implementation</a><ol class="toc-sublist"><li><a href="#do-not-cargo-cult-a-frontier-models-regex">Do not cargo-cult a frontier model's regex</a></li></ol></li><li data-toc-section="7-bpe-wordpiece-and-unigram"><a href="#7-bpe-wordpiece-and-unigram">BPE, WordPiece, and Unigram</a></li><li data-toc-section="8-the-central-problems-with-fixed-tokenization"><a href="#8-the-central-problems-with-fixed-tokenization">The central problems with fixed tokenization</a><ol class="toc-sublist"><li><a href="#81-characters-inside-a-token-are-not-directly-visible-to-the-main-model">Characters inside a token are not directly visible to the main model</a></li><li><a href="#82-digit-grouping-imposes-an-arbitrary-coordinate-system-on-arithmetic">Digit grouping imposes an arbitrary coordinate system on arithmetic</a></li><li><a href="#83-a-one-character-typo-can-trigger-a-discontinuous-retokenization">A one-character typo can trigger a discontinuous retokenization</a></li><li><a href="#84-cross-lingual-inequity-the-same-content-can-carry-very-different-token-costs">Cross-lingual inequity: the same content can carry very different token costs</a></li><li><a href="#85-data-and-domain-shifts-make-a-vocabulary-stale">Data and domain shifts make a vocabulary stale</a></li><li><a href="#86-a-single-canonical-encoding-is-brittleand-can-become-a-safety-blind-spot">A single canonical encoding is brittle—and can become a safety blind spot</a></li><li><a href="#87-prompt-boundaries-can-make-token-level-sampling-differ-from-string-level-conditioning">Prompt boundaries can make token-level sampling differ from string-level conditioning</a></li><li><a href="#88-the-tokenizer-is-not-learned-end-to-end">The tokenizer is not learned end to end</a></li></ol></li><li data-toc-section="9-is-stronger-compression-always-better"><a href="#9-is-stronger-compression-always-better">Is stronger compression always better?</a><ol class="toc-sublist"><li><a href="#why-per-token-perplexity-is-not-comparable-across-tokenizers">Why per-token perplexity is not comparable across tokenizers</a></li><li><a href="#a-practical-evaluation-matrix">A practical evaluation matrix</a></li></ol></li><li data-toc-section="10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation"><a href="#10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation">Future directions: from fixed tokens to dynamic, hierarchical computation</a><ol class="toc-sublist"><li><a href="#101-near-term-design-better-static-tokenizers">Near term: design better static tokenizers</a></li><li><a href="#102-medium-term-keep-a-byte-interface-and-compress-inside-the-model">Medium term: keep a byte interface and compress inside the model</a></li><li><a href="#103-the-key-architectural-contrast-blt-versus-h-net">The key architectural contrast: BLT versus H-Net</a></li><li><a href="#104-open-questions">Open questions</a></li></ol></li><li data-toc-section="11-if-you-were-training-a-tokenizer-today"><a href="#11-if-you-were-training-a-tokenizer-today">If you were training a tokenizer today</a><ol class="toc-sublist"><li><a href="#111-before-training">Before training</a></li><li><a href="#112-run-small-controlled-sweeps">Run small controlled sweeps</a></li><li><a href="#113-audit-before-freezing-the-artifact">Audit before freezing the artifact</a></li></ol></li><li data-toc-section="12-exercises-from-karpathy-to-cs336-and-then-to-research-questions"><a href="#12-exercises-from-karpathy-to-cs336-and-then-to-research-questions">Exercises: from Karpathy to CS336 and then to research questions</a></li><li data-toc-section="13-an-annotated-reading-path"><a href="#13-an-annotated-reading-path">An annotated reading path</a><ol class="toc-sublist"><li><a href="#stage-1-learn-by-implementing">Stage 1: learn by implementing</a></li><li><a href="#stage-2-understand-the-classic-algorithms">Stage 2: understand the classic algorithms</a></li><li><a href="#stage-3-understand-where-tokenizers-fail">Stage 3: understand where tokenizers fail</a></li><li><a href="#stage-4-follow-the-tokenizer-free-and-latent-tokenization-frontier">Stage 4: follow the tokenizer-free and latent-tokenization frontier</a></li></ol></li><li data-toc-section="conclusion"><a href="#conclusion">Conclusion</a></li></ol></nav>
+<div class="toc-footer">
+<a href="#13-an-annotated-reading-path">Reading path <span aria-hidden="true">↓</span></a>
+</div>
+</div>
+</aside>
+<article aria-labelledby="article-title" class="article" data-article="" id="article" tabindex="-1">
+<div class="article-prose"><blockquote class="article-lede">
 <p>This article is written for readers who want to understand tokenization deeply enough to implement it. Its main thread comes from <a class="external-link" href="https://cs336.stanford.edu/" rel="noopener noreferrer" target="_blank">Stanford CS336: Language Modeling from Scratch</a>, the executable <a class="external-link" href="https://github.com/stanford-cs336/lectures/blob/main/lecture_01.py" rel="noopener noreferrer" target="_blank">CS336 Lecture 1 notes</a>, Andrej Karpathy's <a class="external-link" href="https://www.youtube.com/watch?v=zduSFxRajkE" rel="noopener noreferrer" target="_blank">Let's build the GPT Tokenizer</a>, and <a class="external-link" href="https://github.com/karpathy/minbpe" rel="noopener noreferrer" target="_blank">minBPE</a>. The research survey is current through <strong>July 11, 2026</strong>.</p>
-
 </blockquote><blockquote class="evidence-note"><p>A note on evidence: the article explicitly labels selected arXiv papers and preprints. Reported scale, speedups, and downstream results are the authors' findings; they have not necessarily been independently reproduced across hardware, languages, and training recipes. “Recent” identifies the research frontier—it does not imply that every conclusion is settled.</p></blockquote>
 <section aria-labelledby="four-ideas-to-remember" class="article-section key-ideas" data-section-number="00" id="section-four-ideas-to-remember"><p aria-hidden="true" class="section-label">00</p><h2 id="four-ideas-to-remember">Four ideas to remember</h2>
 <ol>
@@ -2296,7 +2263,6 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <li><strong>A tokenizer is part of the model design.</strong> It determines sequence length, vocabulary parameters, how much compute a passage receives, how much content fits in the context window, and the relative cost of different languages.</li>
 <li><strong>The future is probably not “no chunks at all,” but no fixed external subword vocabulary.</strong> Models will still need larger computational units, but their boundaries may become dynamic, hierarchical, and jointly learned with the language model.</li>
 </ol>
-
 </section><section aria-labelledby="1-what-does-a-tokenizer-actually-do" class="article-section" data-chapter="foundations" data-section-number="01" id="section-1-what-does-a-tokenizer-actually-do"><p aria-hidden="true" class="section-label">01</p><h2 id="1-what-does-a-tokenizer-actually-do">1. What does a tokenizer actually do?</h2>
 <p>For a lossless byte-level tokenizer, we can write:</p>
 <div aria-label="E maps byte strings to token ID sequences, and decoding the encoding of x equals x" class="equation" role="img"><span><i>E</i>: Bytes<sup>*</sup> → {0, …, <i>V</i> − 1}<sup>*</sup>,</span><span><i>D</i>(<i>E</i>(<i>x</i>)) = <i>x</i>.</span></div>
@@ -2318,7 +2284,6 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <blockquote>
 <p>Small vocabulary, long sequence, fine granularity, often greater robustness to rare strings and spelling perturbations  ↔  Large vocabulary, short sequence, more rare rows, less direct access to within-token character structure.</p>
 </blockquote>
-
 </section><section aria-labelledby="2-why-not-use-characters-bytes-or-words-directly" class="article-section" data-chapter="foundations" data-section-number="02" id="section-2-why-not-use-characters-bytes-or-words-directly"><p aria-hidden="true" class="section-label">02</p><h2 id="2-why-not-use-characters-bytes-or-words-directly">2. Why not use characters, bytes, or words directly?</h2>
 <div aria-label="Representation units and their trade-offs" class="table-scroll" role="region" tabindex="0"><table><caption class="sr-only">Representation units and their trade-offs</caption>
 <thead>
@@ -2363,7 +2328,6 @@ html[data-theme="dark"] .bpe-token.is-merged::after {
 <li><strong>Unicode subwords with byte fallback</strong> normally operate on Unicode pieces and use byte tokens only for characters not otherwise covered.</li>
 <li><strong>SentencePiece</strong> is a tokenizer framework, not one specific algorithm. It can train BPE or Unigram models and also handles normalization, whitespace representation, special tokens, byte fallback, and related pipeline concerns.</li>
 </ul>
-
 </section><section aria-labelledby="3-the-full-pipeline-of-a-modern-tokenizer" class="article-section" data-chapter="foundations" data-section-number="03" id="section-3-the-full-pipeline-of-a-modern-tokenizer"><p aria-hidden="true" class="section-label">03</p><h2 id="3-the-full-pipeline-of-a-modern-tokenizer">3. The full pipeline of a modern tokenizer</h2>
 <p>The Hugging Face <a class="external-link" href="https://huggingface.co/docs/tokenizers/main/api/tokenizer" rel="noopener noreferrer" target="_blank">Tokenizers documentation</a> describes a tokenizer as a pipeline of components. A useful mental model for GPT-style byte-level BPE is:</p>
 <figure class="code-block"><figcaption><span class="code-language">Text</span><button aria-label="Copy Text code" class="copy-code" data-copy-target="code-0" type="button">Copy</button></figcaption><pre><code class="language-text" id="code-0">Unicode string
@@ -2390,7 +2354,6 @@ IDs
 <blockquote>
 <p><strong>The vocabulary, merge ranks, normalizer, pre-tokenizer regex, special-token table, and decoder jointly define the tokenizer model. They must be serialized and versioned together.</strong></p>
 </blockquote>
-
 </section><section aria-labelledby="4-bpe-fundamentals-training-and-encoding-are-different-operations" class="article-section" data-chapter="implementation" data-section-number="04" id="section-4-bpe-fundamentals-training-and-encoding-are-different-operations"><p aria-hidden="true" class="section-label">04</p><h2 id="4-bpe-fundamentals-training-and-encoding-are-different-operations">4. BPE fundamentals: training and encoding are different operations</h2>
 <p>BPE began with Philip Gage's <a class="external-link" href="http://www.pennelynn.com/Documents/CUJ/HTML/94HTML/19940045.HTM" rel="noopener noreferrer" target="_blank">1994 compression algorithm</a>. <a class="external-link" href="https://aclanthology.org/P16-1162/" rel="noopener noreferrer" target="_blank">Sennrich et al. 2016</a> adapted it to subwords for neural machine translation, and <a class="external-link" href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf" rel="noopener noreferrer" target="_blank">§2.2 of the GPT-2 report</a> popularized byte-level BPE for language models.</p>
 <p>The GPT-2 reference implementation first maps the 256 byte values bijectively to printable Unicode symbols, then runs BPE over those symbols. This is a reversible implementation device, not natural-language segmentation over Unicode characters. <code>tiktoken</code> and the accompanying implementation in this article can instead store vocabulary entries directly as <code>bytes</code>. The concepts are equivalent, but their concrete byte mappings and ranks cannot be mixed when reproducing an existing model.</p>
@@ -2462,8 +2425,6 @@ IDs
 <figure class="code-block"><figcaption><span class="code-language">Python</span><button aria-label="Copy Python code" class="copy-code" data-copy-target="code-2" type="button">Copy</button></figcaption><pre><code class="language-python" id="code-2">text = b"".join(vocab[token_id] for token_id in ids).decode("utf-8")
 </code></pre></figure>
 <p>The bytes of one token need not form valid UTF-8; a Chinese character or emoji may span several tokens. Always concatenate the full byte sequence before decoding. <code>errors="replace"</code> can display an arbitrary invalid ID sequence, but that visualization is lossy—the resulting <code>�</code> must never be used to reconstruct vocabulary bytes.</p>
-
-
 <aside aria-labelledby="bpe-lab-title" class="bpe-lab" data-bpe-lab="" id="bpe-lab">
 <div class="lab-heading">
 <div>
@@ -2588,7 +2549,6 @@ for _ in range(num_merges):
 <h3 id="special-tokens-are-control-plane-data-not-ordinary-vocabulary">Special tokens are control-plane data, not ordinary vocabulary</h3>
 <p><code>&lt;|endoftext|&gt;</code>, BOS, EOS, role delimiters, and tool delimiters should occupy a separate special-token namespace. Parsing them must require explicit permission; otherwise, a reserved string inside user-controlled text can silently become a control instruction. Both minBPE and <code>tiktoken</code> expose an explicit <code>allowed_special</code> choice. This is a security boundary, not decorative API design.</p>
 <p>“Not allowed” still requires a concrete policy. The companion script encodes a reserved string as ordinary bytes, similar to <code>encode_ordinary</code>; <code>tiktoken.encode</code> rejects a known but unallowed special string by default. Either policy can be reasonable. The important requirements are that user text must never be silently interpreted as a control token and that callers and tests know which policy is active.</p>
-
 </section><section aria-labelledby="6-from-teaching-code-to-a-cs336-grade-implementation" class="article-section" data-chapter="implementation" data-section-number="06" id="section-6-from-teaching-code-to-a-cs336-grade-implementation"><p aria-hidden="true" class="section-label">06</p><h2 id="6-from-teaching-code-to-a-cs336-grade-implementation">6. From teaching code to a CS336-grade implementation</h2>
 <p>The simple trainer rescans the entire corpus after every merge, giving roughly <code>O(number_of_merges × corpus_length)</code> work. That is ideal for learning and poor for large-scale training. Production implementations typically:</p>
 <ul>
@@ -2603,7 +2563,6 @@ for _ in range(num_merges):
 <p>The CS336 Lecture 1 implementation intentionally scans every merge rule. The assignment asks students to consider only currently relevant merges, preserve special tokens, use GPT-style pre-tokenization, and make the implementation as fast as practical. Karpathy's later <a class="external-link" href="https://github.com/karpathy/nanochat/blob/master/nanochat/tokenizer.py" rel="noopener noreferrer" target="_blank">nanochat tokenizer</a> likewise moves from readable Python minBPE to Rust training and <code>tiktoken.Encoding</code> inference, and evaluates compression separately on news, code, mathematics, science, Korean, and other slices.</p>
 <h3 id="do-not-cargo-cult-a-frontier-models-regex">Do not cargo-cult a frontier model's regex</h3>
 <p>Karpathy's GPT-4 reproduction exercise uses <code>\p{N}{1,3}</code>, while versions of the nanochat experiments selected <code>\p{N}{1,2}</code> for their own setup. This is exactly the point: digit grouping, vocabulary size, and data distribution must be designed together. “Three digits per chunk” is not a law of nature.</p>
-
 </section><section aria-labelledby="7-bpe-wordpiece-and-unigram" class="article-section" data-chapter="implementation" data-section-number="07" id="section-7-bpe-wordpiece-and-unigram"><p aria-hidden="true" class="section-label">07</p><h2 id="7-bpe-wordpiece-and-unigram">7. BPE, WordPiece, and Unigram</h2>
 <div aria-label="BPE, WordPiece, Unigram, and SentencePiece compared" class="table-scroll" role="region" tabindex="0"><table><caption class="sr-only">BPE, WordPiece, Unigram, and SentencePiece compared</caption>
 <thead>
@@ -2644,7 +2603,6 @@ for _ in range(num_merges):
 <p>The WordPiece row is a conceptual summary, not a recipe for reproducing an arbitrary BERT tokenizer. Historical training details differ across codebases; exact compatibility still requires the original vocabulary, normalizer, pre-tokenizer, and implementation-level tests.</p>
 <p>The key insight in <a class="external-link" href="https://aclanthology.org/P18-1007/" rel="noopener noreferrer" target="_blank">Kudo 2018</a> is that one string admits many valid segmentations, and sampling several of them during training can serve as regularization. <a class="external-link" href="https://aclanthology.org/2020.acl-main.170/" rel="noopener noreferrer" target="_blank">BPE-Dropout</a> obtains a similar effect by randomly skipping BPE merges.</p>
 <p>For a deeper look at WordPiece inference, <a class="external-link" href="https://aclanthology.org/2021.emnlp-main.160/" rel="noopener noreferrer" target="_blank">Fast WordPiece Tokenization</a> uses a trie with failure links to implement longest-match-first in strict linear time. For a recent and particularly clear simplified Unigram implementation, see <a class="external-link" href="https://aclanthology.org/2026.findings-acl.316/" rel="noopener noreferrer" target="_blank">Which Pieces Does Unigram Tokenization Really Need? (Findings ACL 2026)</a>.</p>
-
 </section><section aria-labelledby="8-the-central-problems-with-fixed-tokenization" class="article-section" data-chapter="problems" data-section-number="08" id="section-8-the-central-problems-with-fixed-tokenization"><p aria-hidden="true" class="section-label">08</p><h2 id="8-the-central-problems-with-fixed-tokenization">8. The central problems with fixed tokenization</h2>
 <h3 id="81-characters-inside-a-token-are-not-directly-visible-to-the-main-model">8.1 Characters inside a token are not directly visible to the main model</h3>
 <p>The model receives one embedding ID, not a short sequence of the characters inside that token. It can learn token spellings indirectly from data, but that knowledge may not compose reliably for letter counting, string reversal, rhyme, or editing.</p>
@@ -2679,7 +2637,6 @@ for _ in range(num_merges):
 <h3 id="88-the-tokenizer-is-not-learned-end-to-end">8.8 The tokenizer is not learned end to end</h3>
 <p>The conventional pipeline trains a tokenizer first, often on a separate corpus and a separate compression objective, freezes it permanently, and only then trains the much larger LM. The tokenizer does not know which boundaries are easy to predict, which matter for reasoning, or when context should change a boundary.</p>
 <p>Architectures such as BLT and H-Net aim to align the formation of computational units with the amount of modeling work the input actually requires.</p>
-
 </section><section aria-labelledby="9-is-stronger-compression-always-better" class="article-section" data-chapter="problems" data-section-number="09" id="section-9-is-stronger-compression-always-better"><p aria-hidden="true" class="section-label">09</p><h2 id="9-is-stronger-compression-always-better">9. Is stronger compression always better?</h2>
 <p>Several research results appear to disagree, but they fit together:</p>
 <ul>
@@ -2740,7 +2697,6 @@ for _ in range(num_merges):
 </tbody>
 </table></div>
 <p>A <strong>dead token</strong> is present in the vocabulary but effectively absent from LM training. An <strong>unreachable token</strong> is never emitted by the canonical encoder. A <strong>scaffold token</strong> is mainly an intermediate node in a BPE merge hierarchy and is rarely emitted by itself.</p>
-
 </section><section aria-labelledby="10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation" class="article-section" data-chapter="future" data-section-number="10" id="section-10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation"><p aria-hidden="true" class="section-label">10</p><h2 id="10-future-directions-from-fixed-tokens-to-dynamic-hierarchical-computation">10. Future directions: from fixed tokens to dynamic, hierarchical computation</h2>
 <h3 id="101-near-term-design-better-static-tokenizers">10.1 Near term: design better static tokenizers</h3>
 <p>Static BPE remains a strong engineering baseline. Near-term improvements include:</p>
@@ -2839,7 +2795,6 @@ for _ in range(num_merges):
 <p><strong>Static subword tokenization will remain a cheap and mature default, while frontier research builds dynamic, multiscale, learnable computation over raw bytes.</strong></p>
 </blockquote>
 <p>This is consistent with the summary in CS336 Lecture 1: a model still needs chunks or abstractions over a sequence, but those chunks should be variable so that more capacity is allocated to more informative regions.</p>
-
 </section><section aria-labelledby="11-if-you-were-training-a-tokenizer-today" class="article-section" data-chapter="practice" data-section-number="11" id="section-11-if-you-were-training-a-tokenizer-today"><p aria-hidden="true" class="section-label">11</p><h2 id="11-if-you-were-training-a-tokenizer-today">11. If you were training a tokenizer today</h2>
 <h3 id="111-before-training">11.1 Before training</h3>
 <ol>
@@ -2867,7 +2822,6 @@ for _ in range(num_merges):
 <li>Publish the normalizer, regex, merges, vocabulary, special-token table, version, and hash together.</li>
 </ul>
 <p>Once large-scale LM training begins, the tokenizer becomes similar to an ABI: replacing it is not an ordinary preprocessing change because token IDs already address rows in the embedding table and output head.</p>
-
 </section><section aria-labelledby="12-an-annotated-reading-path" class="article-section" data-chapter="practice" data-section-number="12" id="section-12-an-annotated-reading-path"><p aria-hidden="true" class="section-label">12</p><h2 id="12-an-annotated-reading-path">12. An annotated reading path</h2>
 <div class="reading-filter" data-reading-filter="">
 <div class="reading-filter-head">
@@ -2888,7 +2842,6 @@ for _ in range(num_merges):
 </div>
 <p class="reading-empty" data-reading-empty="" hidden="">No reading matches that combination. Try a broader search.</p>
 </div>
-
 <h3 data-reading-heading="implement" id="stage-1-learn-by-implementing">Stage 1: learn by implementing</h3>
 <ol>
 <li data-reading-item="" data-stage="implement"><a class="external-link" href="https://github.com/stanford-cs336/lectures/blob/main/lecture_01.py" rel="noopener noreferrer" target="_blank">Stanford CS336 Lecture 1</a>: the tradeoffs among character, byte, word, and BPE tokenization, plus a minimal implementation.</li>
@@ -2928,7 +2881,6 @@ for _ in range(num_merges):
 <li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://openreview.net/forum?id=mo6rHb1z82" rel="noopener noreferrer" target="_blank">Fast Byte Latent Transformer, ICML 2026</a>: block diffusion and multiple byte draft/verification paths.</li>
 <li data-reading-item="" data-stage="frontier"><a class="external-link" href="https://openreview.net/forum?id=COQV7D1dAW" rel="noopener noreferrer" target="_blank">Sampling from Your Language Model One Byte at a Time, ICML 2026</a>: a correct byte-prefix sampling interface for an existing token-based autoregressive model without retraining.</li>
 </ol>
-
 </section><section aria-labelledby="conclusion" class="article-section conclusion-section" data-section-number="END" id="section-conclusion"><p aria-hidden="true" class="section-label">END</p><h2 id="conclusion">Conclusion</h2>
 <p>Thinking of tokens as “words” hides the problem. Thinking of them as a <strong>discrete interface, a sequence-compression device, and a unit of compute allocation</strong> connects the major observations:</p>
 <ul>
@@ -2942,28 +2894,25 @@ for _ in range(num_merges):
 <blockquote>
 <p><strong>Today's tokenizer sits outside the model and fixes boundaries in advance from global corpus statistics. Future systems are more likely to begin with a reversible byte interface and form dynamic, hierarchical units of computation inside the model, conditioned on content, context, and predictive difficulty.</strong></p>
 </blockquote></section></div>
-      </article>
-    </div>
-  </main>
-
-  <button class="back-to-top" type="button" aria-label="Back to top" data-back-to-top>
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"></path></svg>
-  </button>
-
-  <footer class="site-footer">
-    <div class="site-shell footer-inner">
-      <p>Liang (Twist) Shan · Beijing, China</p>
-      <div class="footer-links">
-        <a href="https://twist-shan.github.io/">Home</a>
-        <a href="https://twist-shan.github.io/blog/">More notes</a>
-        <a href="https://tiktokenizer.vercel.app/?encoder=gpt2" target="_blank" rel="noopener noreferrer">Tokenizer playground ↗</a>
-      </div>
-      <p>Built with curiosity · 2026</p>
-    </div>
-  </footer>
-
-  <div class="sr-only" aria-live="polite" aria-atomic="true" data-live-status></div>
-  <script>
+</article>
+</div>
+</main>
+<button aria-label="Back to top" class="back-to-top" data-back-to-top="" type="button">
+<svg aria-hidden="true" viewbox="0 0 24 24"><path d="m6 14 6-6 6 6"></path></svg>
+</button>
+<footer class="site-footer">
+<div class="site-shell footer-inner">
+<p>Liang (Twist) Shan · Beijing, China</p>
+<div class="footer-links">
+<a href="https://twist-shan.github.io/">Home</a>
+<a href="https://twist-shan.github.io/blog/">More notes</a>
+<a href="https://tiktokenizer.vercel.app/?encoder=gpt2" rel="noopener noreferrer" target="_blank">Tokenizer playground ↗</a>
+</div>
+<p>Built with curiosity · 2026</p>
+</div>
+</footer>
+<div aria-atomic="true" aria-live="polite" class="sr-only" data-live-status=""></div>
+<script>
 (function () {
   "use strict";
 
@@ -3600,5 +3549,7 @@ for _ in range(num_merges):
 }());
 
   </script>
-</body>
+<script>(()=>{const root=document.documentElement,button=document.querySelector('.article-theme-toggle'),legacy=document.querySelector('#theme-toggle,button.theme-toggle');const sync=()=>{const dark=root.dataset.theme==='dark';button.textContent=dark?'☾':'☼';button.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme');try{localStorage.setItem('quiet-theme',root.dataset.theme)}catch(e){}};const apply=theme=>{if(root.dataset.theme!==theme){if(legacy)legacy.click();else root.dataset.theme=theme}sync()};const init=()=>{let theme='light';try{theme=localStorage.getItem('quiet-theme')||'light'}catch(e){}apply(theme)};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();button.addEventListener('click',()=>apply(root.dataset.theme==='dark'?'light':'dark'))})();</script></body>
 </html>
+
+{% endraw %}

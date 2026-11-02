@@ -5,6 +5,7 @@ permalink: /posts/2026/10/future-of-statistics/
 blog_category: others
 tags:
   - Life
+reading_minutes: 3
 ---
 
 I recently posted a paper whose theoretical derivations got an enormous amount of help from GPT (even though 5.6 Sol wasn’t out yet at the time). My senior labmate and I took the proof outline GPT gave us, refined it, and distilled the insights. Over the summer, I talked with a lot of people, and one question kept coming up: what is the point of theory, and where is its future?
