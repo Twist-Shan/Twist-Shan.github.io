@@ -91,7 +91,7 @@ domains:
             draft: false
             title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
             description: >-
-              We study fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, develop an adaptive elimination algorithm with instance-dependent minimax theoretical guarantee on sample complexity, and evaluate it on synthetic benchmarks and real-world LLM Arena data.
+              We study fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, develop an adaptive elimination algorithm with instance-dependent minimax guarantee on sample complexity, and evaluate it on synthetic benchmarks and real-world LLM Arena data.
             resources:
               - label: "arXiv"
                 url: "https://arxiv.org/abs/2610.27447"
