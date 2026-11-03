@@ -75,3 +75,6 @@ html{scrollbar-gutter:auto!important}
 :root{--accent-ink:#34765b!important}html[data-theme=dark]{--accent-ink:#b6a3ed!important}
 .article-lede a,.article-body a,.article-prose a:not(.figure-zoom),.article-section a:not(.figure-zoom){color:var(--accent)!important}
 .lab-button--accent{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--paper)!important}
+
+/* Consistent research blog label decoration. */
+.unified-hero>.eyebrow,.unified-hero>.hero-eyebrow{display:flex!important;align-items:center;gap:12px}.unified-hero>.eyebrow>.small-dot,.unified-hero>.hero-eyebrow>span[aria-hidden="true"]{display:inline-block!important;width:8px;height:8px;min-width:8px;flex:0 0 8px;border-radius:50%;background:linear-gradient(135deg,#78c9b0,#b5a1ed);margin:0}
