@@ -71,7 +71,9 @@ main,.preview-article-nav{max-width:880px!important}.preview-article-nav{padding
 .lab-badge{font-size:8px;white-space:normal;max-width:190px;line-height:1.6}
 @media(max-width:700px){.bpe-lab,.optimizer-lab,.memory-calculator{padding:16px!important}.formula-note{font-size:17px!important;padding:15px 12px!important}.lab-heading{flex-direction:column}.lab-badge{max-width:none}.article-section .lab-heading h3{font-size:17px!important}}
 
-html{scrollbar-gutter:auto!important}
+/* Reserve the same scrollbar space on short and long articles. */
+html{overflow-y:scroll}
+@supports(scrollbar-gutter:stable){html{overflow-y:auto;scrollbar-gutter:stable!important}}
 :root{--accent-ink:#34765b!important}html[data-theme=dark]{--accent-ink:#b6a3ed!important}
 .article-lede a,.article-body a,.article-prose a:not(.figure-zoom),.article-section a:not(.figure-zoom){color:var(--accent)!important}
 .lab-button--accent{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--paper)!important}

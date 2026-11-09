@@ -1,3 +1,6 @@
+/* Keep centered content stationary when the page scrollbar changes. */
+html{overflow-y:scroll}
+@supports(scrollbar-gutter:stable){html{overflow-y:auto;scrollbar-gutter:stable}}
 
 :root{--paper:#faf9f5;--ink:#272c29;--muted:#656c66;--line:#dedfd6;--section-line:#a6aea4;--accent:#34765b;--card:#fffefb;--serif:Georgia,'Times New Roman',serif;--sans:Arial,'Helvetica Neue',sans-serif;--mono:Consolas,monospace;color-scheme:light}
 html[data-theme=dark]{--paper:#191a1e;--ink:#e8e8ec;--muted:#a9abb5;--line:#34363e;--section-line:#555862;--accent:#b5a1ed;--card:#222329;color-scheme:dark}
