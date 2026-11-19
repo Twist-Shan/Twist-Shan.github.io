@@ -50,6 +50,44 @@ domains:
     title: "Large Language Models"
     mark: llm
     tracks:
+      - label: "LLM / Pretraining / Data"
+        projects:
+          - id: llm-data-repetition
+            draft: false
+            title: "Data Repetition in LLM Pretraining"
+            description: >-
+              We study how repeating training data affects generalization in language models and which data reuse strategies are effective under a fixed compute budget.
+            resources: []
+            advisor:
+              name: "Prof. Song Mei"
+              url: "https://www.stat.berkeley.edu/~songmei/"
+
+      - label: "LLM / Evaluation / Human Preference"
+        projects:
+          - id: chatbot-arena-ranking
+            authors:
+              - name: "Liang Twist Shan"
+                self: true
+              - name: "Jiahao Ai"
+                url: "https://ajh4869.github.io/"
+              - name: "Zhimei Ren"
+                url: "https://zhimeir.github.io/"
+            draft: false
+            title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
+            description: >-
+              We study fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, develop an adaptive elimination algorithm with instance-dependent minimax guarantee on sample complexity, and evaluate it on synthetic benchmarks and real-world LLM Arena data.
+            resources:
+              - label: "arXiv"
+                url: "https://arxiv.org/abs/2610.27447"
+                kind: arxiv
+              - label: "Blog"
+                url: "/posts/2026/10/pareto-frontier/"
+              - label: "Code"
+                url: "https://github.com/Twist-Shan/Beyond_Scalar_Leaderboards"
+            advisor:
+              name: "Prof. Zhimei Ren"
+              url: "https://zhimeir.github.io/"
+
       - label: "LLM / Interpretability / Chain-of-Thought Reasoning"
         projects:
           - id: cot-counting-mechanism
@@ -78,32 +116,6 @@ domains:
               name: "Prof. Yiqiao Zhong"
               url: "https://pages.stat.wisc.edu/~zhong35/"
 
-      - label: "LLM / Evaluation / Pairwise Preference"
-        projects:
-          - id: chatbot-arena-ranking
-            authors:
-              - name: "Liang Twist Shan"
-                self: true
-              - name: "Jiahao Ai"
-                url: "https://ajh4869.github.io/"
-              - name: "Zhimei Ren"
-                url: "https://zhimeir.github.io/"
-            draft: false
-            title: "Beyond Scalar Leaderboards: Adaptive Sampling for Pareto Frontier Identification in Multi-Objective LLM Arenas"
-            description: >-
-              We study fixed-confidence Pareto frontier identification from multi-objective pairwise preferences, develop an adaptive elimination algorithm with instance-dependent minimax guarantee on sample complexity, and evaluate it on synthetic benchmarks and real-world LLM Arena data.
-            resources:
-              - label: "arXiv"
-                url: "https://arxiv.org/abs/2610.27447"
-                kind: arxiv
-              - label: "Blog"
-                url: "/posts/2026/10/pareto-frontier/"
-              - label: "Code"
-                url: "https://github.com/Twist-Shan/Beyond_Scalar_Leaderboards"
-            advisor:
-              name: "Prof. Zhimei Ren"
-              url: "https://zhimeir.github.io/"
-
       - label: "LLM / Application / Router"
         projects:
           - id: llm-prompt-dependent-routing
@@ -116,30 +128,13 @@ domains:
               name: "Prof. Zhimei Ren"
               url: "https://zhimeir.github.io/"
 
-  - id: diffusion-language-model
-    number: "R / 03"
-    title: "Diffusion Language Models"
-    mark: dlm
-    tracks:
-      - label: "DLM / Interpretability / Latent Reasoning"
-        projects:
-          - id: dlm-latent-reasoning
-            draft: false
-            title: "Mechanistic Interpretability of Latent Reasoning in DLMs"
-            description: >-
-              We study how diffusion language models represent and update latent reasoning states, and how these mechanisms change across architectures and decoding algorithms.              
-            resources: []
-            advisor:
-              name: "Prof. Song Mei"
-              url: "https://www.stat.berkeley.edu/~songmei/"
-
   - id: agent
-    number: "R / 04"
+    number: "R / 03"
     title: "Agents"
     mark: agent
     draft: false
     tracks:
-      - label: "Agent / Safety / Memory Monitoring"
+      - label: "Agent / Safety / State Tracking"
         projects:
           - id: agent-memory-monitoring
             draft: false
