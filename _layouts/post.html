@@ -30,7 +30,7 @@
 <script>
       (() => {
         try {
-          const saved = localStorage.getItem('liang-theme');
+          const saved = localStorage.getItem('quiet-theme') || localStorage.getItem('liang-theme');
           const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
           document.documentElement.dataset.theme = theme;
         } catch (_) {}
@@ -39,7 +39,7 @@
 <link href="/assets/css/studio.css?v=others-title-1" rel="stylesheet"/>
 <link href="/assets/css/studio-motion.css" rel="stylesheet"/>
 <link href="/assets/css/article.css" rel="stylesheet"/></head>
-<body class="studio-body page-my-new-website" data-article="my-new-website"><div class="preview-article-nav"><a href="/blog/">← All posts</a><div><button aria-label="Switch to dark theme" class="article-theme-toggle">☼</button></div></div><nav aria-label="Article contents" class="preview-toc"><strong>ON THIS PAGE</strong><a href="#section-1">Welcome to my personal website!</a></nav>
+<body class="studio-body page-my-new-website" data-article="my-new-website"><div class="preview-article-nav"><a href="/blog/">← All posts</a><div><button aria-label="Switch to dark theme" class="article-theme-toggle theme" type="button">☼</button></div></div><nav aria-label="Article contents" class="preview-toc"><strong>ON THIS PAGE</strong><a href="#section-1">Welcome to my personal website!</a></nav>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header" data-header="">
 <a aria-label="Liang Shan, home" class="wordmark" href="/">
@@ -76,5 +76,5 @@
 </footer>
 <script defer="" src="/assets/js/studio.js"></script>
 <script defer="" src="/assets/js/studio-motion.js"></script>
-<script>(()=>{const root=document.documentElement,button=document.querySelector('.article-theme-toggle'),legacy=document.querySelector('#theme-toggle,button.theme-toggle');const sync=()=>{const dark=root.dataset.theme==='dark';button.textContent=dark?'☾':'☼';button.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme');try{localStorage.setItem('quiet-theme',root.dataset.theme)}catch(e){}};const apply=theme=>{if(root.dataset.theme!==theme){if(legacy)legacy.click();else root.dataset.theme=theme}sync()};const init=()=>{let theme='light';try{theme=localStorage.getItem('quiet-theme')||'light'}catch(e){}apply(theme)};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();button.addEventListener('click',()=>apply(root.dataset.theme==='dark'?'light':'dark'))})();</script></body>
+</body>
 </html>
